@@ -4,7 +4,7 @@ resource "aws_subnet" "public" {
   availability_zone = local.az_names[0]
 
   tags = merge(
-  local.common_tags,
+    local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-public"
     }
@@ -14,7 +14,7 @@ resource "aws_subnet" "public" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.vpc.id
   tags = merge(
-  local.common_tags,
+    local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-public"
     }

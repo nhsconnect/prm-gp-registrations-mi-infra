@@ -4,7 +4,7 @@ resource "aws_subnet" "private" {
   availability_zone       = local.az_names[0]
   map_public_ip_on_launch = false
   tags = merge(
-  local.common_tags,
+    local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-private"
 

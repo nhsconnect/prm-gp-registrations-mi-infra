@@ -1,28 +1,16 @@
 {
-  "common_dev": {
-    "name": "dev",
-    "bucket_name": "prm-gp2gp-terraform-state",
-    "dynamo_table": "prm-gp2gp-terraform-table",
-    "state_key_prefix": "dev/"
-  },
-  "common_prod": {
-    "name": "prod",
-    "bucket_name": "prm-gp2gp-terraform-state",
-    "dynamo_table": "prm-gp2gp-terraform-table",
-    "state_key_prefix": "prod/"
-  },
   "dev": {
     "name": "dev",
-    "bucket_name": "prm-gp-registrations-mi-terraform-state-dev",
-    "dynamo_table": "prm-gp-registrations-mi-terraform-table",
-    "role_arn_param" : "/registrations/dev/user-input/cross-account-admin-role"
+    "bucket_name": "prm-gp2gp-terraform-state-dev",
+    "dynamo_table": "prm-gp2gp-terraform-table",
+    "role_arn_param": "/registrations/dev/user-input/cross-account-admin-role",
+    "state_key_prefix": "gp-registrations-mi/"
   },
   "prod": {
     "name": "prod",
-    "bucket_name": "prm-gp-registrations-mi-terraform-state-prod",
-    "dynamo_table": "prm-gp-registrations-mi-terraform-table",
-    "role_arn_param" : "/registrations/prod/user-input/cross-account-admin-role"
+    "bucket_name": "prm-gp2gp-terraform-state-prod",
+    "dynamo_table": "prm-gp2gp-terraform-table",
+    "role_arn_param": "/registrations/prod/user-input/cross-account-admin-role",
+    "state_key_prefix": "gp-registrations-mi/"
   }
 }
-
-

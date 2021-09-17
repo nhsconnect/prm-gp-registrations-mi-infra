@@ -2,7 +2,7 @@ format_version: 4
 pipelines:
   "gp-registrations-mi-container-repositories":
     group: gp-registrations-mi-infra
-    label_template: "${container_repositories[:8]}"
+    label_template: "${gp_registrations_mi_container_repositories[:8]}"
     materials:
       gp_registrations_mi_container_repositories:
         plugin_configuration:

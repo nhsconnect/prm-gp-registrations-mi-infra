@@ -1,0 +1,92 @@
+format_version: 4
+pipelines:
+  "gp-registrations-mi-container-repositories":
+    group: gp-registrations-mi-infra
+    label_template: "${container_repositories[:8]}"
+    materials:
+      container_repositories:
+        plugin_configuration:
+          id: git-path
+        options:
+          url: https://github.com/nhsconnect/prm-gp-registrations-mi-infra.git
+          path: stacks/container-repositories
+    stages:
+      - validate:
+          clean_workspace: true
+          jobs:
+            test:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-validate container-repositories dev
+      - plan_dev:
+          clean_workspace: true
+          jobs:
+            plan:
+              resources:
+                - docker
+              artifacts:
+                - build:
+                    source: dev.tfplan
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-plan container-repositories dev
+      - apply_dev:
+          clean_workspace: true
+          jobs:
+            apply:
+              resources:
+                - docker
+              tasks:
+                - fetch:
+                    stage: plan_dev
+                    job: plan
+                    source: dev.tfplan
+                    is_file: yes
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-apply container-repositories dev
+#      - plan_prod:
+#          clean_workspace: true
+#          jobs:
+#            plan:
+#              resources:
+#                - docker
+#              artifacts:
+#                - build:
+#                    source: prod.tfplan
+#              tasks:
+#                - exec:
+#                    command: /bin/bash
+#                    arguments:
+#                      - -c
+#                      - ./tasks dojo-plan container-repositories prod
+#      - apply_prod:
+#          clean_workspace: true
+#          approval:
+#            type: manual
+#            allow_only_on_success: true
+#          jobs:
+#            apply:
+#              resources:
+#                - docker
+#              tasks:
+#                - fetch:
+#                    stage: plan_prod
+#                    job: plan
+#                    source: prod.tfplan
+#                    is_file: yes
+#                - exec:
+#                    command: /bin/bash
+#                    arguments:
+#                      - -c
+#                      - ./tasks dojo-apply container-repositories prod

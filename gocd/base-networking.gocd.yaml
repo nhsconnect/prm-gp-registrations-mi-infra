@@ -4,7 +4,7 @@ pipelines:
     group: gp-registrations-mi-infra
     label_template: "${base_networking[:8]}"
     materials:
-      base_networking:
+      gp_registrations_mi_base_networking:
         plugin_configuration:
           id: git-path
         options:

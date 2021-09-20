@@ -1,0 +1,110 @@
+format_version: 4
+pipelines:
+  "data-pipeline-metrics-calculator-task":
+    group: gp-registrations-mi-infra
+    label_template: "${gp_registrations_mi_task[:8]}"
+    materials:
+      gp_registrations_mi_task:
+        plugin_configuration:
+          id: git-path
+        options:
+          url: https://github.com/nhsconnect/prm-gp-registrations-mi-infra.git
+          path: stacks/gp-registrations-mi
+      gp_registrations_mi_image:
+        pipeline: prm-gp-registrations-mi
+        stage: build_and_publish
+    stages:
+      - validate:
+          clean_workspace: true
+          jobs:
+            test:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-validate gp-registrations-mi dev
+      - plan_dev:
+          clean_workspace: true
+          jobs:
+            plan:
+              resources:
+                - docker
+              artifacts:
+                - build:
+                    source: dev.tfplan
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - TF_VAR_gp_registrations_mi_image_tag=$GO_DEPENDENCY_LABEL_GP_REGISTRATIONS_MI_IMAGE ./tasks dojo-plan gp-registrations-mi dev
+      - apply_dev:
+          clean_workspace: true
+          jobs:
+            apply:
+              resources:
+                - docker
+              tasks:
+                - fetch:
+                    stage: plan_dev
+                    job: plan
+                    source: dev.tfplan
+                    is_file: yes
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-apply gp-registrations-mi dev
+#      - promote_to_prod:
+#          clean_workspace: true
+#          approval:
+#            type: manual
+#            allow_only_on_success: true
+#          jobs:
+#            apply:
+#              resources:
+#                - docker
+#              tasks:
+#                - exec:
+#                    command: /bin/bash
+#                    arguments:
+#                      - -c
+#                      - ./scripts/promote-image dev prod gp-registrations-mi $GO_DEPENDENCY_LABEL_GP_REGISTRATIONS_MI_IMAGE
+#      - plan_prod:
+#          clean_workspace: true
+#          jobs:
+#            plan:
+#              resources:
+#                - docker
+#              artifacts:
+#                - build:
+#                    source: prod.tfplan
+#              tasks:
+#                - exec:
+#                    command: /bin/bash
+#                    arguments:
+#                      - -c
+#                      - TF_VAR_gp_registrations_mi_image_tag=$GO_DEPENDENCY_LABEL_GP_REGISTRATIONS_MI_IMAGE ./tasks dojo-plan gp-registrations-mi prod
+#      - apply_prod:
+#          clean_workspace: true
+#          approval:
+#            type: manual
+#            allow_only_on_success: true
+#          jobs:
+#            apply:
+#              resources:
+#                - docker
+#              tasks:
+#                - fetch:
+#                    stage: plan_prod
+#                    job: plan
+#                    source: prod.tfplan
+#                    is_file: yes
+#                - exec:
+#                    command: /bin/bash
+#                    arguments:
+#                      - -c
+#                      - ./tasks dojo-apply gp-registrations-mi prod

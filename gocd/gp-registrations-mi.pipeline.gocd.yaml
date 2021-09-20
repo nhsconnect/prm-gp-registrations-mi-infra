@@ -12,7 +12,7 @@ pipelines:
           path: stacks/gp-registrations-mi
       gp_registrations_mi_image:
         pipeline: prm-gp-registrations-mi
-        stage: build_and_publish
+        stage: publish_docker
     stages:
       - validate:
           clean_workspace: true

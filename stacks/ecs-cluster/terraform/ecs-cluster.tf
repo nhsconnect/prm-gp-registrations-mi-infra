@@ -43,7 +43,7 @@ resource "aws_iam_role_policy_attachment" "ecs_execution" {
 }
 
 resource "aws_iam_policy" "ecs_execution" {
-  name   = "${var.environment}-ecs-execution"
+  name   = "${var.environment}-gp-registrations-mi-ecs-execution"
   policy = data.aws_iam_policy_document.ecs_execution.json
 }
 

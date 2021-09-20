@@ -1,6 +1,6 @@
 format_version: 4
 pipelines:
-  "data-pipeline-metrics-calculator-task":
+  "gp-registrations-mi-task":
     group: gp-registrations-mi-infra
     label_template: "${gp_registrations_mi_task[:8]}"
     materials:

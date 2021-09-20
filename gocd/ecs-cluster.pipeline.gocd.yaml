@@ -1,0 +1,92 @@
+format_version: 4
+pipelines:
+  "gp-registrations-mi-ecs-cluster":
+    group: gp-registrations-mi-infra
+    label_template: "${gp_registrations_mi_ecs_cluster[:8]}"
+    materials:
+      gp_registrations_mi_ecs_cluster:
+        plugin_configuration:
+          id: git-path
+        options:
+          url: https://github.com/nhsconnect/prm-gp-registrations-mi-infra.git
+          path: stacks/ecs-cluster
+    stages:
+      - validate:
+          clean_workspace: true
+          jobs:
+            test:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-validate ecs-cluster dev
+      - plan_dev:
+          clean_workspace: true
+          jobs:
+            plan:
+              resources:
+                - docker
+              artifacts:
+                - build:
+                    source: dev.tfplan
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-plan ecs-cluster dev
+      - apply_dev:
+          clean_workspace: true
+          jobs:
+            apply:
+              resources:
+                - docker
+              tasks:
+                - fetch:
+                    stage: plan_dev
+                    job: plan
+                    source: dev.tfplan
+                    is_file: yes
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-apply ecs-cluster dev
+      # - plan_prod:
+      #     clean_workspace: true
+      #     jobs:
+      #       plan:
+      #         resources:
+      #           - docker
+      #         artifacts:
+      #           - build:
+      #               source: prod.tfplan
+      #         tasks:
+      #           - exec:
+      #               command: /bin/bash
+      #               arguments:
+      #                 - -c
+      #                 - ./tasks dojo-plan ecs-cluster prod
+      # - apply_prod:
+      #     clean_workspace: true
+      #     approval:
+      #       type: manual
+      #       allow_only_on_success: true
+      #     jobs:
+      #       apply:
+      #         resources:
+      #           - docker
+      #         tasks:
+      #           - fetch:
+      #               stage: plan_prod
+      #               job: plan
+      #               source: prod.tfplan
+      #               is_file: yes
+      #           - exec:
+      #               command: /bin/bash
+      #               arguments:
+      #                 - -c
+      #                 - ./tasks dojo-apply ecs-cluster prod

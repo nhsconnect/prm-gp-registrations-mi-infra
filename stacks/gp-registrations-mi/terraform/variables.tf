@@ -34,3 +34,18 @@ variable "log_group_param_name" {
   type        = string
   description = "Cloudwatch log group for gp registrations MI API"
 }
+
+variable "public_subnet_ids_param_name" {
+  type        = list(string)
+  description = "List of public subnet IDs"
+}
+
+variable "vpc_id_param_name" {
+  type        = string
+  description = "VPC ID"
+}
+
+variable "vpc_cidr_block_param_name" {
+  type        = string
+  description = "VPC CIDR block"
+}

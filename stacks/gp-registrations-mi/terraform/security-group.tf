@@ -1,6 +1,6 @@
 resource "aws_security_group" "inbound_only" {
   name   = "${var.environment}-inbound-only"
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = aws_ssm_parameter.vpc_id.value
 
   tags = merge(
     local.common_tags,
@@ -13,9 +13,9 @@ resource "aws_security_group" "inbound_only" {
 resource "aws_security_group_rule" "inbound_only" {
   type              = "ingress"
   security_group_id = aws_security_group.inbound_only.id
-  cidr_blocks       = [aws_vpc.vpc.cidr_block]
-  from_port         = 443
-  to_port           = 443
+  cidr_blocks       = [aws_ssm_parameter.vpc_cidr_block.value]
+  from_port         = 80
+  to_port           = 80
   protocol          = "tcp"
   description       = "TLS from VPC"
 }

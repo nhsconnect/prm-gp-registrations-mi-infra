@@ -15,7 +15,7 @@ resource "aws_lb" "alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.inbound_only.id]
-  subnets            = split(",", aws_ssm_parameter.public_subnet_ids.value)
+  subnets            = split(",", data.aws_ssm_parameter.public_subnet_ids.value)
 
   enable_deletion_protection = true
 
@@ -31,16 +31,16 @@ resource "aws_lb_target_group" "alb" {
   name     = "${var.environment}-gp-registrations-mi-alb-tg"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = aws_ssm_parameter.vpc_id.value
+  vpc_id   = data.aws_ssm_parameter.vpc_id.value
 }
 
 resource "aws_alb_listener" "http_listener" {
   load_balancer_arn = aws_lb.alb.id
   port              = 80
   protocol          = "HTTP"
- 
+
   default_action {
-    target_group_arn = aws_alb_target_group.alb.id
+    target_group_arn = aws_lb_target_group.alb.id
     type             = "forward"
   }
 }

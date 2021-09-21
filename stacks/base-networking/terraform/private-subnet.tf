@@ -23,7 +23,7 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.vpc.id
   tags = {
     Name        = "${var.environment}-gp-registrations-mi-private"
-    Environment = "${var.environment}"
+    Environment = var.environment
   }
 }
 

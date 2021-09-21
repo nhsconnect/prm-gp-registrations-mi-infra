@@ -1,4 +1,4 @@
-resource "aws_subnet" "private" {
+resource "aws_subnet" "private_a" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, var.private_cidr_offset)
   availability_zone       = local.az_names[0]
@@ -6,7 +6,21 @@ resource "aws_subnet" "private" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-private"
+      Name = "${var.environment}-gp-registrations-mi-private-a"
+
+    }
+  )
+}
+
+resource "aws_subnet" "private_b" {
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = cidrsubnet(var.vpc_cidr, 8, var.private_cidr_offset + 1)
+  availability_zone       = local.az_names[1]
+  map_public_ip_on_launch = false
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi-private-b"
 
     }
   )
@@ -27,7 +41,12 @@ resource "aws_route_table" "private" {
   }
 }
 
-resource "aws_route_table_association" "private" {
-  subnet_id      = aws_subnet.private.id
+resource "aws_route_table_association" "private_a" {
+  subnet_id      = aws_subnet.private_a.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private_b" {
+  subnet_id      = aws_subnet.private_b.id
   route_table_id = aws_route_table.private.id
 }

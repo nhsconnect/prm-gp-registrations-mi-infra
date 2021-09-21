@@ -36,7 +36,7 @@ variable "log_group_param_name" {
 }
 
 variable "public_subnet_ids_param_name" {
-  type        = list(string)
+  type        = string
   description = "List of public subnet IDs"
 }
 

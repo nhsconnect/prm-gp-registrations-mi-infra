@@ -15,7 +15,7 @@ resource "aws_lb" "alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.inbound_only.id]
-  subnets            = aws_ssm_parameter.public_subnet_ids.value
+  subnets            = split(",", aws_ssm_parameter.public_subnet_ids.value)
 
   enable_deletion_protection = true
 

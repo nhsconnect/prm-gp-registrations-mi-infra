@@ -14,7 +14,7 @@ resource "aws_lb" "alb" {
   name               = "${var.environment}-gp-registrations-mi-alb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.inbound_only.id]
+  security_groups    = [aws_security_group.mi_alb.id]
   subnets            = split(",", data.aws_ssm_parameter.public_subnet_ids.value)
 
   enable_deletion_protection = true

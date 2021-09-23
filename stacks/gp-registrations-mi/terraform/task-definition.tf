@@ -21,6 +21,10 @@ resource "aws_ecs_task_definition" "gp_registrations_mi" {
       name      = "gp-registrations-mi"
       image     = "${data.aws_ssm_parameter.gp_registrations_mi_repository_url.value}:${var.gp_registrations_mi_image_tag}"
       essential = true
+      portMappings = [{
+        containerPort = 8080
+        hostPort      = 8080
+      }]
       logConfiguration = {
         logDriver = "awslogs"
         options = {

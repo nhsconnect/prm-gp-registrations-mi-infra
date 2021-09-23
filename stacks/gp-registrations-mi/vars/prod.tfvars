@@ -4,3 +4,4 @@ execution_role_arn_param_name="/registrations/prod/data-gp-registrations-mi/ecs-
 public_subnet_ids_param_name= "/registrations/prod/gp-registrations-mi/base-networking/public-subnet-ids"
 vpc_id_param_name="/registrations/prod/gp-registrations-mi/base-networking/vpc-id"
 vpc_cidr_block_param_name="/registrations/prod/gp-registrations-mi/base-networking/vpc-cidr-block"
+ecs_cluster_arn_param_name="/registrations/prod/gp-registrations-mi/ecs-cluster/ecs-cluster-arn"

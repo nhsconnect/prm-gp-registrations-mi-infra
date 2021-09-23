@@ -42,4 +42,5 @@ resource "aws_ecs_task_definition" "gp_registrations_mi" {
     }
   )
   execution_role_arn = data.aws_ssm_parameter.execution_role_arn.value
+  task_role_arn      = aws_iam_role.gp_registrations_mi.arn
 }

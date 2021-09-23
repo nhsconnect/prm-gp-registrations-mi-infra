@@ -49,3 +49,8 @@ variable "vpc_cidr_block_param_name" {
   type        = string
   description = "VPC CIDR block"
 }
+
+variable "ecs_cluster_arn_param_name" {
+  type        = string
+  description = "ECS cluster arn"
+}

@@ -28,10 +28,11 @@ resource "aws_lb" "alb" {
 }
 
 resource "aws_lb_target_group" "alb" {
-  name     = "${var.environment}-gp-registrations-mi-alb-tg"
-  port     = 8080
-  protocol = "HTTP"
-  vpc_id   = data.aws_ssm_parameter.vpc_id.value
+  name        = "${var.environment}-gp-registrations-mi-alb-tg"
+  port        = 8080
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = data.aws_ssm_parameter.vpc_id.value
 }
 
 resource "aws_lb_listener" "http_listener" {

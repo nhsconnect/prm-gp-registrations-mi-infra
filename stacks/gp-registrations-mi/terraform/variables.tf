@@ -40,6 +40,11 @@ variable "public_subnet_ids_param_name" {
   description = "List of public subnet IDs"
 }
 
+variable "private_subnet_ids_param_name" {
+  type        = string
+  description = "List of private subnet IDs"
+}
+
 variable "vpc_id_param_name" {
   type        = string
   description = "VPC ID"

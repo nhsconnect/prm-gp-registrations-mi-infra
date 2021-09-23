@@ -5,3 +5,4 @@ public_subnet_ids_param_name= "/registrations/dev/gp-registrations-mi/base-netwo
 vpc_id_param_name="/registrations/dev/gp-registrations-mi/base-networking/vpc-id"
 vpc_cidr_block_param_name="/registrations/dev/gp-registrations-mi/base-networking/vpc-cidr-block"
 ecs_cluster_arn_param_name="/registrations/dev/gp-registrations-mi/ecs-cluster/ecs-cluster-arn"
+private_subnet_ids_param_name="/registrations/dev/gp-registrations-mi/base-networking/private-subnet-ids"

@@ -50,26 +50,25 @@ resource "aws_route_table_association" "public_b" {
   route_table_id = aws_route_table.public.id
 }
 
-//TODO: Do we need this?
-//resource "aws_eip" "nat" {
-//  vpc = true
-//
-//  tags = merge(
-//  local.common_tags,
-//    {
-//      Name = "${var.environment}-gp-registrations-mi-nat"
-//    }
-//  )
-//}
-//
-//resource "aws_nat_gateway" "nat_gateway" {
-//  allocation_id = aws_eip.nat.id
-//  subnet_id     = aws_subnet.public.id
-//
-//  tags = merge(
-//  local.common_tags,
-//    {
-//      Name = "${var.environment}-gp-registrations-mi"
-//    }
-//  )
-//}
+resource "aws_eip" "nat" {
+  vpc = true
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi-nat"
+    }
+  )
+}
+
+resource "aws_nat_gateway" "nat_gateway" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public_a.id
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi"
+    }
+  )
+}

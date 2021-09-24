@@ -26,12 +26,11 @@ resource "aws_subnet" "private_b" {
   )
 }
 
-// TODO: Connect private to public subnet
-//resource "aws_route" "private" {
-//  route_table_id         = aws_route_table.private.id
-////  nat_gateway_id         = aws_nat_gateway.nat_gateway.id
-//  destination_cidr_block = "0.0.0.0/0"
-//}
+resource "aws_route" "private" {
+  route_table_id         = aws_route_table.private.id
+  nat_gateway_id         = aws_nat_gateway.nat_gateway.id
+  destination_cidr_block = "0.0.0.0/0"
+}
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.vpc.id

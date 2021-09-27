@@ -52,11 +52,11 @@ resource "aws_security_group_rule" "mi_container_inbound_only" {
 }
 
 resource "aws_security_group_rule" "mi_container_outbound_only" {
-  type              = "egress"
-  security_group_id = aws_security_group.gp_registrations_mi_container.id
-  cidr_blocks       = ["0.0.0.0/0"]
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  description       = "Allow all outbound"
+  type                     = "egress"
+  security_group_id        = aws_security_group.gp_registrations_mi_container.id
+  source_security_group_id = aws_security_group.mi_alb.id
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  description              = "Allow all outbound"
 }

@@ -38,13 +38,34 @@ resource "aws_lb_target_group" "alb" {
   }
 }
 
-resource "aws_lb_listener" "http_listener" {
+resource "aws_lb_listener" "https_listener" {
   load_balancer_arn = aws_lb.alb.id
-  port              = 80
-  protocol          = "HTTP"
+  port              = 443
+  protocol          = "HTTPS"
+
+  certificate_arn = aws_acm_certificate_validation.gp-registrations-mi-cert-validation.certificate_arn
 
   default_action {
     target_group_arn = aws_lb_target_group.alb.id
     type             = "forward"
   }
+}
+
+resource "aws_acm_certificate" "gp-registrations-mi-cert" {
+  domain_name = aws_lb.alb.name
+
+  validation_method = "DNS"
+
+  tags = {
+    CreatedBy   = var.repo_name
+    Environment = var.environment
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_acm_certificate_validation" "gp-registrations-mi-cert-validation" {
+  certificate_arn = aws_acm_certificate.gp-registrations-mi-cert.arn
 }

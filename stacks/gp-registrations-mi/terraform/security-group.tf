@@ -42,13 +42,13 @@ resource "aws_security_group" "gp_registrations_mi_container" {
 }
 
 resource "aws_security_group_rule" "mi_container_inbound_only" {
-  type              = "ingress"
-  security_group_id = aws_security_group.gp_registrations_mi_container.id
-  cidr_blocks       = [data.aws_ssm_parameter.vpc_cidr_block.value]
-  from_port         = 0
-  to_port           = 8080
-  protocol          = "tcp"
-  description       = "TLS from VPC"
+  type                     = "ingress"
+  security_group_id        = aws_security_group.gp_registrations_mi_container.id
+  source_security_group_id = aws_security_group.mi_alb.id
+  from_port                = 0
+  to_port                  = 8080
+  protocol                 = "tcp"
+  description              = "TLS from VPC"
 }
 
 resource "aws_security_group_rule" "mi_container_outbound_only" {

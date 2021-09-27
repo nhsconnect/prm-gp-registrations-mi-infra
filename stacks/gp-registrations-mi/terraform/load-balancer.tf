@@ -52,7 +52,7 @@ resource "aws_lb_listener" "https_listener" {
 }
 
 resource "aws_acm_certificate" "gp-registrations-mi-cert" {
-  domain_name = "dev-gp-registrations-mi-alb-783279340.eu-west-2.elb.amazonaws"
+  domain_name = "gp-registrations-mi.nhs.uk"
 
   validation_method = "DNS"
 

@@ -7,7 +7,7 @@ data "aws_ssm_parameter" "private_subnet_ids" {
   name = var.private_subnet_ids_param_name
 }
 
-resource "aws_ecs_service" "mi-service" {
+resource "aws_ecs_service" "mi_service" {
   name            = "${var.environment}-gp-registrations-mi-ecs-service"
   cluster         = data.aws_ssm_parameter.ecs_cluster_arn.value
   task_definition = aws_ecs_task_definition.gp_registrations_mi.arn
@@ -24,6 +24,5 @@ resource "aws_ecs_service" "mi-service" {
     container_name   = "gp-registrations-mi"
     container_port   = 8080
   }
-
 
 }

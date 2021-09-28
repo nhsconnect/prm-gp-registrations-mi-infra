@@ -39,7 +39,7 @@ function get_repo_url() {
   env=$1
   image=$2
 
-  repo_url_param="/registrations/${env}/data-pipeline/ecr/url/${image}"
+  repo_url_param="/registrations/${env}/gp-registrations-mi/ecr/url/${image}"
 
   aws ssm get-parameters \
       --region ${aws_region} \

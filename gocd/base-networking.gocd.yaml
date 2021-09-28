@@ -81,7 +81,7 @@ pipelines:
                 - docker
               tasks:
                 - fetch:
-                    stage: prod
+                    stage: plan_prod
                     job: plan
                     source: prod.tfplan
                     is_file: yes

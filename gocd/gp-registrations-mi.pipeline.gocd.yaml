@@ -58,53 +58,53 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks dojo-apply gp-registrations-mi dev
-#      - promote_to_prod:
-#          clean_workspace: true
-#          approval:
-#            type: manual
-#            allow_only_on_success: true
-#          jobs:
-#            apply:
-#              resources:
-#                - docker
-#              tasks:
-#                - exec:
-#                    command: /bin/bash
-#                    arguments:
-#                      - -c
-#                      - ./scripts/promote-image dev prod gp-registrations-mi $GO_DEPENDENCY_LABEL_GP_REGISTRATIONS_MI_IMAGE
-#      - plan_prod:
-#          clean_workspace: true
-#          jobs:
-#            plan:
-#              resources:
-#                - docker
-#              artifacts:
-#                - build:
-#                    source: prod.tfplan
-#              tasks:
-#                - exec:
-#                    command: /bin/bash
-#                    arguments:
-#                      - -c
-#                      - TF_VAR_gp_registrations_mi_image_tag=$GO_DEPENDENCY_LABEL_GP_REGISTRATIONS_MI_IMAGE ./tasks dojo-plan gp-registrations-mi prod
-#      - apply_prod:
-#          clean_workspace: true
-#          approval:
-#            type: manual
-#            allow_only_on_success: true
-#          jobs:
-#            apply:
-#              resources:
-#                - docker
-#              tasks:
-#                - fetch:
-#                    stage: plan_prod
-#                    job: plan
-#                    source: prod.tfplan
-#                    is_file: yes
-#                - exec:
-#                    command: /bin/bash
-#                    arguments:
-#                      - -c
-#                      - ./tasks dojo-apply gp-registrations-mi prod
+      - promote_to_prod:
+          clean_workspace: true
+          approval:
+            type: manual
+            allow_only_on_success: true
+          jobs:
+            apply:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./scripts/promote-image dev prod gp-registrations-mi $GO_DEPENDENCY_LABEL_GP_REGISTRATIONS_MI_IMAGE
+      - plan_prod:
+          clean_workspace: true
+          jobs:
+            plan:
+              resources:
+                - docker
+              artifacts:
+                - build:
+                    source: prod.tfplan
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - TF_VAR_gp_registrations_mi_image_tag=$GO_DEPENDENCY_LABEL_GP_REGISTRATIONS_MI_IMAGE ./tasks dojo-plan gp-registrations-mi prod
+      - apply_prod:
+          clean_workspace: true
+          approval:
+            type: manual
+            allow_only_on_success: true
+          jobs:
+            apply:
+              resources:
+                - docker
+              tasks:
+                - fetch:
+                    stage: plan_prod
+                    job: plan
+                    source: prod.tfplan
+                    is_file: yes
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-apply gp-registrations-mi prod

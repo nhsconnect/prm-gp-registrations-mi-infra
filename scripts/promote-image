@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -Eeo pipefail
+
+source_environment=$1
+destination_environment=$2
+image_name=$3
+image_tag=$4
+
+function usage() {
+    echo "Usage:"
+    echo "promote-image SOURCE-ENV DESTINATION-ENV IMAGE-NAME IMAGE-TAG"
+    exit 1
+}
+
+if [ "$#" -ne 4 ]; then
+    echo "Incorrect number of parameters"
+    usage
+fi
+
+source_login=$(dojo "./scripts/ecr-helper get-login $source_environment")
+destination_login=$(dojo "./scripts/ecr-helper get-login $destination_environment")
+
+source_repo_url=$(dojo "./scripts/ecr-helper get-repo-url $source_environment $image_name")
+destination_repo_url=$(dojo "./scripts/ecr-helper get-repo-url $destination_environment $image_name")
+
+source_repo=$source_repo_url:$image_tag
+destination_repo=$destination_repo_url:$image_tag
+
+eval $source_login
+docker pull $source_repo
+docker tag $source_repo $destination_repo
+eval $destination_login
+docker push $destination_repo
+

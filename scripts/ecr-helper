@@ -1,0 +1,84 @@
+#!/bin/bash
+
+set -Eeo pipefail
+
+aws_region=eu-west-2
+
+function assume_role() {
+  env=$1
+  role_param="/registrations/${env}/user-input/cross-account-admin-role"
+
+  role_arn=$(
+    aws ssm get-parameters \
+        --region ${aws_region} \
+        --names ${role_param} \
+        --query 'Parameters[0].Value' \
+        --output text
+  )
+
+  timestamp=$(date +%s)
+  session_name="ci-ecr-helper-${timestamp}"
+  sts=$(
+    aws sts assume-role \
+      --role-arn $role_arn \
+      --role-session-name $session_name \
+      --output json
+  )
+
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_SECRET_ACCESS_KEY
+  unset AWS_SESSION_TOKEN
+  unset AWS_SECURITY_TOKEN
+
+  export AWS_ACCESS_KEY_ID=$(echo $sts | jq -r .Credentials.AccessKeyId)
+  export AWS_SECRET_ACCESS_KEY=$(echo $sts | jq -r .Credentials.SecretAccessKey)
+  export AWS_SESSION_TOKEN=$(echo $sts | jq -r .Credentials.SessionToken)
+}
+
+function get_repo_url() {
+  env=$1
+  image=$2
+
+  repo_url_param="/registrations/${env}/data-pipeline/ecr/url/${image}"
+
+  aws ssm get-parameters \
+      --region ${aws_region} \
+      --names ${repo_url_param} \
+      --query 'Parameters[0].Value' \
+      --output text
+
+}
+
+function get_login() {
+  aws ecr get-login --no-include-email --region ${aws_region}
+}
+
+function usage() {
+    echo "Usage:"
+    echo "ecr-helper [get-login environment] | [get-repo-url environment image]"
+    exit 1
+}
+
+task=$1
+environment=$2
+
+if [ "$#" -le 1 ]; then
+    echo "Incorrect number of parameters"
+    usage
+fi
+
+case "${task}" in
+  get-login)
+    assume_role $environment
+    get_login
+    ;;
+  get-repo-url)
+    assume_role $environment
+    image=$3
+    get_repo_url $environment $image
+    ;;
+  *)
+    echo "Invalid command: '${task}'"
+    usage
+  ;;
+esac

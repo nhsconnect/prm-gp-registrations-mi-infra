@@ -55,7 +55,7 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks dojo-apply base-networking dev
-      - prod:
+      - plan_prod:
           clean_workspace: true
           jobs:
             plan:

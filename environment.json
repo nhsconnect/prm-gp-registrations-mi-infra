@@ -8,9 +8,9 @@
   },
   "prod": {
     "name": "prod",
-    "bucket_name": "prm-gp2gp-terraform-state-prod",
+    "bucket_name": "prm-gp2gp-terraform-state-preprod",
     "dynamo_table": "prm-gp2gp-terraform-table",
-    "role_arn_param": "/registrations/prod/user-input/cross-account-admin-role",
+    "role_arn_param": "/registrations/preprod/user-input/cross-account-admin-role",
     "state_key_prefix": "gp-registrations-mi/"
   }
 }

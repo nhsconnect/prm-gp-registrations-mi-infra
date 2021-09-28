@@ -55,38 +55,38 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks dojo-apply container-repositories dev
-#      - plan_prod:
-#          clean_workspace: true
-#          jobs:
-#            plan:
-#              resources:
-#                - docker
-#              artifacts:
-#                - build:
-#                    source: prod.tfplan
-#              tasks:
-#                - exec:
-#                    command: /bin/bash
-#                    arguments:
-#                      - -c
-#                      - ./tasks dojo-plan container-repositories prod
-#      - apply_prod:
-#          clean_workspace: true
-#          approval:
-#            type: manual
-#            allow_only_on_success: true
-#          jobs:
-#            apply:
-#              resources:
-#                - docker
-#              tasks:
-#                - fetch:
-#                    stage: plan_prod
-#                    job: plan
-#                    source: prod.tfplan
-#                    is_file: yes
-#                - exec:
-#                    command: /bin/bash
-#                    arguments:
-#                      - -c
-#                      - ./tasks dojo-apply container-repositories prod
+      - plan_prod:
+          clean_workspace: true
+          jobs:
+            plan:
+              resources:
+                - docker
+              artifacts:
+                - build:
+                    source: prod.tfplan
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-plan container-repositories prod
+      - apply_prod:
+          clean_workspace: true
+          approval:
+            type: manual
+            allow_only_on_success: true
+          jobs:
+            apply:
+              resources:
+                - docker
+              tasks:
+                - fetch:
+                    stage: plan_prod
+                    job: plan
+                    source: prod.tfplan
+                    is_file: yes
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-apply container-repositories prod

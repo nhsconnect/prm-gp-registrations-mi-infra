@@ -9,7 +9,6 @@ resource "aws_security_group" "mi_alb" {
   )
 }
 
-#  TODO: set IP to personal IP addresses
 resource "aws_security_group_rule" "alb_inbound_only" {
   type              = "ingress"
   security_group_id = aws_security_group.mi_alb.id

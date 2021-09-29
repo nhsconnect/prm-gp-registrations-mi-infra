@@ -21,13 +21,21 @@ fi
 source_login=$(dojo "./scripts/ecr-helper get-login $source_environment")
 destination_login=$(dojo "./scripts/ecr-helper get-login $destination_environment")
 
+echo "Source environment: $source_environment"
+echo "Destination environment: $destination_environment"
+
 source_repo_url=$(dojo "./scripts/ecr-helper get-repo-url $source_environment $image_name")
 destination_repo_url=$(dojo "./scripts/ecr-helper get-repo-url $destination_environment $image_name")
+
+echo "source_repo_url: $source_repo_url"
+echo "destination_repo_url: $destination_repo_url"
 
 source_repo=$source_repo_url:$image_tag
 destination_repo=$destination_repo_url:$image_tag
 
 echo "Promoting $image_name:$image_tag from $source_environment to $destination_environment"
+echo "source_repo: $source_repo"
+echo "destination_repo: $destination_repo"
 
 eval $source_login
 docker pull $source_repo

@@ -9,20 +9,10 @@ resource "aws_security_group" "mi_alb" {
   )
 }
 
-resource "aws_security_group_rule" "alb_inbound_only" {
-  type              = "ingress"
-  security_group_id = aws_security_group.mi_alb.id
-  cidr_blocks       = [data.aws_ssm_parameter.vpc_cidr_block.value]
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  description       = "TLS from VPC"
-}
-
 resource "aws_security_group_rule" "alb_outbound_only" {
   type              = "egress"
   security_group_id = aws_security_group.mi_alb.id
-  cidr_blocks       = ["0.0.0.0/0"]
+  source_security_group_id = aws_security_group.gp_registrations_mi_container.id
   from_port         = 0
   to_port           = 0
   protocol          = "-1"

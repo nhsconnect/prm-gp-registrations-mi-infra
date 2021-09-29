@@ -27,6 +27,8 @@ destination_repo_url=$(dojo "./scripts/ecr-helper get-repo-url $destination_envi
 source_repo=$source_repo_url:$image_tag
 destination_repo=$destination_repo_url:$image_tag
 
+echo "Promoting $image_name:$image_tag from $source_environment to $destination_environment"
+
 eval $source_login
 docker pull $source_repo
 docker tag $source_repo $destination_repo

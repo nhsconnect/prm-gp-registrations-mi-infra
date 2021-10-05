@@ -9,7 +9,7 @@ resource "aws_security_group" "mi_alb" {
   )
 }
 
-resource "aws_security_group_rule" "alb_outbound_only" {
+resource "aws_security_group_rule" "alb_outbound" {
   type              = "egress"
   security_group_id = aws_security_group.mi_alb.id
   source_security_group_id = aws_security_group.gp_registrations_mi_container.id
@@ -30,7 +30,7 @@ resource "aws_security_group" "gp_registrations_mi_container" {
   )
 }
 
-resource "aws_security_group_rule" "mi_container_inbound_only" {
+resource "aws_security_group_rule" "mi_container_inbound" {
   type                     = "ingress"
   security_group_id        = aws_security_group.gp_registrations_mi_container.id
   source_security_group_id = aws_security_group.mi_alb.id
@@ -40,7 +40,7 @@ resource "aws_security_group_rule" "mi_container_inbound_only" {
   description              = "TLS from VPC"
 }
 
-resource "aws_security_group_rule" "mi_container_outbound_only" {
+resource "aws_security_group_rule" "mi_container_outbound" {
   type                     = "egress"
   security_group_id        = aws_security_group.gp_registrations_mi_container.id
   cidr_blocks              = ["0.0.0.0/0"]

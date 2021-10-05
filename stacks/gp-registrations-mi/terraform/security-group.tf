@@ -37,7 +37,7 @@ resource "aws_security_group_rule" "mi_container_inbound" {
   from_port                = 0
   to_port                  = 8080
   protocol                 = "tcp"
-  description              = "TLS from VPC"
+  description              = "Allow inbound traffic from load balancer"
 }
 
 resource "aws_security_group_rule" "mi_container_outbound" {

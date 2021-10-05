@@ -74,7 +74,7 @@ data "aws_iam_policy_document" "ecs_execution" {
       "ecr:BatchGetImage"
     ]
     resources = [
-      "${local.ecr_arn_prefix}:repository/registrations/${var.environment}/gp-registrations-mi/gp-registrations-mi"
+      "${local.ecr_arn_prefix}:repository/registrations/${var.environment}/gp-registrations-mi/*"
     ]
   }
 

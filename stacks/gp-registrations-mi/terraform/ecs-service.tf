@@ -21,7 +21,7 @@ resource "aws_ecs_service" "mi_service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.alb.arn
-    container_name   = "gp-registrations-mi"
+    container_name   = local.container_name
     container_port   = 8080
   }
 

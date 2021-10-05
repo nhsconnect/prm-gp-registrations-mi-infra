@@ -13,12 +13,16 @@ data "aws_ssm_parameter" "execution_role_arn" {
 
 data "aws_region" "current" {}
 
+locals {
+  container_name = "mi-api"
+}
+
 resource "aws_ecs_task_definition" "gp_registrations_mi" {
-  family = "${var.environment}-gp-registrations-mi"
+  family = "${var.environment}-${local.container_name}"
 
   container_definitions = jsonencode([
     {
-      name      = "gp-registrations-mi"
+      name      = local.container_name
       image     = "${data.aws_ssm_parameter.gp_registrations_mi_repository_url.value}:${var.gp_registrations_mi_image_tag}"
       essential = true
       portMappings = [{

@@ -13,10 +13,10 @@ resource "aws_security_group_rule" "alb_outbound" {
   type              = "egress"
   security_group_id = aws_security_group.mi_alb.id
   source_security_group_id = aws_security_group.gp_registrations_mi_container.id
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  description       = "Allow all outbound"
+  from_port         = 8080
+  to_port           = 8080
+  protocol          = "tcp"
+  description       = "Allow alb to talk to the container"
 }
 
 resource "aws_security_group" "gp_registrations_mi_container" {

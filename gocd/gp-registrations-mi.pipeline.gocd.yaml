@@ -72,7 +72,7 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - ./scripts/promote-image dev prod gp-registrations-mi $GO_DEPENDENCY_LABEL_GP_REGISTRATIONS_MI_IMAGE
+                      - ./scripts/promote-image dev prod mi-api $GO_DEPENDENCY_LABEL_GP_REGISTRATIONS_MI_IMAGE
       - plan_prod:
           clean_workspace: true
           jobs:

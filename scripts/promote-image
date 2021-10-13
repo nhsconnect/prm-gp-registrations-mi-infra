@@ -30,8 +30,11 @@ destination_repo=$destination_repo_url:$image_tag
 echo "Promoting $image_name:$image_tag from $source_environment to $destination_environment"
 
 eval $source_login
+
+echo "Pulling docker image from $source_repo"
 docker pull $source_repo
 docker tag $source_repo $destination_repo
 eval $destination_login
-docker push $destination_repo
 
+echo "Pushing docker image to $destination_repo"
+docker push $destination_repo

@@ -59,3 +59,8 @@ variable "ecs_cluster_arn_param_name" {
   type        = string
   description = "ECS cluster arn"
 }
+
+variable "apigee_ips_param_name" {
+  type        = string
+  description = "Apigee IPs"
+}

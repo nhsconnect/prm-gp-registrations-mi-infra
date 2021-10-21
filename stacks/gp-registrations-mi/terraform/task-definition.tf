@@ -25,6 +25,9 @@ resource "aws_ecs_task_definition" "gp_registrations_mi" {
       name      = local.container_name
       image     = "${data.aws_ssm_parameter.gp_registrations_mi_repository_url.value}:${var.gp_registrations_mi_image_tag}"
       essential = true
+      environment = [
+        {"name": "OUTPUT_MI_EVENTS_BUCKET", "value": aws_s3_bucket.mi_output.bucket},
+      ]
       portMappings = [{
         containerPort = 8080
         hostPort      = 8080

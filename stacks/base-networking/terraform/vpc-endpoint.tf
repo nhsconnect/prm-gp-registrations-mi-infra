@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "mi_output_bucket_write_access" {
     ]
 
     resources = [
-      data.aws_ssm_parameter.mi_output_bucket_arn
+      data.aws_ssm_parameter.mi_output_bucket_arn.value
     ]
   }
 }

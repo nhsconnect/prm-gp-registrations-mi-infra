@@ -26,7 +26,7 @@ variable "private_cidr_offset" {
   default     = 100
 }
 
-variable "mi_output_bucket_write_access_policy" {
+variable "mi_output_bucket_arn" {
   type        = string
-  description = "MI Output S3 bucket write access only IAM policy"
+  description = "MI Output S3 bucket ARN"
 }

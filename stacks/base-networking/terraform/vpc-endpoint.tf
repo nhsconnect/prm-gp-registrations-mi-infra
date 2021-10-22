@@ -1,13 +1,27 @@
 data "aws_region" "current" {}
 
-data "aws_ssm_parameter" "mi_output_bucket_write_access_policy" {
-  name = var.mi_output_bucket_write_access_policy
+data "aws_ssm_parameter" "mi_output_bucket_arn" {
+  name = var.mi_output_bucket_arn
+}
+
+data "aws_iam_policy_document" "mi_output_bucket_write_access" {
+  statement {
+    sid = "WriteObjects"
+
+    actions = [
+      "s3:PutObject",
+    ]
+
+    resources = [
+      data.aws_ssm_parameter.mi_output_bucket_arn
+    ]
+  }
 }
 
 resource "aws_vpc_endpoint" "s3" {
   vpc_id       = aws_vpc.vpc.id
   service_name = "com.amazonaws.${data.aws_region.current.name}.s3"
-  policy = data.aws_ssm_parameter.mi_output_bucket_write_access_policy.value
+  policy       = data.aws_iam_policy_document.mi_output_bucket_write_access.json
 
   tags = merge(
     local.common_tags,

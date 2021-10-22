@@ -25,8 +25,3 @@ variable "private_cidr_offset" {
   description = "CIDR address offset to begin creating private subnets at"
   default     = 100
 }
-
-variable "mi_output_bucket_arn" {
-  type        = string
-  description = "MI Output S3 bucket ARN"
-}

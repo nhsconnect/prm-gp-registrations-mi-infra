@@ -14,13 +14,13 @@ resource "aws_security_group" "mi_alb" {
 }
 
 resource "aws_security_group_rule" "alb_apigee_inbound" {
-  type                     = "ingress"
-  security_group_id        = aws_security_group.mi_alb.id
-  cidr_blocks              = split(",", data.aws_ssm_parameter.apigee_ips.value)
-  from_port                = 80
-  to_port                  = 80
-  protocol                 = "tcp"
-  description              = "Allow inbound traffic from apigee"
+  type              = "ingress"
+  security_group_id = aws_security_group.mi_alb.id
+  cidr_blocks       = split(",", data.aws_ssm_parameter.apigee_ips.value)
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  description       = "Allow inbound traffic from apigee"
 }
 
 resource "aws_security_group_rule" "alb_outbound" {

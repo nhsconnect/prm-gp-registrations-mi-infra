@@ -6,7 +6,7 @@ resource "aws_ssm_parameter" "cloudwatch_log_group_name" {
 }
 
 resource "aws_ssm_parameter" "execution_role_arn" {
-  name  = "/registrations/${var.environment}/data-gp-registrations-mi/ecs-execution-role-arn"
+  name  = "/registrations/${var.environment}/gp-registrations-mi/ecs-execution-role-arn"
   type  = "String"
   value = aws_iam_role.ecs_execution.arn
   tags  = local.common_tags

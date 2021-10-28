@@ -20,7 +20,7 @@ resource "aws_ecs_service" "mi_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.alb.arn
+    target_group_arn = aws_lb_target_group.nlb.arn
     container_name   = local.container_name
     container_port   = 8080
   }

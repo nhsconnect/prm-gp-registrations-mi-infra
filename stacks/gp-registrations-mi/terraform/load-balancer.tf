@@ -64,9 +64,6 @@ resource "aws_lb" "nlb" {
 }
 
 resource "aws_lb_target_group" "nlb" {
-  depends_on = [
-    aws_lb.nlb
-  ]
   name        = "${var.environment}-gp-registrations-mi-nlb-tg"
   port        = 8080
   protocol    = "TCP"

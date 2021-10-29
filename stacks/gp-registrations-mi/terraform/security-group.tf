@@ -54,6 +54,16 @@ resource "aws_security_group_rule" "mi_container_inbound" {
   description              = "Allow inbound traffic from load balancer"
 }
 
+resource "aws_security_group_rule" "mi_container_inbound_vpc" {
+  type                     = "ingress"
+  security_group_id        = aws_security_group.gp_registrations_mi_container.id
+  from_port                = 8080
+  to_port                  = 8080
+  cidr_blocks              = [data.aws_ssm_parameter.vpc_cidr_block]
+  protocol                 = "tcp"
+  description              = "Allow inbound traffic from VPC since NLB does not have security groups"
+}
+
 resource "aws_security_group_rule" "mi_container_outbound" {
   type              = "egress"
   security_group_id = aws_security_group.gp_registrations_mi_container.id

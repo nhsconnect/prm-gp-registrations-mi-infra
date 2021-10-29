@@ -47,6 +47,7 @@ resource "aws_api_gateway_integration" "api_gateway_integration" {
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   rest_api_id = aws_api_gateway_rest_api.rest_api.id
+  depends_on  = [aws_api_gateway_integration.api_gateway_integration]
 
   lifecycle {
     create_before_destroy = true

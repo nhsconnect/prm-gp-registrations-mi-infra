@@ -75,14 +75,27 @@ resource "aws_lb_target_group" "nlb" {
   health_check {
     path = "/actuator/health"
   }
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi-nlb-tg"
+    }
+  )
 }
 
 resource "aws_lb_listener" "nlb_listener" {
   load_balancer_arn = aws_lb.nlb.id
-  port              = 80
+  port              = 8080
   protocol          = "TCP"
   default_action {
     target_group_arn = aws_lb_target_group.nlb.id
     type             = "forward"
   }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi-nlb-listener"
+    }
+  )
 }

@@ -86,7 +86,7 @@ resource "aws_lb_target_group" "nlb" {
 
 resource "aws_lb_listener" "nlb_listener" {
   load_balancer_arn = aws_lb.nlb.id
-  port              = 8080
+  port              = 80
   protocol          = "TCP"
   default_action {
     target_group_arn = aws_lb_target_group.nlb.id

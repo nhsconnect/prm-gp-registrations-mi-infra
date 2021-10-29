@@ -54,6 +54,7 @@ resource "aws_lb" "nlb" {
   internal           = true
   load_balancer_type = "network"
   subnets            = split(",", data.aws_ssm_parameter.private_subnet_ids.value)
+  security_groups    = [aws_security_group.mi_nlb.id]
 
   tags = merge(
     local.common_tags,

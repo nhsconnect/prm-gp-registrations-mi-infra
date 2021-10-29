@@ -63,3 +63,34 @@ resource "aws_security_group_rule" "mi_container_outbound" {
   protocol          = "-1"
   description       = "Allow all outbound"
 }
+
+resource "aws_security_group" "mi_nlb" {
+  name   = "${var.environment}-mi-nlb"
+  vpc_id = data.aws_ssm_parameter.vpc_id.value
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi-nlb"
+    }
+  )
+}
+
+resource "aws_security_group_rule" "nlb_outbound" {
+  type                     = "egress"
+  security_group_id        = aws_security_group.mi_nlb.id
+  source_security_group_id = aws_security_group.gp_registrations_mi_container.id
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  description              = "Allow nlb to talk to the container"
+}
+
+resource "aws_security_group_rule" "mi_container_inbound_nlb" {
+  type                     = "ingress"
+  security_group_id        = aws_security_group.gp_registrations_mi_container.id
+  source_security_group_id = aws_security_group.mi_nlb.id
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  description              = "Allow inbound traffic from load balancer"
+}

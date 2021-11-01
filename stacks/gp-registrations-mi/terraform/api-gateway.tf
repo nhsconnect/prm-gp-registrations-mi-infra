@@ -47,7 +47,9 @@ resource "aws_api_gateway_integration" "api_gateway_integration" {
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   rest_api_id = aws_api_gateway_rest_api.rest_api.id
-  depends_on  = [aws_api_gateway_integration.api_gateway_integration]
+  stage_name  = "${var.environment}-env"
+  depends_on = [aws_api_gateway_integration.api_gateway_integration,
+  aws_cloudwatch_log_group.api_gateway_stage, aws_api_gateway_account.api_gateway]
 
   triggers = {
     redeployment = sha1(jsonencode(aws_api_gateway_rest_api.rest_api.body))
@@ -84,7 +86,7 @@ resource "aws_api_gateway_method_settings" "method_settings" {
 }
 
 resource "aws_cloudwatch_log_group" "api_gateway_stage" {
-  name              = "/api-gateway/API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.rest_api.id}/${var.environment}-env"
+  name              = "/api-gateway/${var.environment}-gp-registrations-mi/${aws_api_gateway_rest_api.rest_api.id}/${var.environment}-env"
   retention_in_days = 7
 
   tags = merge(
@@ -116,7 +118,7 @@ data "aws_iam_policy_document" "assume_iam_role" {
 
 resource "aws_iam_role" "cloudwatch_role" {
   name               = "${var.environment}-gp-registrations-mi-api-gateway"
-  description        = "API gateway role for GP Registrations MI"
+  description        = "API gateway role to allow for cloudwatch logging"
   assume_role_policy = data.aws_iam_policy_document.assume_iam_role.json
 }
 
@@ -133,7 +135,7 @@ data "aws_iam_policy_document" "cloudwatch_iam_policy" {
       "logs:FilterLogEvents"
     ]
     resources = [
-      "${aws_cloudwatch_log_group.api_gateway_stage.arn}:*"
+      "*"
     ]
   }
 }

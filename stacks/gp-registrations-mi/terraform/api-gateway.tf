@@ -140,6 +140,6 @@ data "aws_iam_policy_document" "cloudwatch_iam_policy" {
 
 resource "aws_iam_role_policy" "cloudwatch_role_policy" {
   name   = "${var.environment}-api-gateway-cloudwatch-log"
-  role   = aws_iam_role.cloudwatch_role.name
+  role   = aws_iam_role.cloudwatch_role.id
   policy = data.aws_iam_policy_document.cloudwatch_iam_policy.json
 }

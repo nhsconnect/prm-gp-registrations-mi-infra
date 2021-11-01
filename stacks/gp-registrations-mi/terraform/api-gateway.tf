@@ -87,3 +87,52 @@ resource "aws_cloudwatch_log_group" "api_gateway_stage" {
     }
   )
 }
+
+
+resource "aws_api_gateway_account" "api_gateway" {
+  cloudwatch_role_arn = aws_iam_role.cloudwatch_role.arn
+}
+
+
+data "aws_iam_policy_document" "assume_iam_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "apigateway.amazonaws.com"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role" "cloudwatch_role" {
+  name               = "${var.environment}-gp-registrations-mi-api-gateway"
+  description        = "API gateway role for GP Registrations MI"
+  assume_role_policy = data.aws_iam_policy_document.assume_iam_role.json
+}
+
+data "aws_iam_policy_document" "cloudwatch_iam_policy" {
+  statement {
+    sid = "CloudwatchLogs"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = [
+      "${aws_cloudwatch_log_group.api_gateway_stage.arn}:*"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "cloudwatch_role_policy" {
+  name   = "${var.environment}-api-gateway"
+  policy = data.aws_iam_policy_document.cloudwatch_iam_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "api_gateway" {
+  role       = aws_iam_role.cloudwatch_role.name
+  policy_arn = aws_iam_policy.cloudwatch_role_policy.arn
+}

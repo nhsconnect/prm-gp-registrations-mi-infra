@@ -63,6 +63,13 @@ resource "aws_api_gateway_stage" "api_gateway_stage" {
   deployment_id = aws_api_gateway_deployment.api_gateway_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.rest_api.id
   stage_name    = "${var.environment}-env"
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi-api-gateway-stage"
+    }
+  )
 }
 
 resource "aws_api_gateway_method_settings" "method_settings" {
@@ -77,7 +84,7 @@ resource "aws_api_gateway_method_settings" "method_settings" {
 }
 
 resource "aws_cloudwatch_log_group" "api_gateway_stage" {
-  name              = "/api-gateway/${var.environment}-gp-registrations-mi/${aws_api_gateway_rest_api.rest_api.id}/${var.environment}-env"
+  name              = "/api-gateway/API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.rest_api.id}/${var.environment}-env"
   retention_in_days = 7
 
   tags = merge(
@@ -119,7 +126,11 @@ data "aws_iam_policy_document" "cloudwatch_iam_policy" {
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
-      "logs:PutLogEvents"
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+      "logs:PutLogEvents",
+      "logs:GetLogEvents",
+      "logs:FilterLogEvents"
     ]
     resources = [
       "${aws_cloudwatch_log_group.api_gateway_stage.arn}:*"
@@ -127,12 +138,8 @@ data "aws_iam_policy_document" "cloudwatch_iam_policy" {
   }
 }
 
-resource "aws_iam_policy" "cloudwatch_role_policy" {
-  name   = "${var.environment}-api-gateway"
+resource "aws_iam_role_policy" "cloudwatch_role_policy" {
+  name   = "${var.environment}-api-gateway-cloudwatch-log"
+  role   = aws_iam_role.cloudwatch_role.name
   policy = data.aws_iam_policy_document.cloudwatch_iam_policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "api_gateway" {
-  role       = aws_iam_role.cloudwatch_role.name
-  policy_arn = aws_iam_policy.cloudwatch_role_policy.arn
 }

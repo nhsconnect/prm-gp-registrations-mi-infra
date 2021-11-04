@@ -40,7 +40,7 @@ resource "aws_api_gateway_integration" "api_gateway_integration" {
   resource_id             = aws_api_gateway_resource.resource.id
   http_method             = aws_api_gateway_method.method.http_method
   type                    = "HTTP_PROXY"
-  uri                     = "http://${aws_lb.nlb.dns_name}:80/{proxy}"
+  uri                     = "http://${aws_lb.nlb.dns_name}:80"
   integration_http_method = "ANY"
   connection_type         = "VPC_LINK"
   connection_id           = aws_api_gateway_vpc_link.vpc_link.id

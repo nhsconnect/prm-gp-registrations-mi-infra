@@ -109,9 +109,11 @@ resource "aws_cloudwatch_log_group" "api_gateway_stage" {
   )
 }
 
+
 resource "aws_api_gateway_account" "api_gateway" {
   cloudwatch_role_arn = aws_iam_role.cloudwatch_role.arn
 }
+
 
 data "aws_iam_policy_document" "assume_iam_role" {
   statement {

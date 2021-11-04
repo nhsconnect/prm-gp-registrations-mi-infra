@@ -40,10 +40,16 @@ resource "aws_api_gateway_integration" "api_gateway_integration" {
   resource_id             = aws_api_gateway_resource.resource.id
   http_method             = aws_api_gateway_method.method.http_method
   type                    = "HTTP_PROXY"
-  uri                     = "http://${aws_lb.nlb.dns_name}:80"
+  uri                     = format("%s/{proxy}", "http://${aws_lb.nlb.dns_name}:80")
   integration_http_method = "ANY"
   connection_type         = "VPC_LINK"
   connection_id           = aws_api_gateway_vpc_link.vpc_link.id
+
+  cache_key_parameters = ["method.request.path.proxy"]
+
+  request_parameters = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
 }
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment" {
@@ -53,7 +59,12 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   aws_cloudwatch_log_group.api_gateway_stage, aws_api_gateway_account.api_gateway, aws_api_gateway_method.method]
 
   triggers = {
-    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.rest_api.body))
+    redeployment = sha1(join(",", tolist([
+      jsonencode(aws_api_gateway_rest_api.rest_api.body),
+      jsonencode(aws_api_gateway_resource.resource),
+      jsonencode(aws_api_gateway_method.method),
+      jsonencode(aws_api_gateway_integration.api_gateway_integration)
+    ])))
   }
 
   lifecycle {

@@ -1,7 +1,3 @@
-data "aws_ssm_parameter" "public_subnet_ids" {
-  name = var.public_subnet_ids_param_name
-}
-
 data "aws_ssm_parameter" "vpc_id" {
   name = var.vpc_id_param_name
 }

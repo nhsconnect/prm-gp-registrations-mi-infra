@@ -35,11 +35,6 @@ variable "log_group_param_name" {
   description = "Cloudwatch log group for gp registrations MI API"
 }
 
-variable "public_subnet_ids_param_name" {
-  type        = string
-  description = "List of public subnet IDs"
-}
-
 variable "private_subnet_ids_param_name" {
   type        = string
   description = "List of private subnet IDs"

@@ -17,7 +17,7 @@ resource "aws_lb" "alb" {
   security_groups    = [aws_security_group.mi_alb.id]
   subnets            = split(",", data.aws_ssm_parameter.public_subnet_ids.value)
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
   tags = merge(
     local.common_tags,

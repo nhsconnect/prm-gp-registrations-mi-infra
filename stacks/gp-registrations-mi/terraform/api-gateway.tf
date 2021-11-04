@@ -24,22 +24,23 @@ resource "aws_api_gateway_rest_api" "rest_api" {
 resource "aws_api_gateway_resource" "resource" {
   rest_api_id = aws_api_gateway_rest_api.rest_api.id
   parent_id   = aws_api_gateway_rest_api.rest_api.root_resource_id
-  path_part   = "gpregistrationsmi"
+  path_part   = "{proxy+}"
 }
 
 resource "aws_api_gateway_method" "method" {
-  rest_api_id   = aws_api_gateway_rest_api.rest_api.id
-  resource_id   = aws_api_gateway_resource.resource.id
-  http_method   = "ANY"
-  authorization = "NONE"
+  rest_api_id        = aws_api_gateway_rest_api.rest_api.id
+  resource_id        = aws_api_gateway_resource.resource.id
+  http_method        = "ANY"
+  authorization      = "NONE"
+  request_parameters = { "method.request.path.proxy" = true }
 }
 
 resource "aws_api_gateway_integration" "api_gateway_integration" {
   rest_api_id             = aws_api_gateway_rest_api.rest_api.id
   resource_id             = aws_api_gateway_resource.resource.id
   http_method             = aws_api_gateway_method.method.http_method
-  type                    = "HTTP"
-  uri                     = "http://${aws_lb.nlb.dns_name}:80"
+  type                    = "HTTP_PROXY"
+  uri                     = "http://${aws_lb.nlb.dns_name}:80/{proxy}"
   integration_http_method = "ANY"
   connection_type         = "VPC_LINK"
   connection_id           = aws_api_gateway_vpc_link.vpc_link.id
@@ -49,7 +50,7 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   rest_api_id = aws_api_gateway_rest_api.rest_api.id
   stage_name  = "${var.environment}-env"
   depends_on = [aws_api_gateway_integration.api_gateway_integration,
-  aws_cloudwatch_log_group.api_gateway_stage, aws_api_gateway_account.api_gateway]
+  aws_cloudwatch_log_group.api_gateway_stage, aws_api_gateway_account.api_gateway, aws_api_gateway_method.method]
 
   triggers = {
     redeployment = sha1(jsonencode(aws_api_gateway_rest_api.rest_api.body))

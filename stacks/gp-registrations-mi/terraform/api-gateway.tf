@@ -55,8 +55,13 @@ resource "aws_api_gateway_integration" "api_gateway_integration" {
 resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   rest_api_id = aws_api_gateway_rest_api.rest_api.id
   stage_name  = "${var.environment}-env"
-  depends_on = [aws_api_gateway_integration.api_gateway_integration,
-  aws_cloudwatch_log_group.api_gateway_stage, aws_api_gateway_account.api_gateway, aws_api_gateway_method.method]
+  depends_on = [
+    aws_api_gateway_integration.api_gateway_integration,
+    aws_cloudwatch_log_group.execution_logs,
+    aws_cloudwatch_log_group.access_logs,
+    aws_api_gateway_account.api_gateway,
+    aws_api_gateway_method.method
+  ]
 
   triggers = {
     redeployment = sha1(join(",", tolist([
@@ -73,13 +78,13 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment" {
 }
 
 resource "aws_api_gateway_stage" "api_gateway_stage" {
-  depends_on    = [aws_cloudwatch_log_group.api_gateway_stage]
+  depends_on    = [aws_cloudwatch_log_group.access_logs, aws_cloudwatch_log_group.execution_logs]
   deployment_id = aws_api_gateway_deployment.api_gateway_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.rest_api.id
   stage_name    = "${var.environment}-env"
 
   access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.api_gateway_stage.arn
+    destination_arn = aws_cloudwatch_log_group.access_logs.arn
     format = jsonencode(
       {
         "requestId" : "$context.requestId",
@@ -115,9 +120,9 @@ resource "aws_api_gateway_method_settings" "method_settings" {
   }
 }
 
-resource "aws_cloudwatch_log_group" "api_gateway_stage" {
+resource "aws_cloudwatch_log_group" "access_logs" {
   name              = "/api-gateway/${var.environment}-gp-registrations-mi/${aws_api_gateway_rest_api.rest_api.id}/${var.environment}-env"
-  retention_in_days = 7
+  retention_in_days = var.retention_period_in_days
 
   tags = merge(
     local.common_tags,
@@ -127,6 +132,17 @@ resource "aws_cloudwatch_log_group" "api_gateway_stage" {
   )
 }
 
+resource "aws_cloudwatch_log_group" "execution_logs" {
+  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.rest_api.id}/${var.environment}-env"
+  retention_in_days = var.retention_period_in_days
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi"
+    }
+  )
+}
 
 resource "aws_api_gateway_account" "api_gateway" {
   cloudwatch_role_arn = aws_iam_role.cloudwatch_role.arn

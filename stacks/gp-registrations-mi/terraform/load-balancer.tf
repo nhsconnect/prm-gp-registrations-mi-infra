@@ -12,7 +12,7 @@ resource "aws_lb" "nlb" {
   load_balancer_type = "network"
   subnets            = split(",", data.aws_ssm_parameter.private_subnet_ids.value)
 
-  enable_deletion_protection = true
+  enable_deletion_protection       = true
   enable_cross_zone_load_balancing = true
 
   tags = merge(

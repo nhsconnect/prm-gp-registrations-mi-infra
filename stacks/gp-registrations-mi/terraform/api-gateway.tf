@@ -78,6 +78,24 @@ resource "aws_api_gateway_stage" "api_gateway_stage" {
   rest_api_id   = aws_api_gateway_rest_api.rest_api.id
   stage_name    = "${var.environment}-env"
 
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gateway_stage.arn
+    format = jsonencode(
+      {
+        "requestId" : "$context.requestId",
+        "ip" : "$context.identity.sourceIp",
+        "caller" : "$context.identity.caller",
+        "user" : "$context.identity.user",
+        "requestTime" : "$context.requestTime",
+        "httpMethod" : "$context.httpMethod",
+        "resourcePath" : "$context.resourcePath",
+        "status" : "$context.status",
+        "protocol" : "$context.protocol",
+        "responseLength" : "$context.responseLength"
+      }
+    )
+  }
+
   tags = merge(
     local.common_tags,
     {

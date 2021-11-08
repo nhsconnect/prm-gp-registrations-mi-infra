@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "apigee_ip_policy" {
       "execute-api:Invoke"
     ]
     resources = [
-      aws_api_gateway_rest_api.rest_api.arn
+      aws_api_gateway_rest_api.rest_api.execution_arn
     ]
     condition {
       test     = "IpAddress"

@@ -1,7 +1,3 @@
-data "aws_ssm_parameter" "apigee_ips" {
-  name = var.apigee_ips_param_name
-}
-
 resource "aws_security_group" "gp_registrations_mi_container" {
   name   = "${var.environment}-gp-registrations-mi-container"
   vpc_id = data.aws_ssm_parameter.vpc_id.value

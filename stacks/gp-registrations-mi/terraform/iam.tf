@@ -37,3 +37,29 @@ data "aws_iam_policy_document" "mi_output_bucket_write_access" {
     ]
   }
 }
+
+resource "aws_api_gateway_rest_api_policy" "api_policy" {
+  rest_api_id = aws_api_gateway_rest_api.rest_api.id
+  policy      = data.aws_iam_policy_document.apigee_ip_policy.json
+}
+
+data "aws_iam_policy_document" "apigee_ip_policy" {
+  statement {
+    sid = "InvokeApiGateway"
+    actions = [
+      "execute-api:Invoke"
+    ]
+    resources = [
+      aws_api_gateway_rest_api.rest_api.arn
+    ]
+    condition {
+      test     = "IpAddress"
+      values   = split(",", data.aws_ssm_parameter.apigee_ips.value)
+      variable = "aws:SourceIp"
+    }
+  }
+}
+
+data "aws_ssm_parameter" "apigee_ips" {
+  name = var.apigee_ips_param_name
+}

@@ -67,7 +67,8 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment" {
       jsonencode(aws_api_gateway_rest_api.rest_api.body),
       jsonencode(aws_api_gateway_resource.resource),
       jsonencode(aws_api_gateway_method.method),
-      jsonencode(aws_api_gateway_integration.api_gateway_integration)
+      jsonencode(aws_api_gateway_integration.api_gateway_integration),
+      jsonencode(aws_api_gateway_rest_api_policy.api_policy)
     ])))
   }
 

@@ -57,6 +57,11 @@ data "aws_iam_policy_document" "apigee_ip_policy" {
       values   = split(",", data.aws_ssm_parameter.apigee_ips.value)
       variable = "aws:SourceIp"
     }
+
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
   }
 }
 

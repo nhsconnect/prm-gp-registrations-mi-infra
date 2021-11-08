@@ -54,7 +54,7 @@ resource "aws_api_gateway_integration" "api_gateway_integration" {
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   rest_api_id = aws_api_gateway_rest_api.rest_api.id
-  stage_name  = "${var.environment}-env"
+  stage_name  = local.api_stage_name
   depends_on = [
     aws_api_gateway_integration.api_gateway_integration,
     aws_cloudwatch_log_group.execution_logs,
@@ -81,7 +81,7 @@ resource "aws_api_gateway_stage" "api_gateway_stage" {
   depends_on    = [aws_cloudwatch_log_group.access_logs, aws_cloudwatch_log_group.execution_logs]
   deployment_id = aws_api_gateway_deployment.api_gateway_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.rest_api.id
-  stage_name    = "${var.environment}-env"
+  stage_name    = local.api_stage_name
 
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.access_logs.arn
@@ -121,7 +121,7 @@ resource "aws_api_gateway_method_settings" "method_settings" {
 }
 
 resource "aws_cloudwatch_log_group" "access_logs" {
-  name              = "/api-gateway/${var.environment}-gp-registrations-mi/${aws_api_gateway_rest_api.rest_api.id}/${var.environment}-env"
+  name              = "/api-gateway/${var.environment}-gp-registrations-mi/${aws_api_gateway_rest_api.rest_api.id}/${local.api_stage_name}"
   retention_in_days = var.retention_period_in_days
 
   tags = merge(
@@ -133,7 +133,7 @@ resource "aws_cloudwatch_log_group" "access_logs" {
 }
 
 resource "aws_cloudwatch_log_group" "execution_logs" {
-  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.rest_api.id}/${var.environment}-env"
+  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.rest_api.id}/${local.api_stage_name}"
   retention_in_days = var.retention_period_in_days
 
   tags = merge(

@@ -65,3 +65,7 @@ variable "retention_period_in_days" {
   default     = 120
   description = "The number of days for cloudwatch logs retention period"
 }
+
+locals {
+  api_stage_name = "${var.environment}-env"
+}

@@ -40,13 +40,7 @@ data "aws_iam_policy_document" "mi_output_bucket_write_access" {
 
 resource "aws_api_gateway_rest_api_policy" "api_policy" {
   rest_api_id = aws_api_gateway_rest_api.rest_api.id
-  policy      = aws_iam_policy.apigee_ip_iam_policy.policy
-}
-
-
-resource "aws_iam_policy" "apigee_ip_iam_policy" {
-  name   = "${var.environment}-apigee-ip-invoke-gp-registrations-mi-api"
-  policy = data.aws_iam_policy_document.apigee_ip_policy.json
+  policy      = data.aws_iam_policy_document.apigee_ip_policy.json
 }
 
 data "aws_iam_policy_document" "apigee_ip_policy" {
@@ -63,7 +57,6 @@ data "aws_iam_policy_document" "apigee_ip_policy" {
       values   = split(",", data.aws_ssm_parameter.apigee_ips.value)
       variable = "aws:SourceIp"
     }
-
     principals {
       type        = "*"
       identifiers = ["*"]

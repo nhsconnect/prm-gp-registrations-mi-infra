@@ -59,7 +59,7 @@ data "aws_iam_policy_document" "apigee_ip_policy" {
     }
 
     principals {
-      type        = "AWS"
+      type        = "*"
       identifiers = ["*"]
     }
   }

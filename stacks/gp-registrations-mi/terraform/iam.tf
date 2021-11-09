@@ -45,7 +45,7 @@ resource "aws_api_gateway_rest_api_policy" "api_policy" {
 
 data "aws_iam_policy_document" "apigee_ip_policy" {
   statement {
-    sid = "WhitelistApigeeIps"
+    sid = "AllowApigeeIps"
     actions = [
       "execute-api:Invoke"
     ]

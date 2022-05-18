@@ -26,18 +26,14 @@ resource "aws_s3_bucket_versioning" "mi_output" {
   }
 }
 
-resource "aws_kms_key" "mi_output" {
-  description             = "Key used to encrypt MI bucket objects"
-  deletion_window_in_days = 10
-}
-
 resource "aws_s3_bucket_server_side_encryption_configuration" "mi_output" {
   bucket = aws_s3_bucket.mi_output.bucket
 
   rule {
+    bucket_key_enabled = true
+
     apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.mi_output.arn
-      sse_algorithm     = "aws:kms"
+      sse_algorithm     = "AES256"
     }
   }
 }

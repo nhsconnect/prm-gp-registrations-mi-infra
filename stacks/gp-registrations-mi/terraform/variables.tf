@@ -69,3 +69,13 @@ variable "retention_period_in_days" {
 locals {
   api_stage_name = "${var.environment}-env"
 }
+
+variable "splunk_cloud_url_param_name" {
+  type        = string
+  description = "SSM param containing splunk cloud url to send MI events to"
+}
+
+variable "splunk_cloud_api_token_param_name" {
+  type        = string
+  description = "SSM param containing splunk cloud api token to send MI events to"
+}

@@ -6,3 +6,5 @@ vpc_cidr_block_param_name="/registrations/prod/gp-registrations-mi/base-networki
 ecs_cluster_arn_param_name="/registrations/prod/gp-registrations-mi/ecs-cluster/ecs-cluster-arn"
 private_subnet_ids_param_name="/registrations/prod/gp-registrations-mi/base-networking/private-subnet-ids"
 apigee_ips_param_name="/registrations/prod/user-input/gp-registrations-mi/apigee-ips"
+splunk_cloud_url_param_name="/registrations/prod/user-input/splunk-cloud-url"
+splunk_cloud_api_token_param_name="/registrations/prod/user-input/splunk-cloud-api-token"

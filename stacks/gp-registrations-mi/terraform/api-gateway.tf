@@ -33,6 +33,7 @@ resource "aws_api_gateway_method" "method" {
   http_method        = "ANY"
   authorization      = "NONE"
   request_parameters = { "method.request.path.proxy" = true }
+  api_key_required   = true
 }
 
 resource "aws_api_gateway_integration" "api_gateway_integration" {
@@ -142,4 +143,24 @@ resource "aws_cloudwatch_log_group" "execution_logs" {
       Name = "${var.environment}-gp-registrations-mi"
     }
   )
+}
+
+resource "aws_api_gateway_usage_plan" "api_gateway_usage_plan" {
+  name         = "${var.environment}-gp-registrations-mi-api-gateway-usage-plan-api-key"
+  description  = "Usage plan to configure api key to connect to the apigee proxy"
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.rest_api.id
+    stage  = aws_api_gateway_stage.api_gateway_stage.stage_name
+  }
+}
+
+resource "aws_api_gateway_api_key" "apigee_proxy" {
+  name = "${var.environment}-gp-registrations-mi-apigee-proxy-api-key"
+}
+
+resource "aws_api_gateway_usage_plan_key" "main" {
+  key_id        = aws_api_gateway_api_key.apigee_proxy.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.api_gateway_usage_plan.id
 }

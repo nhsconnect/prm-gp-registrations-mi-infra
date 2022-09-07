@@ -62,6 +62,16 @@ data "aws_iam_policy_document" "apigee_ip_policy" {
       identifiers = ["*"]
     }
   }
+
+  statement {
+    sid = "AllowGETStatus"
+    actions = [
+      "execute-api:Invoke"
+    ]
+    resources = [
+      "${aws_api_gateway_rest_api.rest_api.execution_arn}/${local.api_stage_name}/GET/_status"
+    ]
+  }
 }
 
 data "aws_ssm_parameter" "apigee_ips" {

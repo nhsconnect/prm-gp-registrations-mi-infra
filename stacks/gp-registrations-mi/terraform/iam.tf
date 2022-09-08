@@ -71,6 +71,10 @@ data "aws_iam_policy_document" "apigee_ip_policy" {
     resources = [
       "${aws_api_gateway_rest_api.rest_api.execution_arn}/${local.api_stage_name}/GET/_status"
     ]
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
   }
 }
 

@@ -33,7 +33,7 @@ resource "aws_lb_target_group" "nlb" {
   target_type = "ip"
   vpc_id      = data.aws_ssm_parameter.vpc_id.value
   health_check {
-    path = "/actuator/health"
+    path = "/_status"
   }
 
   tags = merge(

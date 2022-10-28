@@ -16,7 +16,3 @@ resource "aws_sns_topic_subscription" "incoming_enriched_mi_events_for_s3_upload
   endpoint             = aws_sqs_queue.incoming_enriched_mi_events_for_s3_uploader.arn
 }
 
-resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_uploader" {
-  queue_url = aws_sqs_queue.incoming_enriched_mi_events_for_s3_uploader.id
-  policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events.json
-}

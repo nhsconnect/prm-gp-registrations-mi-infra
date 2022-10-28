@@ -4,6 +4,7 @@ resource "aws_iam_role" "gp_registrations_mi" {
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
   managed_policy_arns = [
     aws_iam_policy.mi_output_bucket_write_access.arn,
+    aws_iam_policy.incoming_enriched_mi_events_sns_topic_publish.arn
   ]
 }
 
@@ -106,4 +107,26 @@ data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events" {
       variable = "aws:SourceArn"
     }
   }
+}
+
+resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_uploader" {
+  queue_url = aws_sqs_queue.incoming_enriched_mi_events_for_s3_uploader.id
+  policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events.json
+}
+
+data "aws_iam_policy_document" "incoming_enriched_mi_events_sns_topic" {
+  statement {
+    actions = [
+      "sns:Publish",
+      "sns:GetTopicAttributes"
+    ]
+    resources = [
+      aws_sns_topic.enriched_mi_events.arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "incoming_enriched_mi_events_sns_topic_publish" {
+  name   = "${aws_sns_topic.enriched_mi_events.name}-publish"
+  policy = data.aws_iam_policy_document.incoming_enriched_mi_events_sns_topic.json
 }

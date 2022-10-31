@@ -9,7 +9,7 @@ pipelines:
           id: git-path
         options:
           url: https://github.com/nhsconnect/prm-gp-registrations-mi-infra.git
-          path: stacks/gp-registrations-mi
+          path: stacks/gp-registrations-mi, lambda/s3-event-uploader
       gp_registrations_mi_image:
         pipeline: prm-gp-registrations-mi
         stage: publish_docker
@@ -35,6 +35,9 @@ pipelines:
               artifacts:
                 - build:
                     source: dev.tfplan
+                - build:
+                    source: lambda/build/s3-event-uploader.zip
+                    destination: lambda/build/
               tasks:
                 - exec:
                     command: /bin/bash
@@ -52,6 +55,12 @@ pipelines:
                     stage: plan_dev
                     job: plan
                     source: dev.tfplan
+                    is_file: yes
+                - fetch:
+                    stage: plan_dev
+                    job: plan
+                    source: lambda/build/s3-event-uploader.zip
+                    destination: lambda/build/
                     is_file: yes
                 - exec:
                     command: /bin/bash
@@ -82,6 +91,9 @@ pipelines:
               artifacts:
                 - build:
                     source: prod.tfplan
+                - build:
+                    source: lambda/build/s3-event-uploader.zip
+                    destination: lambda/build/
               tasks:
                 - exec:
                     command: /bin/bash
@@ -102,6 +114,12 @@ pipelines:
                     stage: plan_prod
                     job: plan
                     source: prod.tfplan
+                    is_file: yes
+                - fetch:
+                    stage: plan_dev
+                    job: plan
+                    source: lambda/build/s3-event-uploader.zip
+                    destination: lambda/build/
                     is_file: yes
                 - exec:
                     command: /bin/bash

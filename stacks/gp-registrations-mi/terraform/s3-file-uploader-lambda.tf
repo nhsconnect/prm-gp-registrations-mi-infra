@@ -17,3 +17,12 @@ resource "aws_lambda_event_source_mapping" "sqs_queue_s3_event_uploader_lambda_t
   event_source_arn = aws_sqs_queue.incoming_enriched_mi_events_for_s3_event_uploader.arn
   function_name    = aws_lambda_function.s3_event_uploader_lambda.arn
 }
+
+resource "aws_iam_role" "s3_event_uploader_lambda_role" {
+  name               = "${var.environment}-s3-event-uploader-lambda-role"
+  assume_role_policy = data.aws_iam_policy_document.s3_event_uploader_lambda_assume_role.json
+  managed_policy_arns = [
+    aws_iam_policy.sqs_receive_incoming_enriched_mi_events_for_lambda.arn,
+    aws_iam_policy.s3_event_uploader_lambda_cloudwatch_log_access.arn
+  ]
+}

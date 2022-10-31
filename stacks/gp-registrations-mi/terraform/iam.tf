@@ -126,6 +126,14 @@ data "aws_iam_policy_document" "incoming_enriched_mi_events_sns_topic" {
   }
 }
 
+resource "aws_iam_role" "s3_event_uploader_lambda_role" {
+  name               = "${var.environment}-s3-event-uploader-lambda-role"
+  assume_role_policy = data.aws_iam_policy_document.s3_event_uploader_lambda_assume_role.json
+  managed_policy_arns = [
+    aws_iam_policy.sqs_receive_incoming_enriched_mi_events_for_lambda.arn,
+  ]
+}
+
 resource "aws_cloudwatch_log_group" "s3_event_uploader_lambda" {
   name = "/aws/lambda/${aws_lambda_function.s3_event_uploader_lambda.function_name}"
   tags = merge(
@@ -158,6 +166,11 @@ resource "aws_iam_policy" "s3_event_uploader_lambda_cloudwatch_log_access" {
 resource "aws_iam_policy" "incoming_enriched_mi_events_sns_topic_publish" {
   name   = "${aws_sns_topic.enriched_mi_events.name}-publish"
   policy = data.aws_iam_policy_document.incoming_enriched_mi_events_sns_topic.json
+}
+
+resource "aws_iam_role_policy_attachment" "s3_event_uploader_lambda_role" {
+  role       = aws_iam_role.s3_event_uploader_lambda_role.name
+  policy_arn = aws_iam_policy.s3_event_uploader_lambda_cloudwatch_log_access.arn
 }
 
 data "aws_iam_policy_document" "s3_event_uploader_lambda_assume_role" {

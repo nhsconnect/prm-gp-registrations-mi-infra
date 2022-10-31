@@ -174,11 +174,11 @@ resource "aws_iam_policy" "s3_event_uploader_lambda_cloudwatch_log_access" {
 }
 
 resource "aws_cloudwatch_log_group" "s3_event_uploader_lambda" {
-  name = "/aws/lambda/${var.environment}-${aws_lambda_function.s3_event_uploader_lambda.function_name}"
+  name = "/aws/lambda/${aws_lambda_function.s3_event_uploader_lambda.function_name}"
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-${aws_lambda_function.s3_event_uploader_lambda.function_name}"
+      Name = aws_lambda_function.s3_event_uploader_lambda.function_name
     }
   )
   retention_in_days = 60

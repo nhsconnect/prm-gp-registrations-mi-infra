@@ -131,7 +131,7 @@ resource "aws_cloudwatch_log_group" "s3_event_uploader_lambda" {
   tags = merge(
     local.common_tags,
     {
-      Name = aws_lambda_function.s3_event_uploader_lambda.arn
+      Name = aws_lambda_function.s3_event_uploader_lambda.function_name
     }
   )
   retention_in_days = 60
@@ -165,7 +165,7 @@ resource "aws_iam_role" "s3_event_uploader_lambda_role" {
   assume_role_policy = data.aws_iam_policy_document.s3_event_uploader_lambda_assume_role.json
   managed_policy_arns = [
     aws_iam_policy.sqs_receive_incoming_enriched_mi_events_for_lambda.arn,
-    aws_iam_policy.s3_event_uploader_lambda_cloudwatch_log_access.arn
+#    aws_iam_policy.s3_event_uploader_lambda_cloudwatch_log_access.arn
   ]
 }
 

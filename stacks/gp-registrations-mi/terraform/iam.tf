@@ -98,7 +98,7 @@ data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events" {
     }
 
     resources = [
-      aws_sqs_queue.incoming_enriched_mi_events_for_s3_uploader.arn
+      aws_sqs_queue.incoming_enriched_mi_events_for_s3_event_uploader.arn
     ]
 
     condition {
@@ -109,8 +109,8 @@ data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events" {
   }
 }
 
-resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_uploader" {
-  queue_url = aws_sqs_queue.incoming_enriched_mi_events_for_s3_uploader.id
+resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_event_uploader" {
+  queue_url = aws_sqs_queue.incoming_enriched_mi_events_for_s3_event_uploader.id
   policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events.json
 }
 
@@ -129,4 +129,41 @@ data "aws_iam_policy_document" "incoming_enriched_mi_events_sns_topic" {
 resource "aws_iam_policy" "incoming_enriched_mi_events_sns_topic_publish" {
   name   = "${aws_sns_topic.enriched_mi_events.name}-publish"
   policy = data.aws_iam_policy_document.incoming_enriched_mi_events_sns_topic.json
+}
+
+resource "aws_iam_role" "s3_event_uploader_lambda_role" {
+  name               = "${var.environment}-s3-event-uploader-lambda-role"
+  assume_role_policy = data.aws_iam_policy_document.s3_event_uploader_lambda_assume_role.json
+  managed_policy_arns = [
+    aws_iam_policy.sqs_receive_incoming_enriched_mi_events_for_lambda.arn,
+  ]
+}
+
+data "aws_iam_policy_document" "s3_event_uploader_lambda_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_policy" "sqs_receive_incoming_enriched_mi_events_for_lambda" {
+  name   = "${var.environment}-sqs-receive-incoming-enriched-mi-events-lambda"
+  policy = data.aws_iam_policy_document.sqs_receive_incoming_enriched_mi_events_for_lambda.json
+}
+
+data "aws_iam_policy_document" "sqs_receive_incoming_enriched_mi_events_for_lambda" {
+  statement {
+    actions = [
+      "sqs:GetQueue*",
+      "sqs:ChangeMessageVisibility",
+      "sqs:DeleteMessage",
+      "sqs:ReceiveMessage"
+    ]
+    resources = [
+      aws_sqs_queue.incoming_enriched_mi_events_for_s3_event_uploader.arn
+    ]
+  }
 }

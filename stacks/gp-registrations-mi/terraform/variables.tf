@@ -79,3 +79,9 @@ variable "splunk_cloud_api_token_param_name" {
   type        = string
   description = "SSM param containing splunk cloud api token to send MI events to"
 }
+
+variable "s3_event_uploader_zip" {
+  type        = string
+  description = "Path to zipfile containing lambda code for uploading events to s3"
+  default     = "lambda/build/s3-event-uploader.zip"
+}

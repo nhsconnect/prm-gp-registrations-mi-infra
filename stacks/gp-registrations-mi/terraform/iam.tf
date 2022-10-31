@@ -179,7 +179,7 @@ resource "aws_cloudwatch_log_group" "s3_event_uploader_lambda" {
   tags = merge(
     local.common_tags,
     {
-      Name = aws_lambda_function.s3_event_uploader_lambda.function_name
+      Name = aws_lambda_function.s3_event_uploader_lambda.arn
     }
   )
   retention_in_days = 60

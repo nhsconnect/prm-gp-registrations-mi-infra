@@ -27,3 +27,14 @@ The stack name denotes the specific stack you would like to validate.
 The environment can be `dev` or `preprod`.
 
 To run the formatting, run `./tasks format <stack-name> <environment>`
+
+## Troubleshooting
+Error: `Too many command line arguments. Did you mean to use -chdir?`
+
+If you are unable to validate/plan, make sure you doing it inside the dojo container by typing
+```
+    dojo (then running command inside)
+    or
+    ./tasks dojo-validate
+
+```

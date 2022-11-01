@@ -5,7 +5,7 @@ variable "splunk_cloud_event_uploader_lambda_name" {
 resource "aws_lambda_function" "splunk_cloud_event_uploader_lambda" {
   filename      = var.splunk_cloud_event_uploader_zip
   function_name = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
-  role          = aws_iam_role.s3_event_uploader_lambda_role.arn
+  role          = aws_iam_role.splunk_cloud_event_uploader_lambda_role.arn
   handler       = "main.lambda_handler"
   source_code_hash = filebase64sha256(var.splunk_cloud_event_uploader_zip)
   runtime = "python3.9"

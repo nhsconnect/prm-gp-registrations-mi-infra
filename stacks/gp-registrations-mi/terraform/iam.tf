@@ -22,26 +22,6 @@ data "aws_iam_policy_document" "ecs_assume" {
   }
 }
 
-resource "aws_iam_policy" "splunk_cloud_uploader_lambda_ssm_access" {
-  name   = "${var.environment}-splunk-cloud-uploader-lambda-ssm-access"
-  policy = data.aws_iam_policy_document.splunk_cloud_uploader_lambda_ssm_access.json
-}
-
-data "aws_iam_policy_document" "splunk_cloud_uploader_lambda_ssm_access" {
-  statement {
-    sid = "GetSSMParameter"
-
-    actions = [
-      "ssm:GetParameter"
-    ]
-
-    resources = [
-      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_url_param_name}",
-      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_api_token_param_name}",
-    ]
-  }
-}
-
 resource "aws_iam_policy" "mi_output_bucket_write_access" {
   name   = "${aws_s3_bucket.mi_output.bucket}-write"
   policy = data.aws_iam_policy_document.mi_output_bucket_write_access.json
@@ -120,7 +100,8 @@ data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events" {
     }
 
     resources = [
-      aws_sqs_queue.incoming_enriched_mi_events_for_s3_event_uploader.arn
+      aws_sqs_queue.incoming_enriched_mi_events_for_s3_event_uploader.arn,
+      aws_sqs_queue.incoming_enriched_mi_events_for_splunk_cloud_event_uploader.arn
     ]
 
     condition {
@@ -274,4 +255,24 @@ resource "aws_cloudwatch_log_group" "splunk_cloud_event_uploader_lambda" {
     }
   )
   retention_in_days = 60
+}
+
+resource "aws_iam_policy" "splunk_cloud_uploader_lambda_ssm_access" {
+  name   = "${var.environment}-splunk-cloud-uploader-lambda-ssm-access"
+  policy = data.aws_iam_policy_document.splunk_cloud_uploader_lambda_ssm_access.json
+}
+
+data "aws_iam_policy_document" "splunk_cloud_uploader_lambda_ssm_access" {
+  statement {
+    sid = "GetSSMParameter"
+
+    actions = [
+      "ssm:GetParameter"
+    ]
+
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_url_param_name}",
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_api_token_param_name}",
+    ]
+  }
 }

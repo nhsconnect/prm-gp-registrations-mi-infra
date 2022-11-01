@@ -9,7 +9,7 @@ pipelines:
           id: git-path
         options:
           url: https://github.com/nhsconnect/prm-gp-registrations-mi-infra.git
-          path: stacks/gp-registrations-mi, lambda/s3-event-uploader
+          path: stacks/gp-registrations-mi, lambda/s3-event-uploader, lambda/splunk-cloud-event-uploader
       gp_registrations_mi_image:
         pipeline: prm-gp-registrations-mi
         stage: publish_docker
@@ -38,6 +38,9 @@ pipelines:
                 - build:
                     source: lambda/build/s3-event-uploader.zip
                     destination: lambda/build/
+                - build:
+                    source: lambda/build/splunk-cloud-event-uploader.zip
+                    destination: lambda/build/
               tasks:
                 - exec:
                     command: /bin/bash
@@ -60,6 +63,12 @@ pipelines:
                     stage: plan_dev
                     job: plan
                     source: lambda/build/s3-event-uploader.zip
+                    destination: lambda/build/
+                    is_file: yes
+                - fetch:
+                    stage: plan_dev
+                    job: plan
+                    source: lambda/build/splunk-cloud-event-uploader.zip
                     destination: lambda/build/
                     is_file: yes
                 - exec:
@@ -94,6 +103,9 @@ pipelines:
                 - build:
                     source: lambda/build/s3-event-uploader.zip
                     destination: lambda/build/
+                - build:
+                    source: lambda/build/splunk-cloud-event-uploader.zip
+                    destination: lambda/build/
               tasks:
                 - exec:
                     command: /bin/bash
@@ -119,6 +131,12 @@ pipelines:
                     stage: plan_dev
                     job: plan
                     source: lambda/build/s3-event-uploader.zip
+                    destination: lambda/build/
+                    is_file: yes
+                - fetch:
+                    stage: plan_dev
+                    job: plan
+                    source: lambda/build/splunk-cloud-event-uploader.zip
                     destination: lambda/build/
                     is_file: yes
                 - exec:

@@ -145,18 +145,18 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
-resource "aws_iam_policy" "sqs_receive_incoming_enriched_mi_events_for_lambda" {
-  name   = "${var.environment}-sqs-receive-incoming-enriched-mi-events-lambda"
+#S3
+resource "aws_iam_policy" "sqs_receive_incoming_enriched_mi_events_for_s3_event_uploader_lambda" {
+  name   = "${var.environment}-sqs-receive-incoming-enriched-mi-events-s3-lambda"
   policy = data.aws_iam_policy_document.sqs_receive_incoming_enriched_mi_events_for_s3_event_uploader_lambda.json
 }
 
-#S3
 resource "aws_iam_role" "s3_event_uploader_lambda_role" {
   name               = "${var.environment}-s3-event-uploader-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = [
+    aws_iam_policy.sqs_receive_incoming_enriched_mi_events_for_s3_event_uploader_lambda.arn,
     aws_iam_policy.s3_event_uploader_lambda_cloudwatch_log_access.arn,
-    aws_iam_policy.sqs_receive_incoming_enriched_mi_events_for_lambda.arn,
   ]
 }
 
@@ -204,11 +204,16 @@ resource "aws_cloudwatch_log_group" "s3_event_uploader_lambda" {
 }
 
 #Splunk Cloud
+resource "aws_iam_policy" "sqs_receive_incoming_enriched_mi_events_for_splunk_cloud_uploader_lambda" {
+  name   = "${var.environment}-sqs-receive-incoming-enriched-mi-events-splunk-cloud"
+  policy = data.aws_iam_policy_document.sqs_receive_incoming_enriched_mi_events_for_splunk_cloud_event_uploader_lambda.json
+}
+
 resource "aws_iam_role" "splunk_cloud_event_uploader_lambda_role" {
   name               = "${var.environment}-splunk_cloud-event-uploader-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = [
-    aws_iam_policy.sqs_receive_incoming_enriched_mi_events_for_lambda.arn,
+    aws_iam_policy.sqs_receive_incoming_enriched_mi_events_for_splunk_cloud_uploader_lambda.arn,
     aws_iam_policy.splunk_cloud_uploader_lambda_ssm_access.arn,
     aws_iam_policy.splunk_cloud_event_uploader_lambda_cloudwatch_log_access.arn,
   ]

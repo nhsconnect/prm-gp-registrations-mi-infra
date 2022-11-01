@@ -85,3 +85,9 @@ variable "s3_event_uploader_zip" {
   description = "Path to zipfile containing lambda code for uploading events to s3"
   default     = "lambda/build/s3-event-uploader.zip"
 }
+
+variable "splunk_cloud_event_uploader_zip" {
+  type        = string
+  description = "Path to zipfile containing lambda code for uploading events to splunk cloud"
+  default     = "lambda/build/splunk-cloud-event-uploader.zip"
+}

@@ -100,7 +100,6 @@ data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events" {
     }
 
     resources = [
-      aws_sqs_queue.incoming_enriched_mi_events_for_s3_event_uploader.arn,
       aws_sqs_queue.incoming_enriched_mi_events_for_splunk_cloud_event_uploader.arn
     ]
 
@@ -110,11 +109,6 @@ data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events" {
       variable = "aws:SourceArn"
     }
   }
-}
-
-resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_event_uploader" {
-  queue_url = aws_sqs_queue.incoming_enriched_mi_events_for_s3_event_uploader.id
-  policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events.json
 }
 
 data "aws_iam_policy_document" "incoming_enriched_mi_events_sns_topic" {
@@ -145,65 +139,6 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
-#S3
-resource "aws_iam_policy" "sqs_receive_incoming_enriched_mi_events_for_s3_event_uploader_lambda" {
-  name   = "${var.environment}-sqs-receive-incoming-enriched-mi-events-s3-lambda"
-  policy = data.aws_iam_policy_document.sqs_receive_incoming_enriched_mi_events_for_s3_event_uploader_lambda.json
-}
-
-resource "aws_iam_role" "s3_event_uploader_lambda_role" {
-  name               = "${var.environment}-s3-event-uploader-lambda-role"
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
-  managed_policy_arns = [
-    aws_iam_policy.sqs_receive_incoming_enriched_mi_events_for_s3_event_uploader_lambda.arn,
-    aws_iam_policy.s3_event_uploader_lambda_cloudwatch_log_access.arn,
-  ]
-}
-
-data "aws_iam_policy_document" "sqs_receive_incoming_enriched_mi_events_for_s3_event_uploader_lambda" {
-  statement {
-    actions = [
-      "sqs:GetQueue*",
-      "sqs:ChangeMessageVisibility",
-      "sqs:DeleteMessage",
-      "sqs:ReceiveMessage"
-    ]
-    resources = [
-      aws_sqs_queue.incoming_enriched_mi_events_for_s3_event_uploader.arn,
-    ]
-  }
-}
-
-data "aws_iam_policy_document" "s3_event_uploader_lambda_cloudwatch_log_access" {
-  statement {
-    sid = "CloudwatchLogs"
-    actions = [
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
-    ]
-    resources = [
-      "${aws_cloudwatch_log_group.s3_event_uploader_lambda.arn}:*",
-    ]
-  }
-}
-
-resource "aws_iam_policy" "s3_event_uploader_lambda_cloudwatch_log_access" {
-  name   = "${var.environment}-s3-event-uploader-lambda-log-access"
-  policy = data.aws_iam_policy_document.s3_event_uploader_lambda_cloudwatch_log_access.json
-}
-
-resource "aws_cloudwatch_log_group" "s3_event_uploader_lambda" {
-  name = "/aws/lambda/${var.environment}-${var.s3_event_uploader_lambda_name}"
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "${var.environment}-${var.s3_event_uploader_lambda_name}"
-    }
-  )
-  retention_in_days = 60
-}
-
-#Splunk Cloud
 resource "aws_iam_policy" "sqs_receive_incoming_enriched_mi_events_for_splunk_cloud_uploader_lambda" {
   name   = "${var.environment}-sqs-receive-incoming-enriched-mi-events-splunk-cloud"
   policy = data.aws_iam_policy_document.sqs_receive_incoming_enriched_mi_events_for_splunk_cloud_event_uploader_lambda.json

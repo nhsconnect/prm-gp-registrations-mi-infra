@@ -82,7 +82,6 @@ dojo-validate)
   dojo "./tasks validate ${stack_name} ${stack_env}"
   ;;
 plan)
-  build_lambda s3-event-uploader
   build_lambda splunk-cloud-event-uploader
   tf_init
   terraform plan -var environment=$env_name \
@@ -109,7 +108,6 @@ destroy)
     ${tf_dir}
   ;;
 build-lambda)
-  build_lambda s3-event-uploader
   build_lambda splunk-cloud-event-uploader
 ;;
 *)

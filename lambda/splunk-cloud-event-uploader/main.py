@@ -43,13 +43,15 @@ def _send_events_to_splunk_cloud(sqs_messages):
 
     events = sqs_messages["Records"]
     for event in events:
+        event_body = json.loads(event["body"])
+
         request_body = json.dumps({
             "source": "itoc:gp2gp",
-            "event": event["body"]
+            "event": event_body
         })
 
         print("Attempting to send event to Splunk Cloud with messageId: '" + event["messageId"] +
-              "' and eventId: '" + event["body"]["eventId"] + "'")
+              "' and eventId: '" + event_body["eventId"] + "'")
 
         headers = {"Authorization": splunk_cloud_api_token}
         connection.request(
@@ -60,6 +62,6 @@ def _send_events_to_splunk_cloud(sqs_messages):
         if response.status != 200:
             raise UnableToSendEventToSplunkCloud(
                 f"Splunk request returned a {response.status} code with body {response.read()}. With messageId: '" +
-                event["messageId"] + "' and eventId: '" + event["body"]["eventId"] + "'")
+                event["messageId"] + "' and eventId: '" + event_body["eventId"] + "'")
 
         return response.read()

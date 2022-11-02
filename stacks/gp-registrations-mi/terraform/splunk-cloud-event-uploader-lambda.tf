@@ -11,6 +11,13 @@ resource "aws_lambda_function" "splunk_cloud_event_uploader_lambda" {
   runtime = "python3.9"
   timeout = 15
   tags          = local.common_tags
+
+  environment {
+    variables = {
+      SPLUNK_CLOUD_API_TOKEN = var.splunk_cloud_api_token_param_name,
+      SPLUNK_CLOUD_URL = var.splunk_cloud_url_param_name
+    }
+  }
 }
 
 resource "aws_lambda_event_source_mapping" "sqs_queue_splunk_cloud_event_uploader_lambda_trigger" {

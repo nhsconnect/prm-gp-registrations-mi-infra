@@ -153,6 +153,27 @@ data "aws_iam_policy_document" "sqs_receive_incoming_enriched_mi_events_for_splu
   }
 }
 
+resource "aws_iam_policy" "splunk_cloud_uploader_lambda_ssm_access" {
+  name   = "${var.environment}-splunk-cloud-uploader-lambda-ssm-access"
+  policy = data.aws_iam_policy_document.splunk_cloud_uploader_lambda_ssm_access.json
+}
+
+data "aws_iam_policy_document" "splunk_cloud_uploader_lambda_ssm_access" {
+  statement {
+    sid = "GetSSMParameter"
+
+    actions = [
+      "ssm:GetParameter"
+    ]
+
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_url_param_name}",
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_api_token_param_name}",
+    ]
+  }
+}
+
+#Cloudwatch - Splunk Cloud lambda
 data "aws_iam_policy_document" "splunk_cloud_event_uploader_lambda_cloudwatch_log_access" {
   statement {
     sid = "CloudwatchLogs"
@@ -182,22 +203,31 @@ resource "aws_cloudwatch_log_group" "splunk_cloud_event_uploader_lambda" {
   retention_in_days = 60
 }
 
-resource "aws_iam_policy" "splunk_cloud_uploader_lambda_ssm_access" {
-  name   = "${var.environment}-splunk-cloud-uploader-lambda-ssm-access"
-  policy = data.aws_iam_policy_document.splunk_cloud_uploader_lambda_ssm_access.json
-}
-
-data "aws_iam_policy_document" "splunk_cloud_uploader_lambda_ssm_access" {
+#Cloudwatch - SNS topic
+data "aws_iam_policy_document" "sns_topic_enriched_mi_events_cloudwatch_log_access" {
   statement {
-    sid = "GetSSMParameter"
-
+    sid = "CloudwatchLogs"
     actions = [
-      "ssm:GetParameter"
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
     ]
-
     resources = [
-      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_url_param_name}",
-      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_api_token_param_name}",
+      "${aws_cloudwatch_log_group.sns_topic_enriched_mi_events.arn}:*",
     ]
   }
+}
+resource "aws_iam_policy" "sns_topic_enriched_mi_events_log_access" {
+  name   = "${var.environment}-sns-topic-enriched-mi-events-cloudwatch-log-access"
+  policy = data.aws_iam_policy_document.sns_topic_enriched_mi_events_cloudwatch_log_access.json
+}
+
+resource "aws_cloudwatch_log_group" "sns_topic_enriched_mi_events" {
+  name = "/sns/${var.environment}-${aws_sns_topic.enriched_mi_events.name}"
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-${aws_sns_topic.enriched_mi_events.name}"
+    }
+  )
+  retention_in_days = 60
 }

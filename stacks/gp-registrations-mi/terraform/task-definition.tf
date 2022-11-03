@@ -17,14 +17,6 @@ locals {
   container_name = "mi-api"
 }
 
-data "aws_ssm_parameter" "splunk_cloud_url_param_name" {
-  name = var.splunk_cloud_url_param_name
-}
-
-data "aws_ssm_parameter" "splunk_cloud_api_token_param_name" {
-  name = var.splunk_cloud_api_token_param_name
-}
-
 resource "aws_ecs_task_definition" "gp_registrations_mi" {
   family = "${var.environment}-${local.container_name}"
 
@@ -34,9 +26,6 @@ resource "aws_ecs_task_definition" "gp_registrations_mi" {
       image     = "${data.aws_ssm_parameter.gp_registrations_mi_repository_url.value}:${var.gp_registrations_mi_image_tag}"
       essential = true
       environment = [
-        { "name" : "OUTPUT_MI_EVENTS_BUCKET", "value" : aws_s3_bucket.mi_output.bucket },
-        { "name" : "SPLUNK_CLOUD_URL", "value" : data.aws_ssm_parameter.splunk_cloud_url_param_name.value },
-        { "name" : "SPLUNK_CLOUD_API_TOKEN", "value" : data.aws_ssm_parameter.splunk_cloud_api_token_param_name.value },
         { "name" : "MI_EVENTS_SNS_TOPIC_ARN", "value" : aws_sns_topic.enriched_mi_events.arn },
       ]
       portMappings = [{

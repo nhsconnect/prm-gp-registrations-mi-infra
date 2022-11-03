@@ -35,11 +35,11 @@ data "aws_iam_policy_document" "sns_topic_enriched_mi_events_cloudwatch_log_acce
 }
 
 resource "aws_cloudwatch_log_group" "sns_topic_enriched_mi_events" {
-  name = "/sns/${var.environment}-${aws_sns_topic.enriched_events_topic.name}"
+  name = "/sns/${var.environment}-${var.enriched_mi_events_sns_topic_name}"
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-${aws_sns_topic.enriched_events_topic.name}"
+      Name = "${var.environment}-${var.enriched_mi_events_sns_topic_name}"
     }
   )
   retention_in_days = 60

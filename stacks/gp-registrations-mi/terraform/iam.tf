@@ -65,6 +65,11 @@ data "aws_ssm_parameter" "apigee_ips" {
   name = var.apigee_ips_param_name
 }
 
+resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_event_uploader" {
+  queue_url = aws_sqs_queue.incoming_enriched_mi_events_for_splunk_cloud_event_uploader.id
+  policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events.json
+}
+
 data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events" {
   statement {
 

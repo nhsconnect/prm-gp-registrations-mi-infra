@@ -122,7 +122,7 @@ resource "aws_api_gateway_method_settings" "method_settings" {
 }
 
 resource "aws_cloudwatch_log_group" "access_logs" {
-  name              = "/api-gateway/${var.environment}-gp-registrations-mi/${aws_api_gateway_rest_api.rest_api.id}/${local.api_stage_name}"
+  name              = "/api-gateway/${var.environment}-gp-registrations-mi/${aws_api_gateway_rest_api.rest_api.id}/${local.api_stage_name}/access"
   retention_in_days = var.retention_period_in_days
 
   tags = merge(
@@ -134,7 +134,7 @@ resource "aws_cloudwatch_log_group" "access_logs" {
 }
 
 resource "aws_cloudwatch_log_group" "execution_logs" {
-  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.rest_api.id}/${local.api_stage_name}"
+  name              = "/api-gateway/${var.environment}-gp-registrations-mi/${aws_api_gateway_rest_api.rest_api.id}/${local.api_stage_name}/execution"
   retention_in_days = var.retention_period_in_days
 
   tags = merge(

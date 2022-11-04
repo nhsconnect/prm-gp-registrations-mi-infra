@@ -79,7 +79,7 @@ resource "aws_iam_role" "splunk_cloud_event_uploader_lambda_role" {
   name               = "${var.environment}-splunk_cloud-event-uploader-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = [
-    aws_iam_policy.sqs_receive_incoming_enriched_mi_events_for_splunk_cloud_uploader_lambda.arn,
+    aws_iam_policy.incoming_enriched_mi_events_for_splunk_cloud_uploader_lambda_sqs_read_access.arn,
     aws_iam_policy.splunk_cloud_uploader_lambda_ssm_access.arn,
     aws_iam_policy.splunk_cloud_event_uploader_lambda_cloudwatch_log_access.arn,
   ]
@@ -104,7 +104,12 @@ resource "aws_iam_policy" "incoming_enriched_mi_events_sns_topic_publish" {
 }
 
 #SQS - Splunk Cloud lambda
-data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events" {
+resource "aws_sqs_queue_policy" "sqs_incoming_enriched_mi_events_for_splunk_cloud_uploader_send_message" {
+  queue_url = aws_sqs_queue.incoming_enriched_mi_events_for_splunk_cloud_event_uploader.id
+  policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events_send_message.json
+}
+
+data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events_send_message" {
   statement {
 
     effect = "Allow"
@@ -130,17 +135,12 @@ data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events" {
   }
 }
 
-resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_event_uploader" {
-  queue_url = aws_sqs_queue.incoming_enriched_mi_events_for_splunk_cloud_event_uploader.id
-  policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events.json
+resource "aws_iam_policy" "incoming_enriched_mi_events_for_splunk_cloud_uploader_lambda_sqs_read_access" {
+  name   = "${var.environment}-incoming-enriched-mi-events-splunk-cloud-lambda-sqs-read"
+  policy = data.aws_iam_policy_document.incoming_enriched_mi_events_for_splunk_cloud_event_uploader_lambda_sqs_read_access.json
 }
 
-resource "aws_iam_policy" "sqs_receive_incoming_enriched_mi_events_for_splunk_cloud_uploader_lambda" {
-  name   = "${var.environment}-sqs-receive-incoming-enriched-mi-events-splunk-cloud"
-  policy = data.aws_iam_policy_document.sqs_receive_incoming_enriched_mi_events_for_splunk_cloud_event_uploader_lambda.json
-}
-
-data "aws_iam_policy_document" "sqs_receive_incoming_enriched_mi_events_for_splunk_cloud_event_uploader_lambda" {
+data "aws_iam_policy_document" "incoming_enriched_mi_events_for_splunk_cloud_event_uploader_lambda_sqs_read_access" {
   statement {
     actions = [
       "sqs:GetQueue*",

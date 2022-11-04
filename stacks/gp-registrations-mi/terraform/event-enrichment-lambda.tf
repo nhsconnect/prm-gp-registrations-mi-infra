@@ -1,5 +1,5 @@
 variable "event_enrichment_lambda_name" {
-  default = "event_enrichment-lambda"
+  default = "event-enrichment-lambda"
 }
 
 resource "aws_lambda_function" "event_enrichment_lambda" {

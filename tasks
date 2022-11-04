@@ -83,7 +83,7 @@ dojo-validate)
   ;;
 plan)
   build_lambda splunk-cloud-event-uploader
-  build_lambda event_enrichment
+  build_lambda event-enrichment
   tf_init
   terraform plan -var environment=$env_name \
     -var-file=stacks/${stack_name}/vars/${stack_env}.tfvars \
@@ -110,7 +110,7 @@ destroy)
   ;;
 build-lambda)
   build_lambda splunk-cloud-event-uploader
-  build_lambda event_enrichment
+  build_lambda event-enrichment
 ;;
 *)
   echo "Invalid task: '${task}'"

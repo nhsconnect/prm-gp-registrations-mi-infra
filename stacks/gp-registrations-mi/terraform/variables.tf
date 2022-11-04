@@ -89,5 +89,5 @@ variable "splunk_cloud_event_uploader_lambda_zip" {
 variable "event_enrichment_lambda_zip" {
   type        = string
   description = "Path to zipfile containing lambda code for enriching MI events"
-  default     = "lambda/build/event_enrichment.zip"
+  default     = "lambda/build/event-enrichment.zip"
 }

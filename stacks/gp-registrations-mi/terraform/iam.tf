@@ -215,7 +215,7 @@ data "aws_iam_policy_document" "sns_topic_enriched_mi_events_cloudwatch_log_acce
       "logs:PutRetentionPolicy"
     ]
     resources = [
-      "${aws_cloudwatch_log_group.sns_topic_enriched_mi_events.arn}:*",
+      "*",
     ]
   }
 }

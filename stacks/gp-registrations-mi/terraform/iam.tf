@@ -164,7 +164,7 @@ data "aws_iam_policy_document" "incoming_mi_events_for_splunk_cloud_event_upload
 
 resource "aws_iam_policy" "incoming_mi_events_for_event_enrichment_lambda_sqs_read_access" {
   name   = "${var.environment}-incoming-mi-events-enrichment-lambda-sqs-read"
-  policy = data.aws_iam_policy_document.incoming_mi_events_for_splunk_cloud_event_uploader_lambda_sqs_read_access.json
+  policy = data.aws_iam_policy_document.incoming_mi_events_for_event_enrichment_lambda_sqs_read_access.json
 }
 
 data "aws_iam_policy_document" "incoming_mi_events_for_event_enrichment_lambda_sqs_read_access" {

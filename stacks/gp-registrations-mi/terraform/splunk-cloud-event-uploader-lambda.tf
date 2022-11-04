@@ -21,6 +21,6 @@ resource "aws_lambda_function" "splunk_cloud_event_uploader_lambda" {
 }
 
 resource "aws_lambda_event_source_mapping" "sqs_queue_splunk_cloud_event_uploader_lambda_trigger" {
-  event_source_arn = aws_sqs_queue.incoming_enriched_mi_events_for_splunk_cloud_event_uploader.arn
+  event_source_arn = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.arn
   function_name    = aws_lambda_function.splunk_cloud_event_uploader_lambda.arn
 }

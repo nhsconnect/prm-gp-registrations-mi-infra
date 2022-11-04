@@ -1,4 +1,4 @@
-resource "aws_sqs_queue" "incoming_enriched_mi_events_for_splunk_cloud_event_uploader" {
+resource "aws_sqs_queue" "incoming_mi_events_for_splunk_cloud_event_uploader" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-splunk-cloud-lambda"
   sqs_managed_sse_enabled = true
 
@@ -10,9 +10,9 @@ resource "aws_sqs_queue" "incoming_enriched_mi_events_for_splunk_cloud_event_upl
   )
 }
 
-resource "aws_sns_topic_subscription" "incoming_enriched_mi_events_for_splunk_cloud_event_uploader" {
+resource "aws_sns_topic_subscription" "incoming_mi_events_for_splunk_cloud_event_uploader" {
   protocol             = "sqs"
   raw_message_delivery = true
-  topic_arn            = aws_sns_topic.enriched_mi_events.arn
-  endpoint             = aws_sqs_queue.incoming_enriched_mi_events_for_splunk_cloud_event_uploader.arn
+  topic_arn            = aws_sns_topic.mi_events.arn
+  endpoint             = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.arn
 }

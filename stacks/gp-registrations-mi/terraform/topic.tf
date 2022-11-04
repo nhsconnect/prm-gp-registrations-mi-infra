@@ -1,5 +1,5 @@
 variable "mi_events_sns_topic_name" {
-  default = "gp-registrations-mi-mi-events-sns-topic"
+  default = "gp-registrations-mi-events-sns-topic"
 }
 
 resource "aws_sns_topic" "mi_events" {

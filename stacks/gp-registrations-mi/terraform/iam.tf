@@ -154,6 +154,25 @@ data "aws_iam_policy_document" "incoming_mi_events_for_splunk_cloud_event_upload
   }
 }
 
+resource "aws_iam_policy" "incoming_mi_events_for_event_enrichment_lambda_sqs_read_access" {
+  name   = "${var.environment}-incoming-mi-events-enrichment-lambda-sqs-read"
+  policy = data.aws_iam_policy_document.incoming_mi_events_for_splunk_cloud_event_uploader_lambda_sqs_read_access.json
+}
+
+data "aws_iam_policy_document" "incoming_mi_events_for_event_enrichment_lambda_sqs_read_access" {
+  statement {
+    actions = [
+      "sqs:GetQueue*",
+      "sqs:ChangeMessageVisibility",
+      "sqs:DeleteMessage",
+      "sqs:ReceiveMessage"
+    ]
+    resources = [
+      aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda.arn,
+    ]
+  }
+}
+
 #SSM - Splunk Cloud lambda
 resource "aws_iam_policy" "splunk_cloud_uploader_lambda_ssm_access" {
   name   = "${var.environment}-splunk-cloud-uploader-lambda-ssm-access"

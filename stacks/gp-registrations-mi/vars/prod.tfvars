@@ -8,5 +8,3 @@ private_subnet_ids_param_name="/registrations/prod/gp-registrations-mi/base-netw
 apigee_ips_param_name="/registrations/prod/user-input/gp-registrations-mi/apigee-ips"
 splunk_cloud_url_param_name="/registrations/prod/user-input/splunk-cloud-url"
 splunk_cloud_api_token_param_name="/registrations/prod/user-input/splunk-cloud-api-token"
-splunk_cloud_event_uploader_sqs_queue_url="/registrations/prod/gp-registrations-mi/splunk-cloud-event-uploader-sqs-queue-url"
-event_enrichment_sqs_queue_url="/registrations/prod/gp-registrations-mi/event-enrichment-sqs-queue-url"

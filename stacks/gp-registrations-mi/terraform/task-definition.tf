@@ -27,7 +27,7 @@ resource "aws_ecs_task_definition" "gp_registrations_mi" {
       essential = true
       environment = [
         { "name" : "MI_EVENTS_SNS_TOPIC_ARN", "value" : aws_sns_topic.mi_events.arn },
-        { "name" : "MI_EVENTS_SQS_QUEUE_FOR_ENRICHMENT_ARN", "value" : aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda.arn },
+        { "name" : "MI_EVENTS_SQS_QUEUE_FOR_EVENT_ENRICHMENT_URL", "value" : aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda.url },
       ]
       portMappings = [{
         containerPort = 8080

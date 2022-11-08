@@ -4,30 +4,9 @@ resource "aws_iam_role" "event_enrichment_lambda_role" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = [
     aws_iam_policy.incoming_mi_events_for_event_enrichment_lambda_sqs_read_access.arn,
-    aws_iam_policy.incoming_mi_events_for_event_enrichment_lambda_ssm_access.arn,
     aws_iam_policy.outgoing_event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access.arn,
     aws_iam_policy.event_enrichment_lambda_cloudwatch_log_access.arn,
   ]
-}
-
-#SSM
-resource "aws_iam_policy" "incoming_mi_events_for_event_enrichment_lambda_ssm_access" {
-  name   = "${var.environment}-event-enrichment-lambda-ssm-access"
-  policy = data.aws_iam_policy_document.incoming_mi_events_for_event_enrichment_lambda_ssm_access.json
-}
-
-data "aws_iam_policy_document" "incoming_mi_events_for_event_enrichment_lambda_ssm_access" {
-  statement {
-    sid = "GetSSMParameter"
-
-    actions = [
-      "ssm:GetParameter"
-    ]
-
-    resources = [
-      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_event_uploader_sqs_queue_url}",
-    ]
-  }
 }
 
 #SQS - inbound

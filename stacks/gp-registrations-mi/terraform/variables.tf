@@ -91,3 +91,13 @@ variable "event_enrichment_lambda_zip" {
   description = "Path to zipfile containing lambda code for enriching MI events"
   default     = "lambda/build/event-enrichment.zip"
 }
+
+variable "splunk_cloud_event_uploader_sqs_queue_url" {
+  type        = string
+  description = "Url to send enriched events to upload to splunk cloud"
+}
+
+variable "event_enrichment_sqs_queue_url" {
+  type        = string
+  description = "Url to send raw events to be enriched"
+}

@@ -1,3 +1,4 @@
+#Lambda
 resource "aws_iam_role" "splunk_cloud_event_uploader_lambda_role" {
   name               = "${var.environment}-splunk_cloud-event-uploader-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
@@ -8,23 +9,27 @@ resource "aws_iam_role" "splunk_cloud_event_uploader_lambda_role" {
   ]
 }
 
-resource "aws_iam_policy" "incoming_mi_events_sns_topic_publish" {
-  name   = "${aws_sns_topic.mi_events.name}-publish"
-  policy = data.aws_iam_policy_document.incoming_mi_events_sns_topic.json
+resource "aws_iam_policy" "splunk_cloud_uploader_lambda_ssm_access" {
+  name   = "${var.environment}-splunk-cloud-uploader-lambda-ssm-access"
+  policy = data.aws_iam_policy_document.splunk_cloud_uploader_lambda_ssm_access.json
 }
 
-data "aws_iam_policy_document" "incoming_mi_events_sns_topic" {
+data "aws_iam_policy_document" "splunk_cloud_uploader_lambda_ssm_access" {
   statement {
+    sid = "GetSSMParameter"
+
     actions = [
-      "sns:Publish",
-      "sns:GetTopicAttributes"
+      "ssm:GetParameter"
     ]
+
     resources = [
-      aws_sns_topic.mi_events.arn
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_url_param_name}",
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_api_token_param_name}",
     ]
   }
 }
 
+#SQS
 resource "aws_sqs_queue_policy" "sqs_incoming_mi_events_for_splunk_cloud_uploader_send_message" {
   queue_url = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.id
   policy    = data.aws_iam_policy_document.sqs_queue_incoming_mi_events_send_message.json
@@ -75,27 +80,7 @@ data "aws_iam_policy_document" "incoming_mi_events_for_splunk_cloud_event_upload
   }
 }
 
-resource "aws_iam_policy" "splunk_cloud_uploader_lambda_ssm_access" {
-  name   = "${var.environment}-splunk-cloud-uploader-lambda-ssm-access"
-  policy = data.aws_iam_policy_document.splunk_cloud_uploader_lambda_ssm_access.json
-}
-
-data "aws_iam_policy_document" "splunk_cloud_uploader_lambda_ssm_access" {
-  statement {
-    sid = "GetSSMParameter"
-
-    actions = [
-      "ssm:GetParameter"
-    ]
-
-    resources = [
-      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_url_param_name}",
-      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_api_token_param_name}",
-    ]
-  }
-}
-
-#Cloudwatch - Splunk Cloud lambda
+#Cloudwatch
 data "aws_iam_policy_document" "splunk_cloud_event_uploader_lambda_cloudwatch_log_access" {
   statement {
     sid = "CloudwatchLogs"
@@ -125,7 +110,7 @@ resource "aws_cloudwatch_log_group" "splunk_cloud_event_uploader_lambda" {
   retention_in_days = 60
 }
 
-#Cloudwatch - SNS topic
+#SNS topic
 resource "aws_iam_role" "sns_topic_mi_events_cloudwatch_log_access_role" {
   name               = "${var.environment}-sns-topic-mi-events-cloudwatch-log-access-role"
   assume_role_policy = data.aws_iam_policy_document.sns_assume_role.json
@@ -146,6 +131,23 @@ data "aws_iam_policy_document" "sns_topic_mi_events_cloudwatch_log_access" {
     ]
     resources = [
       "*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "incoming_mi_events_sns_topic_publish" {
+  name   = "${aws_sns_topic.mi_events.name}-publish"
+  policy = data.aws_iam_policy_document.incoming_mi_events_sns_topic.json
+}
+
+data "aws_iam_policy_document" "incoming_mi_events_sns_topic" {
+  statement {
+    actions = [
+      "sns:Publish",
+      "sns:GetTopicAttributes"
+    ]
+    resources = [
+      aws_sns_topic.mi_events.arn
     ]
   }
 }

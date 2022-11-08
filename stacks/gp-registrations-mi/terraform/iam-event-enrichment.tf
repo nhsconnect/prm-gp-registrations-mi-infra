@@ -32,7 +32,7 @@ data "aws_iam_policy_document" "event_enrichment_lambda_to_send_to_queue_for_upl
 
 #SSM
 resource "aws_iam_policy" "incoming_mi_events_for_event_enrichment_lambda_ssm_access" {
-  name   = "${var.environment}-splunk-cloud-uploader-lambda-ssm-access"
+  name   = "${var.environment}-event-enrichment-lambda-ssm-access"
   policy = data.aws_iam_policy_document.incoming_mi_events_for_event_enrichment_lambda_ssm_access.json
 }
 

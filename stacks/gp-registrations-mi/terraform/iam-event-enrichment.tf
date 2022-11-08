@@ -4,7 +4,28 @@ resource "aws_iam_role" "event_enrichment_lambda_role" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = [
     aws_iam_policy.incoming_mi_events_for_event_enrichment_lambda_sqs_read_access.arn,
+    aws_iam_policy.event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access.arn,
   ]
+}
+
+resource "aws_iam_policy" "event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access" {
+  name   = "${var.environment}-event-enrichment-lambda-to-send-to-splunk-upload-queue"
+  policy = data.aws_iam_policy_document.event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access.json
+}
+
+data "aws_iam_policy_document" "event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access" {
+  statement {
+
+    effect = "Allow"
+
+    actions = [
+      "sqs:SendMessage"
+    ]
+
+    resources = [
+      aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.arn
+    ]
+  }
 }
 
 #SQS

@@ -14,7 +14,7 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
 
   environment {
     variables = {
-      SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL = var.splunk_cloud_event_uploader_sqs_queue_url,
+      SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.url,
     }
   }
 }

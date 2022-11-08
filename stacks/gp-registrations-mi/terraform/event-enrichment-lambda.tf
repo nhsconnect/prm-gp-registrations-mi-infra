@@ -11,6 +11,12 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
   runtime = "python3.9"
   timeout = 15
   tags          = local.common_tags
+
+  environment {
+    variables = {
+      SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL = var.splunk_cloud_event_uploader_sqs_queue_url,
+    }
+  }
 }
 
 resource "aws_lambda_event_source_mapping" "sqs_queue_event_enrichment_lambda_trigger" {

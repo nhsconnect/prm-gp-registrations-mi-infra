@@ -5,6 +5,7 @@ resource "aws_iam_role" "event_enrichment_lambda_role" {
   managed_policy_arns = [
     aws_iam_policy.incoming_mi_events_for_event_enrichment_lambda_sqs_read_access.arn,
     aws_iam_policy.event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access.arn,
+    aws_iam_policy.incoming_mi_events_for_event_enrichment_lambda_sqs_read_access.arn
   ]
 }
 
@@ -24,6 +25,26 @@ data "aws_iam_policy_document" "event_enrichment_lambda_to_send_to_queue_for_upl
 
     resources = [
       aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.arn
+    ]
+  }
+}
+
+#SSM
+resource "aws_iam_policy" "incoming_mi_events_for_event_enrichment_lambda_ssm_access" {
+  name   = "${var.environment}-splunk-cloud-uploader-lambda-ssm-access"
+  policy = data.aws_iam_policy_document.incoming_mi_events_for_event_enrichment_lambda_ssm_access.json
+}
+
+data "aws_iam_policy_document" "incoming_mi_events_for_event_enrichment_lambda_ssm_access" {
+  statement {
+    sid = "GetSSMParameter"
+
+    actions = [
+      "ssm:GetParameter"
+    ]
+
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.splunk_cloud_event_uploader_sqs_queue_url}",
     ]
   }
 }

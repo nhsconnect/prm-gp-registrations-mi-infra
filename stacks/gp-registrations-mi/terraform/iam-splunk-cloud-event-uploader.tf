@@ -9,6 +9,7 @@ resource "aws_iam_role" "splunk_cloud_event_uploader_lambda_role" {
   ]
 }
 
+#SSM
 resource "aws_iam_policy" "splunk_cloud_uploader_lambda_ssm_access" {
   name   = "${var.environment}-splunk-cloud-uploader-lambda-ssm-access"
   policy = data.aws_iam_policy_document.splunk_cloud_uploader_lambda_ssm_access.json

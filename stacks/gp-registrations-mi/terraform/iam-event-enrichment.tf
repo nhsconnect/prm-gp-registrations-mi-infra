@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "incoming_mi_events_for_event_enrichment_lambda_s
 
 #SQS - outbound
 resource "aws_iam_policy" "outgoing_event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access" {
-  name   = "${var.environment}-event-enrichment-lambda-to-send-to-splunk-upload-queue"
+  name   = "${var.environment}-event-enrichment-lambda-send-to-splunk-uploader-queue"
   policy = data.aws_iam_policy_document.outgoing_event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access.json
 }
 

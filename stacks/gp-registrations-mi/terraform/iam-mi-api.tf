@@ -62,13 +62,3 @@ data "aws_iam_policy_document" "apigee_ip_policy" {
 data "aws_ssm_parameter" "apigee_ips" {
   name = var.apigee_ips_param_name
 }
-
-data "aws_iam_policy_document" "lambda_assume_role" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-}

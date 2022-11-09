@@ -1,6 +1,8 @@
 import logging
 import os
 import json
+from json import JSONDecodeError
+
 import boto3
 from urllib.parse import urlparse
 from http.client import HTTPSConnection
@@ -41,27 +43,37 @@ def _send_events_to_splunk_cloud(sqs_messages):
     connection = HTTPSConnection(splunk_cloud_base_url)
     connection.connect()
 
-    events = sqs_messages["Records"]
-    for event in events:
-        event_body = json.loads(event["body"])
+    events_of_events = sqs_messages["Records"]
+    try:
+        for events in events_of_events:
+            for event in events:
+                event_body = json.loads(event["body"])
 
-        request_body = json.dumps({
-            "source": "itoc:gp2gp",
-            "event": event_body
-        })
+                request_body = json.dumps({
+                    "source": "itoc:gp2gp",
+                    "event": event_body
+                })
 
-        print("Attempting to send event to Splunk Cloud with messageId: '" + event["messageId"] +
-              "' and eventId: '" + event_body["eventId"] + "'")
+                print("Attempting to send event to Splunk Cloud with messageId: '" + event["messageId"] +
+                      "' and eventId: '" + event_body["eventId"] + "'")
 
-        headers = {"Authorization": splunk_cloud_api_token}
-        connection.request(
-            'POST', splunk_cloud_endpoint_path, request_body, headers)
+                headers = {"Authorization": splunk_cloud_api_token}
+                connection.request(
+                    'POST', splunk_cloud_endpoint_path, request_body, headers)
 
-        response = connection.getresponse()
+                response = connection.getresponse()
 
-        if response.status != 200:
-            raise UnableToSendEventToSplunkCloud(
-                f"Splunk request returned a {response.status} code with body {response.read()}. With messageId: '" +
-                event["messageId"] + "' and eventId: '" + event_body["eventId"] + "'")
+                if response.status != 200:
+                    raise UnableToSendEventToSplunkCloud(
+                        f"Splunk request returned a {response.status} code with body {response.read()}. With messageId: '" +
+                        event["messageId"] + "' and eventId: '" + event_body["eventId"] + "'")
 
-        return response.read()
+                return response.read()
+    except JSONDecodeError as e:
+        print("Unable to parse JSON:" + str(events_of_events), e)
+        return False
+    except Exception as e:
+        print("Unable to upload events to splunk:" + str(events_of_events), e)
+        return False
+
+

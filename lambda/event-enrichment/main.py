@@ -15,7 +15,7 @@ def lambda_handler(sqs_messages, context):
         print("Enriching events - SQS Records: ", sqs_messages)
         enriched_events = _enrich_events(sqs_messages)
         print("Successfully enriched events:", enriched_events)
-        return True
+        return enriched_events
     except Exception as exception:
         print("Failed to enrich events. " + str(exception))
         return False

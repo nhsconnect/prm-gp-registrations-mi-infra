@@ -71,9 +71,4 @@ def _send_events_to_splunk_cloud(sqs_messages):
                 return response.read()
     except JSONDecodeError as e:
         print("Unable to parse JSON:" + str(events_of_events), e)
-        return False
-    except Exception as e:
-        print("Unable to upload events to splunk:" + str(events_of_events), e)
-        return False
-
-
+        raise UnableToSendEventToSplunkCloud()

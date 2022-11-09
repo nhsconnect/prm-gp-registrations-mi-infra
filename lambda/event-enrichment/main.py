@@ -1,3 +1,6 @@
+import json
+
+
 class SsmSecretManager:
     def __init__(self, ssm):
         self._ssm = ssm
@@ -9,10 +12,9 @@ class SsmSecretManager:
 
 def lambda_handler(sqs_messages, context):
     try:
-        print("Enriching event - messages: ", sqs_messages)
+        print("Enriching events - SQS Records: ", sqs_messages)
         enriched_events = _enrich_events(sqs_messages)
-        print("Successfully enriched events. Preparing to upload", enriched_events)
-        print("Successfully enriched events and sent to SQS event uploader", enriched_events)
+        print("Successfully enriched events:", enriched_events)
         return True
     except Exception as exception:
         print("Failed to enrich events. " + str(exception))
@@ -20,6 +22,5 @@ def lambda_handler(sqs_messages, context):
 
 
 def _enrich_events(sqs_messages):
-    print("Finished enriching")
-    return "test"
-
+    events = sqs_messages["Records"]
+    return [json.loads(event["body"]) for event in events]

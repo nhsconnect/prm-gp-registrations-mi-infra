@@ -3,7 +3,6 @@ resource "aws_iam_role" "gp_registrations_mi" {
   description        = "Role for gp registrations mi ecs service"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
   managed_policy_arns = [
-    aws_iam_policy.incoming_mi_events_sns_topic_publish.arn,
     aws_iam_policy.outgoing_send_mi_events_to_queue_for_enrichment_access.arn
   ]
 }

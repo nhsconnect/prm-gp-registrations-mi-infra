@@ -34,3 +34,12 @@ resource "aws_sqs_queue" "incoming_mi_events_for_event_enrichment_lambda_dlq" {
     }
   )
 }
+
+resource "aws_sqs_queue_redrive_allow_policy" "incoming_mi_events_for_event_enrichment_lambda_dlq_allow" {
+  queue_url = aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda_dlq.id
+
+  redrive_allow_policy = jsonencode({
+    redrivePermission = "byQueue",
+    sourceQueueArns   = [aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda.arn]
+  })
+}

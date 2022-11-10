@@ -1,6 +1,6 @@
 #Lambda
 resource "aws_iam_role" "splunk_cloud_event_uploader_lambda_role" {
-  name               = "${var.environment}-splunk_cloud-event-uploader-lambda-role"
+  name               = "${var.environment}-splunk-cloud-event-uploader-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = [
     aws_iam_policy.incoming_mi_events_for_splunk_cloud_uploader_lambda_sqs_read_access.arn,

@@ -14,9 +14,9 @@ resource "aws_lambda_function_event_invoke_config" "event_enrichment_lambda_to_s
   function_name = aws_lambda_function.event_enrichment_lambda.function_name
 
   destination_config {
-#    on_failure {
-#      destination =
-#    }
+    on_failure {
+      destination = aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda_dlq.arn
+    }
 
     on_success {
       destination = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.arn

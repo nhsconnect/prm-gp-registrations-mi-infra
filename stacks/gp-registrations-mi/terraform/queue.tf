@@ -13,6 +13,7 @@ resource "aws_sqs_queue" "incoming_mi_events_for_splunk_cloud_event_uploader" {
 resource "aws_sqs_queue" "incoming_mi_events_for_event_enrichment_lambda" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-enrichment-lambda"
   sqs_managed_sse_enabled = true
+  redrive_policy = aws_sqs_queue_redrive_allow_policy.incoming_mi_events_for_event_enrichment_lambda_dlq_allow
 
   tags = merge(
     local.common_tags,

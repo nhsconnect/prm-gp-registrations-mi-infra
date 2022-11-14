@@ -5,6 +5,7 @@ import urllib3
 
 ODS_PORTAL_URL = "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations/"
 ICB_ROLE_ID = "RO98"
+EMPTY_ORGANISATION = {"Name": None}
 
 
 class OdsPortalException(Exception):
@@ -42,7 +43,7 @@ def _enrich_events(sqs_messages):
     for event in events:
         requesting_practice_organisation = _fetch_organisation(event["requestingPracticeOdsCode"])
         event["requesting_practice_name"] = requesting_practice_organisation["Name"]
-        event["requesting_practice_icb_ods_code"] = _find_icb_ods_code(requesting_practice_organisation)
+        event["requesting_pr actice_icb_ods_code"] = _find_icb_ods_code(requesting_practice_organisation)
         event["requesting_practice_icb_name"] = _fetch_organisation_name(event["requesting_practice_icb_ods_code"])
 
         if event["sendingPracticeOdsCode"]:
@@ -83,18 +84,22 @@ def _fetch_organisation_name(ods_code: str) -> str:
 
 def _fetch_organisation(ods_code: str):
     if ods_code is None:
-        return {"Name": None}
+        return EMPTY_ORGANISATION
 
     print("Attempting to retrieve organisation with ods_code: " + ods_code)
     http = urllib3.PoolManager()
     response = http.request('GET', ODS_PORTAL_URL + ods_code)
-    print("Successfully retrieved organisation with ods_code: " + ods_code)
+
+    if response.status == 404:
+        print("Unable to find organisation with ods code" + ods_code)
+        return EMPTY_ORGANISATION
 
     if response.status != 200:
         raise OdsPortalException(
             "Unable to fetch organisation data for ods_code:" + ods_code + ". Response status code: " + str(
                 response.status), response)
 
+    print("Successfully retrieved organisation with ods_code: " + ods_code)
     response_content = json.loads(response.data.decode('utf-8'))
     return response_content["Organisation"]
 

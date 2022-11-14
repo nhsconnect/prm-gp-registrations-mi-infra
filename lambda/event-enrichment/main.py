@@ -1,6 +1,18 @@
 import json
 import os
 import boto3
+import urllib3
+
+ODS_PORTAL_URL = "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations/"
+ICB_ROLE_ID = "RO98"
+
+
+class OdsPortalException(Exception):
+    pass
+
+
+class UnableToGetIcbInformation(Exception):
+    pass
 
 
 class SsmSecretManager:
@@ -20,13 +32,71 @@ def lambda_handler(sqs_messages, context):
         _send_enriched_events_to_sqs_for_uploading(enriched_events)
         return True
     except Exception as exception:
-        print("Failed to enrich events. " + str(exception))
+        print("Unable to enrich events. " + str(exception))
         return False
 
 
 def _enrich_events(sqs_messages):
-    events = sqs_messages["Records"]
-    return [json.loads(event["body"]) for event in events]
+    events_records = sqs_messages["Records"]
+    events = [json.loads(event["body"]) for event in events_records]
+    for event in events:
+        requesting_practice_organisation = _fetch_organisation(event["requestingPracticeOdsCode"])
+        event["requesting_practice_name"] = requesting_practice_organisation["Name"]
+        event["requesting_practice_icb_ods_code"] = _find_icb_ods_code(requesting_practice_organisation)
+        event["requesting_practice_icb_name"] = _fetch_organisation_name(event["requesting_practice_icb_ods_code"])
+
+        if event["sendingPracticeOdsCode"]:
+            sending_practice_organisation = _fetch_organisation(event["sendingPracticeOdsCode"])
+            event["sending_practice_name"] = sending_practice_organisation["Name"]
+            event["sending_practice_icb_ods_code"] = _find_icb_ods_code(sending_practice_organisation)
+            event["sending_practice_icb_name"] = _fetch_organisation_name(event["sending_practice_icb_ods_code"])
+
+    return events
+
+
+def _find_icb_ods_code(practice_organisation):
+    print("Finding icb_ods_code for practice organisation", practice_organisation)
+    try:
+        organisation_relationships = practice_organisation["Rels"]["Rel"]
+        print("organisation_relationships", organisation_relationships)
+        organisation_rel_containing_icb_code = next(
+            organisation_details for organisation_details in organisation_relationships if _is_icb(organisation_details))
+
+        if organisation_rel_containing_icb_code:
+            print("Found organisation_rel_containing_icb_code", organisation_rel_containing_icb_code)
+            return organisation_rel_containing_icb_code["Target"]["OrgId"]["extension"]
+        else:
+            print("No organisation_rel_containing_icb_code found for organisation", practice_organisation)
+            return None
+    except Exception as e:
+        print("Unable to find icb information for practice " + str(practice_organisation), e)
+        return None
+
+
+def _is_icb(organisation_details):
+    return organisation_details["Status"] == "Active" and organisation_details["Target"]["PrimaryRoleId"]["id"] == ICB_ROLE_ID
+
+
+def _fetch_organisation_name(ods_code: str) -> str:
+    return _fetch_organisation(ods_code)["Name"]
+
+
+def _fetch_organisation(ods_code: str):
+    if ods_code is None:
+        return {"Name": None}
+
+    print("Attempting to retrieve organisation with ods_code: " + ods_code)
+    http = urllib3.PoolManager()
+    response = http.request('GET', ODS_PORTAL_URL + ods_code)
+    print("Successfully retrieved organisation with ods_code: " + ods_code)
+
+    if response.status != 200:
+        raise OdsPortalException(
+            "Unable to fetch organisation data for ods_code:" + ods_code + ". Response status code: " + str(
+                response.status), response)
+
+    response_content = json.loads(response.data.decode('utf-8'))
+    return response_content["Organisation"]
 
 
 def _send_enriched_events_to_sqs_for_uploading(enriched_events):
@@ -36,5 +106,5 @@ def _send_enriched_events_to_sqs_for_uploading(enriched_events):
     sqs = boto3.client('sqs')
     sqs.send_message(
         QueueUrl=event_uploader_sqs_queue_url,
-        MessageBody=enriched_events
+        MessageBody=json.dumps(enriched_events)
     )

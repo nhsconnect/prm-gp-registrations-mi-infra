@@ -42,15 +42,15 @@ def _enrich_events(sqs_messages):
     events = [json.loads(event["body"]) for event in events_records]
     for event in events:
         requesting_practice_organisation = _fetch_organisation(event["requestingPracticeOdsCode"])
-        event["requesting_practice_name"] = requesting_practice_organisation["Name"]
-        event["requesting_pr actice_icb_ods_code"] = _find_icb_ods_code(requesting_practice_organisation)
-        event["requesting_practice_icb_name"] = _fetch_organisation_name(event["requesting_practice_icb_ods_code"])
+        event["requestingPracticeName"] = requesting_practice_organisation["Name"]
+        event["requestingPracticeIcbOdsCode"] = _find_icb_ods_code(requesting_practice_organisation)
+        event["requestingPracticeIcbName"] = _fetch_organisation_name(event["requestingPracticeIcbOdsCode"])
 
         if event["sendingPracticeOdsCode"]:
             sending_practice_organisation = _fetch_organisation(event["sendingPracticeOdsCode"])
-            event["sending_practice_name"] = sending_practice_organisation["Name"]
-            event["sending_practice_icb_ods_code"] = _find_icb_ods_code(sending_practice_organisation)
-            event["sending_practice_icb_name"] = _fetch_organisation_name(event["sending_practice_icb_ods_code"])
+            event["sendingPracticeName"] = sending_practice_organisation["Name"]
+            event["sendingPracticeIcbOdsCode"] = _find_icb_ods_code(sending_practice_organisation)
+            event["sendingPracticeIcbName"] = _fetch_organisation_name(event["sendingPracticeIcbOdsCode"])
 
     return events
 

@@ -41,6 +41,10 @@ def _enrich_events(sqs_messages):
     events_records = sqs_messages["Records"]
     events = [json.loads(event["body"]) for event in events_records]
     for event in events:
+        if event["eventType"] == "DEGRADES":
+            print("Skipping enrichment for degrades event with eventId: " + event["eventId"])
+            continue
+
         requesting_practice_organisation = _fetch_organisation(event["requestingPracticeOdsCode"])
         event["requestingPracticeName"] = requesting_practice_organisation["Name"]
         event["requestingPracticeIcbOdsCode"] = _find_icb_ods_code(requesting_practice_organisation)

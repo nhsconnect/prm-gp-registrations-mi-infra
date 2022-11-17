@@ -60,7 +60,7 @@ def _enrich_events(sqs_messages):
 
 def _find_icb_ods_code(practice_organisation):
     print("Finding ICB ODS code for practice organisation", practice_organisation)
-    if not hasattr(practice_organisation, "Rels"):
+    if not practice_organisation.get("Rels"):
         print("No ICB ODS code for practice organisation", practice_organisation)
         return None
 
@@ -107,7 +107,7 @@ def _fetch_organisation(ods_code: str):
                 response.status), response)
 
     print("Successfully retrieved organisation with ODS code: " + ods_code)
-    response_content = json.loads(response.data.decode('utf-8'))
+    response_content = json.loads(response.data)
     return response_content["Organisation"]
 
 

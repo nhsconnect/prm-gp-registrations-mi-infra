@@ -71,7 +71,7 @@ def _find_icb_ods_code(practice_organisation):
             organisation_details for organisation_details in organisation_relationships if _is_icb(organisation_details))
 
         if organisation_rel_containing_icb_code:
-            print("Found organisation rel containing ICB ODS code", organisation_rel_containing_icb_code)
+            print("Found organisation rel containing ICB ODS code: ", organisation_rel_containing_icb_code)
             return organisation_rel_containing_icb_code["Target"]["OrgId"]["extension"]
         else:
             print("No organisation rel containing ICB ODS code for organisation", practice_organisation)
@@ -85,10 +85,6 @@ def _is_icb(organisation_details):
     return organisation_details["Status"] == "Active" and organisation_details["Target"]["PrimaryRoleId"]["id"] == ICB_ROLE_ID
 
 
-def _fetch_organisation_name(ods_code: str) -> str:
-    return _fetch_organisation(ods_code)["Name"]
-
-
 def _fetch_organisation(ods_code: str):
     if ods_code is None:
         return EMPTY_ORGANISATION
@@ -98,7 +94,7 @@ def _fetch_organisation(ods_code: str):
     response = http.request('GET', ODS_PORTAL_URL + ods_code)
 
     if response.status == 404:
-        print("Unable to find organisation with ODS code" + ods_code)
+        print("Unable to find organisation with ODS code: " + ods_code)
         return EMPTY_ORGANISATION
 
     if response.status != 200:

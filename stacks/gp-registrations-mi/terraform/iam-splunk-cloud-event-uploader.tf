@@ -4,6 +4,7 @@ resource "aws_iam_role" "splunk_cloud_event_uploader_lambda_role" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = [
     aws_iam_policy.incoming_mi_events_for_splunk_cloud_uploader_lambda_sqs_read_access.arn,
+    aws_iam_policy.incoming_mi_events_for_splunk_cloud_uploader_lambda_to_send_to_dlq_access.arn,
     aws_iam_policy.splunk_cloud_uploader_lambda_ssm_access.arn,
     aws_iam_policy.splunk_cloud_event_uploader_lambda_cloudwatch_log_access.arn,
   ]
@@ -45,6 +46,27 @@ data "aws_iam_policy_document" "incoming_mi_events_for_splunk_cloud_event_upload
     ]
     resources = [
       aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.arn,
+    ]
+  }
+}
+
+#SQS - DLQ
+resource "aws_iam_policy" "incoming_mi_events_for_splunk_cloud_uploader_lambda_to_send_to_dlq_access" {
+  name   = "${var.environment}-splunk-cloud-lambda-send-to-dlq-access"
+  policy = data.aws_iam_policy_document.incoming_mi_events_for_splunk_cloud_uploader_lambda_to_send_to_dlq_access.json
+}
+
+data "aws_iam_policy_document" "incoming_mi_events_for_splunk_cloud_uploader_lambda_to_send_to_dlq_access" {
+  statement {
+
+    effect = "Allow"
+
+    actions = [
+      "sqs:SendMessage"
+    ]
+
+    resources = [
+      aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader_dlq.arn
     ]
   }
 }

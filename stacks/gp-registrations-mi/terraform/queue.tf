@@ -11,7 +11,6 @@ resource "aws_sqs_queue" "incoming_mi_events_for_splunk_cloud_event_uploader" {
 }
 
 resource "aws_sqs_queue" "incoming_mi_events_for_splunk_cloud_event_uploader_dlq" {
-  # rename after preprod to include lambda
   name = "${var.environment}-gp-registrations-mi-events-queue-for-splunk-uploader-dlq"
   sqs_managed_sse_enabled = true
 
@@ -45,7 +44,6 @@ resource "aws_sqs_queue" "incoming_mi_events_for_event_enrichment_lambda" {
 }
 
 resource "aws_sqs_queue" "incoming_mi_events_for_event_enrichment_lambda_dlq" {
-  # rename after preprod to include lambda
   name = "${var.environment}-gp-registrations-mi-events-queue-for-enrichment-dlq"
   sqs_managed_sse_enabled = true
 

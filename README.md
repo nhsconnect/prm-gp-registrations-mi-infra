@@ -24,7 +24,7 @@ Rolling out terraform against each environment is managed by the GoCD pipeline. 
 ```
 
 The stack name denotes the specific stack you would like to validate.
-The environment can be `dev` or `preprod`.
+The environment can be `dev` or `prod`.
 
 To run the formatting, run `./tasks format <stack-name> <environment>`
 

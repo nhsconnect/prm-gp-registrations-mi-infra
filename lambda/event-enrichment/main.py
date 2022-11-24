@@ -66,13 +66,12 @@ def _find_icb_ods_code(practice_organisation):
 
     try:
         organisation_relationships = practice_organisation["Rels"]["Rel"]
-        print("organisation_relationships", organisation_relationships)
         organisation_rel_containing_icb_code = next(
             organisation_details for organisation_details in organisation_relationships if _is_icb(organisation_details))
 
         if organisation_rel_containing_icb_code:
             print("Found organisation rel containing ICB ODS code: ", organisation_rel_containing_icb_code)
-            return organisation_rel_containing_icb_code["Target"]["OrgId"]["extension"]
+            return organisation_rel_containing_icb_code["Target"]["OrgId"]["extension"]  # ODS code
         else:
             print("No organisation rel containing ICB ODS code for organisation", practice_organisation)
             return None

@@ -31,7 +31,7 @@ class TestMain(unittest.TestCase):
         })
 
         mock_PoolManager.assert_called_once_with(method='POST', url=TEST_URL, headers={"Authorization": TEST_TOKEN},
-                                                 request_body=expected_request)
+                                                 body=expected_request)
         assert result is True
 
     @patch.dict(os.environ, {"SPLUNK_CLOUD_URL": TEST_URL})
@@ -61,9 +61,9 @@ class TestMain(unittest.TestCase):
 
         assert mock_PoolManager.call_count == 2
         mock_PoolManager.assert_has_calls([call(method='POST', url=TEST_URL, headers={"Authorization": TEST_TOKEN},
-                                                request_body=expected_request_1),
+                                                body=expected_request_1),
                                            call(method='POST', url=TEST_URL, headers={"Authorization": TEST_TOKEN},
-                                                request_body=expected_request_2)])
+                                                body=expected_request_2)])
 
         assert result is True
 

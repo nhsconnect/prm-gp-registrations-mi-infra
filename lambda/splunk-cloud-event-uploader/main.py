@@ -51,7 +51,7 @@ def _send_events_to_splunk_cloud(sqs_messages):
 
             headers = {"Authorization": splunk_cloud_api_token}
 
-            response = http.request(method='POST', url=splunk_cloud_url, headers=headers, request_body=request_body)
+            response = http.request(method='POST', url=splunk_cloud_url, headers=headers, body=request_body)
 
             if response.status != 200:
                 raise UnableToSendEventToSplunkCloud(

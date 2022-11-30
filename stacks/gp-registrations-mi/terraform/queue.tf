@@ -1,3 +1,4 @@
+# Splunk cloud uploader
 resource "aws_sqs_queue" "incoming_mi_events_for_splunk_cloud_event_uploader" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-splunk-cloud-lambda"
   sqs_managed_sse_enabled = true
@@ -31,6 +32,7 @@ resource "aws_sqs_queue_redrive_allow_policy" "incoming_mi_events_for_splunk_clo
   })
 }
 
+# Event enrichment lambda
 resource "aws_sqs_queue" "incoming_mi_events_for_event_enrichment_lambda" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-enrichment-lambda"
   sqs_managed_sse_enabled = true
@@ -63,3 +65,38 @@ resource "aws_sqs_queue_redrive_allow_policy" "incoming_mi_events_for_event_enri
     sourceQueueArns   = [aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda.arn]
   })
 }
+
+# S3 uploader
+resource "aws_sqs_queue" "incoming_mi_events_for_s3_uploader" {
+  name = "${var.environment}-gp-registrations-mi-events-queue-for-s3-uploader-lambda"
+  sqs_managed_sse_enabled = true
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi-sqs-queue-for-s3-uploader"
+    }
+  )
+}
+
+resource "aws_sqs_queue" "incoming_mi_events_for_s3_uploader_dlq" {
+  name = "${var.environment}-gp-registrations-mi-events-queue-for-s3-uploader-dlq"
+  sqs_managed_sse_enabled = true
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi-sqs-queue-for-s3-uploader-dlq"
+    }
+  )
+}
+
+resource "aws_sqs_queue_redrive_allow_policy" "incoming_mi_events_for_s3_uploader_dlq_allow" {
+  queue_url = aws_sqs_queue.incoming_mi_events_for_s3_uploader_dlq.id
+
+  redrive_allow_policy = jsonencode({
+    redrivePermission = "byQueue",
+    sourceQueueArns   = [aws_sqs_queue.incoming_mi_events_for_s3_uploader.arn]
+  })
+}
+

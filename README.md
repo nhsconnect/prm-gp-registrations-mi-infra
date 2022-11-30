@@ -38,3 +38,8 @@ If you are unable to validate/plan, make sure you doing it inside the dojo conta
     ./tasks dojo-validate
 
 ```
+
+Error: `Error: Error inspecting states in the "s3" backend:
+S3 bucket does not exist.`
+
+Try deleting the .terraform and the plans (dev.tfplan/prod.tfplan)

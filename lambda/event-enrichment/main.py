@@ -31,6 +31,7 @@ def lambda_handler(sqs_messages, context):
         enriched_events = _enrich_events(sqs_messages)
         print("Successfully enriched events:", enriched_events)
         _send_enriched_events_to_sqs_for_uploading(enriched_events)
+        _publish_enriched_events_to_sns_topic(enriched_events)
         return True
     except Exception as exception:
         print("Unable to enrich events. " + str(exception))
@@ -67,7 +68,8 @@ def _find_icb_ods_code(practice_organisation):
     try:
         organisation_relationships = practice_organisation["Rels"]["Rel"]
         organisation_rel_containing_icb_code = next(
-            organisation_details for organisation_details in organisation_relationships if _is_icb(organisation_details))
+            organisation_details for organisation_details in organisation_relationships if
+            _is_icb(organisation_details))
 
         if organisation_rel_containing_icb_code:
             print("Found organisation rel containing ICB ODS code: ", organisation_rel_containing_icb_code)
@@ -81,7 +83,8 @@ def _find_icb_ods_code(practice_organisation):
 
 
 def _is_icb(organisation_details):
-    return organisation_details["Status"] == "Active" and organisation_details["Target"]["PrimaryRoleId"]["id"] == ICB_ROLE_ID
+    return organisation_details["Status"] == "Active" and organisation_details["Target"]["PrimaryRoleId"][
+        "id"] == ICB_ROLE_ID
 
 
 def _fetch_organisation(ods_code: str):
@@ -114,4 +117,16 @@ def _send_enriched_events_to_sqs_for_uploading(enriched_events):
     sqs.send_message(
         QueueUrl=event_uploader_sqs_queue_url,
         MessageBody=json.dumps(enriched_events)
+    )
+
+
+def _publish_enriched_events_to_sns_topic(enriched_events):
+    print("Publishing enriched events to SNS", enriched_events)
+    enriched_events_sns_topic_arn = os.environ["ENRICHED_EVENTS_SNS_TOPIC_ARN"]
+
+    sns = boto3.client('sns')
+    sns.publish(
+        TargetArn=enriched_events_sns_topic_arn,
+        Message=json.dumps(enriched_events),
+        MessageStructure='json'
     )

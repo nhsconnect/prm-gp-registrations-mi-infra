@@ -1,8 +1,10 @@
 import os
 import unittest
 from unittest.mock import patch, MagicMock
+
 from main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
-    OdsPortalException, _send_enriched_events_to_sqs_for_uploading, _enrich_events
+    OdsPortalException, _send_enriched_events_to_sqs_for_uploading, _enrich_events, \
+    _publish_enriched_events_to_sns_topic, lambda_handler
 
 A_VALID_TEST_ORGANISATION = {
     "Name": "Test Practice",
@@ -23,7 +25,58 @@ A_VALID_TEST_ORGANISATION = {
     }
 }
 
+
 class TestMain(unittest.TestCase):
+
+    @patch('boto3.client')
+    @patch('urllib3.PoolManager.request',
+           return_value=type('', (object,), {"status": 200, "data": """{"Organisation": {"Name": "Test Practice", "Rels": {
+        "Rel": [
+            {
+                "Status": "Active",
+                "Target": {
+                    "OrgId": {
+                        "extension": "ODS_1"
+                    },
+                    "PrimaryRoleId": {
+                        "id": "RO98"
+                    }
+                }
+            }
+        ]
+    }}}"""})())
+    @patch.dict(os.environ, {"SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL": "test_url"})
+    @patch.dict(os.environ, {"ENRICHED_EVENTS_SNS_TOPIC_ARN": "test_arn"})
+    def test_should_publish_enriched_event(self, mock_boto_client,
+                                           mock_request):
+        events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}"""
+
+        lambda_input = {"Records": [{"body": events}]}
+
+        publish_spy = MagicMock()
+        mock_boto_client("sns").publish = publish_spy
+        mock_boto_client("sqs").send_message = MagicMock()
+
+        result = lambda_handler(lambda_input, None)
+
+        # expected_events = [{"eventId": "event_id_1",
+        #                     "eventType": "REGISTRATIONS",
+        #                     "requestingPracticeOdsCode": "ODS_1",
+        #                     "sendingPracticeOdsCode": "ODS_1",
+        #                     "requestingPracticeName": "Test Practice",
+        #                     "requestingPracticeIcbOdsCode": "ODS_1",
+        #                     "requestingPracticeIcbName": "Test Practice",
+        #                     "sendingPracticeName": "Test Practice",
+        #                     "sendingPracticeIcbOdsCode": "ODS_1",
+        #                     "sendingPracticeIcbName": "Test Practice",
+        #                     }]
+        #
+        # publish_spy.assert_called_once_with(TargetArn="test_arn",
+        #                                     Message="[{'eventId': 'event_id_1', 'eventType': 'REGISTRATIONS', 'requestingPracticeOdsCode': 'ODS_1', 'sendingPracticeOdsCode': 'ODS_1', 'requestingPracticeName': 'Test Practice', 'requestingPracticeIcbOdsCode': 'ODS_1', 'requestingPracticeIcbName': 'Test Practice', 'sendingPracticeName': 'Test Practice', 'sendingPracticeIcbOdsCode': 'ODS_1', 'sendingPracticeIcbName': 'Test Practice'}]",
+        #                                     MessageStructure='json')
+
+        assert result is True
+
     @patch('boto3.client')
     @patch('urllib3.PoolManager.request',
            return_value=type('', (object,), {"status": 200, "data": """{"Organisation": {"Name": "Test Practice", "Rels": {
@@ -95,6 +148,19 @@ class TestMain(unittest.TestCase):
         _send_enriched_events_to_sqs_for_uploading(enriched_events)
 
         send_message_spy.assert_called_once_with(QueueUrl='test_url', MessageBody='[{"someEvent": 1}]')
+
+    @patch.dict(os.environ, {"ENRICHED_EVENTS_SNS_TOPIC_ARN": "test_arn"})
+    @patch('boto3.client')
+    def test_uploads_events_to_sns(self, mock_boto):
+        enriched_events = [{"someEvent": 1}]
+        publish_spy = MagicMock()
+        mock_boto("sns").publish = publish_spy
+
+        _publish_enriched_events_to_sns_topic(enriched_events)
+
+        publish_spy.assert_called_once_with(TargetArn="test_arn",
+                                            Message='[{"someEvent": 1}]',
+                                            MessageStructure='json')
 
     def test_find_icb_ods_code_returns_none_when_organisation_does_not_have_rels(self):
         organisation = {}

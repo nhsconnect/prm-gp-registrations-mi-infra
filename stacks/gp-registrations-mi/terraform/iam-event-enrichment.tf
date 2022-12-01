@@ -7,6 +7,7 @@ resource "aws_iam_role" "event_enrichment_lambda_role" {
     aws_iam_policy.incoming_event_enrichment_lambda_to_send_to_dlq_access.arn,
     aws_iam_policy.outgoing_event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access.arn,
     aws_iam_policy.event_enrichment_lambda_cloudwatch_log_access.arn,
+    aws_iam_policy.enriched_mi_events_sns_publish_access.arn
   ]
 }
 

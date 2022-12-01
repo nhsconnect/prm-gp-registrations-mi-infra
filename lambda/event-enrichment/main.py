@@ -127,6 +127,6 @@ def _publish_enriched_events_to_sns_topic(enriched_events):
     sns = boto3.client('sns')
     sns.publish(
         TargetArn=enriched_events_sns_topic_arn,
-        Message=json.dumps(enriched_events),
+        Message=json.dumps({'default': json.dumps(enriched_events)}),
         MessageStructure='json'
     )

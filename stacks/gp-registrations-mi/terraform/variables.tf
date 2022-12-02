@@ -95,5 +95,5 @@ variable "event_enrichment_lambda_zip" {
 variable "s3_event_uploader_lambda_zip" {
   type        = string
   description = "Path to zipfile containing lambda code for uploading to s3 bucket"
-  default     = "lambda/build/s3-event-uploader-lambda.zip"
+  default     = "lambda/build/s3-event-uploader.zip"
 }

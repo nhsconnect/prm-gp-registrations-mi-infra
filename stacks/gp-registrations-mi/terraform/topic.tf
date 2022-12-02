@@ -13,5 +13,5 @@ resource "aws_sns_topic" "enriched_events_topic" {
 resource "aws_sns_topic_subscription" "enriched_events_sqs_target" {
   topic_arn = aws_sns_topic.enriched_events_topic.arn
   protocol  = "sqs"
-  endpoint  = aws_sqs_queue.incoming_mi_events_for_s3_uploader.arn
+  endpoint  = aws_sqs_queue.incoming_mi_events_for_s3_event_uploader.arn
 }

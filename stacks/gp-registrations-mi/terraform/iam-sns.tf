@@ -15,8 +15,8 @@ data "aws_iam_policy_document" "sns_publish" {
   }
 }
 
-resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_uploader" {
-  queue_url = aws_sqs_queue.incoming_mi_events_for_s3_uploader.id
+resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_event_uploader" {
+  queue_url = aws_sqs_queue.incoming_mi_events_for_s3_event_uploader.id
   policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events.json
 }
 
@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events" {
     }
 
     resources = [
-      aws_sqs_queue.incoming_mi_events_for_s3_uploader.arn,
+      aws_sqs_queue.incoming_mi_events_for_s3_event_uploader.arn,
     ]
 
     condition {

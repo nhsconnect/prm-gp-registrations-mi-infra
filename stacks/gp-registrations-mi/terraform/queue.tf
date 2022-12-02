@@ -67,7 +67,7 @@ resource "aws_sqs_queue_redrive_allow_policy" "incoming_mi_events_for_event_enri
 }
 
 # S3 uploader
-resource "aws_sqs_queue" "incoming_mi_events_for_s3_uploader" {
+resource "aws_sqs_queue" "incoming_mi_events_for_s3_event_uploader" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-s3-uploader-lambda"
   sqs_managed_sse_enabled = true
 
@@ -79,7 +79,7 @@ resource "aws_sqs_queue" "incoming_mi_events_for_s3_uploader" {
   )
 }
 
-resource "aws_sqs_queue" "incoming_mi_events_for_s3_uploader_dlq" {
+resource "aws_sqs_queue" "incoming_mi_events_for_s3_event_uploader_dlq" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-s3-uploader-dlq"
   sqs_managed_sse_enabled = true
 
@@ -91,12 +91,12 @@ resource "aws_sqs_queue" "incoming_mi_events_for_s3_uploader_dlq" {
   )
 }
 
-resource "aws_sqs_queue_redrive_allow_policy" "incoming_mi_events_for_s3_uploader_dlq_allow" {
-  queue_url = aws_sqs_queue.incoming_mi_events_for_s3_uploader_dlq.id
+resource "aws_sqs_queue_redrive_allow_policy" "incoming_mi_events_for_s3_event_uploader_dlq_allow" {
+  queue_url = aws_sqs_queue.incoming_mi_events_for_s3_event_uploader_dlq.id
 
   redrive_allow_policy = jsonencode({
     redrivePermission = "byQueue",
-    sourceQueueArns   = [aws_sqs_queue.incoming_mi_events_for_s3_uploader.arn]
+    sourceQueueArns   = [aws_sqs_queue.incoming_mi_events_for_s3_event_uploader.arn]
   })
 }
 

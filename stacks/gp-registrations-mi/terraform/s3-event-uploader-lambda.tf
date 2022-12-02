@@ -1,5 +1,5 @@
 variable "s3_event_uploader_lambda_name" {
-  default = "s3-event-uploader-lambda-name"
+  default = "s3-event-uploader-lambda"
 }
 
 resource "aws_lambda_function" "s3_event_uploader_lambda" {

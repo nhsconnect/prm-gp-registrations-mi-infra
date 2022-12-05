@@ -24,3 +24,14 @@ resource "aws_lambda_event_source_mapping" "sqs_queue_event_enrichment_lambda_tr
   event_source_arn = aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda.arn
   function_name    = aws_lambda_function.event_enrichment_lambda.arn
 }
+
+resource "aws_cloudwatch_log_group" "event_enrichment_lambda" {
+  name = "/aws/lambda/${var.environment}-${var.event_enrichment_lambda_name}"
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-${var.event_enrichment_lambda_name}"
+    }
+  )
+  retention_in_days = 60
+}

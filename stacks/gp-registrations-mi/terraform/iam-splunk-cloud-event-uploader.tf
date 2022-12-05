@@ -89,14 +89,3 @@ resource "aws_iam_policy" "splunk_cloud_event_uploader_lambda_cloudwatch_log_acc
   name   = "${var.environment}-splunk-cloud-event-uploader-lambda-log-access"
   policy = data.aws_iam_policy_document.splunk_cloud_event_uploader_lambda_cloudwatch_log_access.json
 }
-
-resource "aws_cloudwatch_log_group" "splunk_cloud_event_uploader_lambda" {
-  name = "/aws/lambda/${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
-    }
-  )
-  retention_in_days = 60
-}

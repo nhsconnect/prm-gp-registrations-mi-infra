@@ -24,3 +24,14 @@ resource "aws_lambda_event_source_mapping" "sqs_queue_splunk_cloud_event_uploade
   event_source_arn = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.arn
   function_name    = aws_lambda_function.splunk_cloud_event_uploader_lambda.arn
 }
+
+resource "aws_cloudwatch_log_group" "splunk_cloud_event_uploader_lambda" {
+  name = "/aws/lambda/${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
+    }
+  )
+  retention_in_days = 60
+}

@@ -91,14 +91,3 @@ resource "aws_iam_policy" "event_enrichment_lambda_cloudwatch_log_access" {
   name   = "${var.environment}-event-enricher-lambda-log-access"
   policy = data.aws_iam_policy_document.event_enrichment_lambda_cloudwatch_log_access.json
 }
-
-resource "aws_cloudwatch_log_group" "event_enrichment_lambda" {
-  name = "/aws/lambda/${var.environment}-${var.event_enrichment_lambda_name}"
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "${var.environment}-${var.event_enrichment_lambda_name}"
-    }
-  )
-  retention_in_days = 60
-}

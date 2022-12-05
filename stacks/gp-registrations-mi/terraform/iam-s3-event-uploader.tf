@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "mi_events_output_s3_put_access" {
 
 resource "aws_iam_policy" "incoming_mi_events_for_s3_event_uploader_lambda_sqs_read_access" {
   name   = "${var.environment}-incoming-mi-events-for-s3-event-uploader-lambda-sqs-read-access"
-  policy = data.aws_iam_policy_document.incoming_mi_events_for_splunk_cloud_event_uploader_lambda_sqs_read_access.json
+  policy = data.aws_iam_policy_document.incoming_mi_events_for_s3_event_uploader_lambda_sqs_read_access.json
 }
 
 data "aws_iam_policy_document" "incoming_mi_events_for_s3_event_uploader_lambda_sqs_read_access" {

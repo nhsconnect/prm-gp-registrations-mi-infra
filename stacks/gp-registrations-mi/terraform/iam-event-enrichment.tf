@@ -74,6 +74,11 @@ data "aws_iam_policy_document" "incoming_event_enrichment_lambda_to_send_to_dlq_
 }
 
 #Cloudwatch
+resource "aws_iam_policy" "event_enrichment_lambda_cloudwatch_log_access" {
+  name   = "${var.environment}-event-enricher-lambda-log-access"
+  policy = data.aws_iam_policy_document.event_enrichment_lambda_cloudwatch_log_access.json
+}
+
 data "aws_iam_policy_document" "event_enrichment_lambda_cloudwatch_log_access" {
   statement {
     sid = "CloudwatchLogs"
@@ -85,9 +90,4 @@ data "aws_iam_policy_document" "event_enrichment_lambda_cloudwatch_log_access" {
       "${aws_cloudwatch_log_group.event_enrichment_lambda.arn}:*",
     ]
   }
-}
-
-resource "aws_iam_policy" "event_enrichment_lambda_cloudwatch_log_access" {
-  name   = "${var.environment}-event-enricher-lambda-log-access"
-  policy = data.aws_iam_policy_document.event_enrichment_lambda_cloudwatch_log_access.json
 }

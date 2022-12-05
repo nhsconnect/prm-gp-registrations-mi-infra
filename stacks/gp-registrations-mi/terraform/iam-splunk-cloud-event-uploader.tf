@@ -72,6 +72,11 @@ data "aws_iam_policy_document" "incoming_mi_events_for_splunk_cloud_uploader_lam
 }
 
 #Cloudwatch
+resource "aws_iam_policy" "splunk_cloud_event_uploader_lambda_cloudwatch_log_access" {
+  name   = "${var.environment}-splunk-cloud-event-uploader-lambda-log-access"
+  policy = data.aws_iam_policy_document.splunk_cloud_event_uploader_lambda_cloudwatch_log_access.json
+}
+
 data "aws_iam_policy_document" "splunk_cloud_event_uploader_lambda_cloudwatch_log_access" {
   statement {
     sid = "CloudwatchLogs"
@@ -83,9 +88,4 @@ data "aws_iam_policy_document" "splunk_cloud_event_uploader_lambda_cloudwatch_lo
       "${aws_cloudwatch_log_group.splunk_cloud_event_uploader_lambda.arn}:*",
     ]
   }
-}
-
-resource "aws_iam_policy" "splunk_cloud_event_uploader_lambda_cloudwatch_log_access" {
-  name   = "${var.environment}-splunk-cloud-event-uploader-lambda-log-access"
-  policy = data.aws_iam_policy_document.splunk_cloud_event_uploader_lambda_cloudwatch_log_access.json
 }

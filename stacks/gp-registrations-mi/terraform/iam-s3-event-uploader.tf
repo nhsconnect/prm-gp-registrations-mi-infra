@@ -25,7 +25,7 @@ data "aws_iam_policy_document" "mi_events_output_s3_put_access" {
     ]
 
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.mi_events_output.bucket}"
+      "arn:aws:s3:::${aws_s3_bucket.mi_events_output.bucket}/*"
     ]
   }
 }

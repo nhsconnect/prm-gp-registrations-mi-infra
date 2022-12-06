@@ -20,11 +20,17 @@ def _upload_events_to_s3(sqs_messages):
 
 
 def _extract_events_from_sqs_messages(sqs_messages):
+    print(sqs_messages)
     event_records = sqs_messages["Records"]
-    events_with_message_list = [(event_record["body"]) for event_record in
+    print(event_records)
+    events_with_message_list = [event_record["body"] for event_record in
                                 event_records]
-    events = [(event_with_message["Message"]) for event_with_message in events_with_message_list][
-        0]  # remove nested list created
+    print(events_with_message_list)
+    events = [(json.loads(event_with_message)) for event_with_message in events_with_message_list]  # remove nested list created
+    print(events)
+    print("------"*10)
+    events = [(json.loads(event_with_message["Message"])) for event_with_message in events_with_message_list]  # remove nested list created
+    print(events)
     return events
 
 

@@ -10,7 +10,7 @@ class TestMain(unittest.TestCase):
     @patch.dict(os.environ, {"MI_EVENTS_OUTPUT_S3_BUCKET_NAME": "test_bucket_name"})
     def test_should_upload_events_to_s3(self, mock_boto_client):
         events = '[{"eventId": "event_id_1", "eventGeneratedDateTime": "2000-01-02T09:10:00", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}]'
-        message_of_event = json.dumps({"Message":events})
+        message_of_event = json.dumps({"Message": events})
         lambda_input = {"Records": [{"body": message_of_event}]}
         expected_event = '{"eventId": "event_id_1", "eventGeneratedDateTime": "2000-01-02T09:10:00", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}'
 
@@ -23,7 +23,7 @@ class TestMain(unittest.TestCase):
 
     def test_extracting_events_from_sqs_messages(self):
         events = '[{"eventId": "event_id_1", "eventGeneratedDateTime": "2000-01-02T09:10:00", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}]'
-        message_of_event = json.dumps({"Message":events})
+        message_of_event = json.dumps({"Message": events})
         lambda_input = {"Records": [{"body": message_of_event}]}
 
         extracted_event = _extract_events_from_sqs_messages(lambda_input)

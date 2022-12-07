@@ -1,7 +1,6 @@
 import logging
 import os
 import json
-from json import JSONDecodeError
 import boto3
 import urllib3
 
@@ -22,7 +21,8 @@ class SsmSecretManager:
 def lambda_handler(sqs_messages, context):
     try:
         print("Sending events to splunk cloud: ", sqs_messages)
-        _send_events_to_splunk_cloud(sqs_messages)
+        events = _extract_events_from_sqs_messages(sqs_messages)
+        _send_events_to_splunk_cloud(events)
         print("Successfully sent events to Splunk Cloud", sqs_messages)
         return True
     except UnableToSendEventToSplunkCloud as exception:
@@ -30,7 +30,15 @@ def lambda_handler(sqs_messages, context):
         return False
 
 
-def _send_events_to_splunk_cloud(sqs_messages):
+def _extract_events_from_sqs_messages(sqs_messages):
+    event_records = sqs_messages["Records"]
+    event_records_list = [json.loads(event_record["body"]) for event_record in
+                          event_records]
+    events = [(json.loads(event_with_message["Message"])) for event_with_message in event_records_list][0]  # remove nested list created
+    return events
+
+
+def _send_events_to_splunk_cloud(events):
     ssm = boto3.client("ssm")
     secret_manager = SsmSecretManager(ssm)
     splunk_cloud_api_token = secret_manager.get_secret(os.environ["SPLUNK_CLOUD_API_TOKEN"])
@@ -38,8 +46,6 @@ def _send_events_to_splunk_cloud(sqs_messages):
 
     http = urllib3.PoolManager()
 
-    event_records = sqs_messages["Records"]
-    events = [json.loads(event_record["body"]) for event_record in event_records][0]  # remove nested list created
     try:
         for event in events:
             print("Attempting to send event to Splunk Cloud with eventId: '" + event["eventId"] + "'", event)
@@ -60,6 +66,6 @@ def _send_events_to_splunk_cloud(sqs_messages):
 
             print("Successfully sent event to Splunk Cloud with eventId: '" + event["eventId"] + "'", event)
         return True
-    except JSONDecodeError as e:
-        print("Unable to parse JSON:" + str(event_records), e)
+    except Exception as e:
+        print("Unable to send events to Splunk Cloud:" + str(events), e)
         raise UnableToSendEventToSplunkCloud()

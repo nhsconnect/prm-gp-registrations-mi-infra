@@ -89,3 +89,34 @@ data "aws_iam_policy_document" "splunk_cloud_event_uploader_lambda_cloudwatch_lo
     ]
   }
 }
+
+# splunk event uploader sqs queue
+resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_splunk_cloud_event_uploader" {
+  queue_url = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.id
+  policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events_for_splunk_cloud_event_uploader.json
+}
+
+data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events_for_splunk_cloud_event_uploader" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "sqs:SendMessage"
+    ]
+
+    principals {
+      identifiers = ["sns.amazonaws.com"]
+      type        = "Service"
+    }
+
+    resources = [
+      aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.arn
+    ]
+
+    condition {
+      test     = "ArnEquals"
+      values   = [aws_sns_topic.enriched_events_topic.arn]
+      variable = "aws:SourceArn"
+    }
+  }
+}

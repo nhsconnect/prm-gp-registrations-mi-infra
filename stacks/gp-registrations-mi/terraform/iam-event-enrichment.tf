@@ -5,7 +5,6 @@ resource "aws_iam_role" "event_enrichment_lambda_role" {
   managed_policy_arns = [
     aws_iam_policy.incoming_mi_events_for_event_enrichment_lambda_sqs_read_access.arn,
     aws_iam_policy.incoming_event_enrichment_lambda_to_send_to_dlq_access.arn,
-    aws_iam_policy.outgoing_event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access.arn,
     aws_iam_policy.event_enrichment_lambda_cloudwatch_log_access.arn,
     aws_iam_policy.enriched_mi_events_sns_publish_access.arn
   ]
@@ -27,27 +26,6 @@ data "aws_iam_policy_document" "incoming_mi_events_for_event_enrichment_lambda_s
     ]
     resources = [
       aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda.arn,
-    ]
-  }
-}
-
-#SQS - outbound
-resource "aws_iam_policy" "outgoing_event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access" {
-  name   = "${var.environment}-event-enrichment-lambda-send-to-splunk-uploader-queue"
-  policy = data.aws_iam_policy_document.outgoing_event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access.json
-}
-
-data "aws_iam_policy_document" "outgoing_event_enrichment_lambda_to_send_to_queue_for_uploading_event_to_splunk_access" {
-  statement {
-
-    effect = "Allow"
-
-    actions = [
-      "sqs:SendMessage"
-    ]
-
-    resources = [
-      aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.arn
     ]
   }
 }

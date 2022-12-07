@@ -1,9 +1,10 @@
+import json
 import os
 import unittest
 from unittest.mock import patch, MagicMock
 
 from main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
-    OdsPortalException, _send_enriched_events_to_sqs_for_uploading, _enrich_events, \
+    OdsPortalException, _enrich_events, \
     _publish_enriched_events_to_sns_topic, lambda_handler
 
 A_VALID_TEST_ORGANISATION = {
@@ -55,7 +56,6 @@ class TestMain(unittest.TestCase):
 
         publish_spy = MagicMock()
         mock_boto_client("sns").publish = publish_spy
-        mock_boto_client("sqs").send_message = MagicMock()
 
         result = lambda_handler(lambda_input, None)
 
@@ -94,13 +94,13 @@ class TestMain(unittest.TestCase):
             }
         ]
     }}}"""})())
-    def test_should_enrich_events_with_empty_fields_if_unable_to_fetch_organisation(self, mock_sqs_client,
+    def test_should_enrich_events_with_empty_fields_if_unable_to_fetch_organisation(self, mock_boto_client,
                                                                                     mock_request):
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}"""
 
-        sqs_messages = {"Records": [{"body": events}]}
+        lambda_input = {"Records": [{"body": events}]}
 
-        result = _enrich_events(sqs_messages)
+        result = _enrich_events(lambda_input)
 
         expected_events = [{"eventId": "event_id_1",
                             "eventType": "REGISTRATIONS",
@@ -118,12 +118,12 @@ class TestMain(unittest.TestCase):
     @patch('boto3.client')
     @patch('urllib3.PoolManager.request',
            return_value=type('', (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})())
-    def test_should_enrich_events_with_all_fields_from_organisation(self, mock_sqs_client, mock_request):
+    def test_should_enrich_events_with_all_fields_from_organisation(self, mock_boto_client, mock_request):
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ods_1", "sendingPracticeOdsCode": "ods_2"}"""
 
-        sqs_messages = {"Records": [{"body": events}]}
+        lambda_input = {"Records": [{"body": events}]}
 
-        result = _enrich_events(sqs_messages)
+        result = _enrich_events(lambda_input)
 
         expected_events = [{"eventId": "event_id_1",
                             "eventType": "REGISTRATIONS",
@@ -138,17 +138,6 @@ class TestMain(unittest.TestCase):
                             }]
         assert result == expected_events
 
-    @patch.dict(os.environ, {"SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL": "test_url"})
-    @patch('boto3.client')
-    def test_uploads_events_to_sqs(self, mock_boto):
-        enriched_events = [{"someEvent": 1}]
-        send_message_spy = MagicMock()
-        mock_boto("sqs").send_message = send_message_spy
-
-        _send_enriched_events_to_sqs_for_uploading(enriched_events)
-
-        send_message_spy.assert_called_once_with(QueueUrl='test_url', MessageBody='[{"someEvent": 1}]')
-
     @patch.dict(os.environ, {"ENRICHED_EVENTS_SNS_TOPIC_ARN": "test_arn"})
     @patch('boto3.client')
     def test_uploads_events_to_sns(self, mock_boto):
@@ -157,9 +146,10 @@ class TestMain(unittest.TestCase):
         mock_boto("sns").publish = publish_spy
 
         _publish_enriched_events_to_sns_topic(enriched_events)
+        event = '[{"someEvent": 1}]'
 
         publish_spy.assert_called_once_with(TargetArn="test_arn",
-                                            Message='[{"someEvent": 1}]',
+                                            Message=json.dumps({"default":event}),
                                             MessageStructure='json')
 
     def test_find_icb_ods_code_returns_none_when_organisation_does_not_have_rels(self):

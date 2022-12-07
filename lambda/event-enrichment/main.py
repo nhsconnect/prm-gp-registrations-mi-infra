@@ -30,7 +30,6 @@ def lambda_handler(sqs_messages, context):
         print("Enriching events - SQS Records: ", sqs_messages)
         enriched_events = _enrich_events(sqs_messages)
         print("Successfully enriched events:", enriched_events)
-        _send_enriched_events_to_sqs_for_uploading(enriched_events)
         _publish_enriched_events_to_sns_topic(enriched_events)
         return True
     except Exception as exception:
@@ -107,17 +106,6 @@ def _fetch_organisation(ods_code: str):
     print("Successfully retrieved organisation with ODS code: " + ods_code)
     response_content = json.loads(response.data)
     return response_content["Organisation"]
-
-
-def _send_enriched_events_to_sqs_for_uploading(enriched_events):
-    print("Sending enriched events to SQS for uploading to splunk cloud", enriched_events)
-    event_uploader_sqs_queue_url = os.environ["SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL"]
-
-    sqs = boto3.client('sqs')
-    sqs.send_message(
-        QueueUrl=event_uploader_sqs_queue_url,
-        MessageBody=json.dumps(enriched_events)
-    )
 
 
 def _publish_enriched_events_to_sns_topic(enriched_events):

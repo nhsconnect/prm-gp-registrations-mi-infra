@@ -27,7 +27,7 @@ def lambda_handler(sqs_messages, context):
         return True
     except UnableToSendEventToSplunkCloud as exception:
         logging.error("Failed to send events to Splunk Cloud. " + str(exception))
-        return False
+        raise exception
 
 
 def _extract_events_from_sqs_messages(sqs_messages):

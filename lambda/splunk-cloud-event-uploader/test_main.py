@@ -95,6 +95,5 @@ class TestMain(unittest.TestCase):
         message_of_event = json.dumps({"Message": events})
         lambda_input = {"Records": [{"body": message_of_event}]}
 
-        result = lambda_handler(lambda_input, None)
+        self.assertRaises(Exception, lambda_handler, lambda_input)
 
-        assert result is False

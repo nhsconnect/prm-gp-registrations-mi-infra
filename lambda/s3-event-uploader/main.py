@@ -29,6 +29,6 @@ def _extract_events_from_sqs_messages(sqs_messages):
 
 def _generate_s3_key(event):
     event_id = event["eventId"]
-    event_date_time = event["registrationEventDateTime"]
-    s3_path = datetime.datetime.strptime(event_date_time, '%Y-%m-%dT%H:%M:%S%z').strftime('%Y/%m/%d/%H')
+    event_date_time = event["eventGeneratedDateTime"]
+    s3_path = datetime.datetime.strptime(event_date_time, '%Y-%m-%dT%H:%M:%S').strftime('%Y/%m/%d')
     return s3_path + "/" + event_id + ".json"

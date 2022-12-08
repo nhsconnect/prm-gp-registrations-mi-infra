@@ -34,7 +34,7 @@ def lambda_handler(sqs_messages, context):
         return True
     except Exception as exception:
         print("Unable to enrich events. " + str(exception))
-        return False
+        raise exception
 
 
 def _enrich_events(sqs_messages):
@@ -112,6 +112,7 @@ def _publish_enriched_events_to_sns_topic(enriched_events):
     print("Publishing enriched events to SNS", enriched_events)
     enriched_events_sns_topic_arn = os.environ["ENRICHED_EVENTS_SNS_TOPIC_ARN"]
 
+    print("Sending:", json.dumps({'default': json.dumps(enriched_events)}))
     sns = boto3.client('sns')
     sns.publish(
         TargetArn=enriched_events_sns_topic_arn,

@@ -1,6 +1,7 @@
 import json
 import os
 import unittest
+from json import JSONDecodeError
 from unittest.mock import patch, MagicMock
 
 from main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
@@ -48,32 +49,31 @@ class TestMain(unittest.TestCase):
     }}}"""})())
     @patch.dict(os.environ, {"SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL": "test_url"})
     @patch.dict(os.environ, {"ENRICHED_EVENTS_SNS_TOPIC_ARN": "test_arn"})
-    def test_should_publish_enriched_event(self, mock_boto_client,
-                                           mock_request):
+    def test_should_publish_enriched_event_with_lambda_handler(self, mock_request, mock_boto):
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}"""
 
         lambda_input = {"Records": [{"body": events}]}
 
         publish_spy = MagicMock()
-        mock_boto_client("sns").publish = publish_spy
+        mock_boto("sns").publish = publish_spy
 
         result = lambda_handler(lambda_input, None)
 
-        # expected_events = [{"eventId": "event_id_1",
-        #                     "eventType": "REGISTRATIONS",
-        #                     "requestingPracticeOdsCode": "ODS_1",
-        #                     "sendingPracticeOdsCode": "ODS_1",
-        #                     "requestingPracticeName": "Test Practice",
-        #                     "requestingPracticeIcbOdsCode": "ODS_1",
-        #                     "requestingPracticeIcbName": "Test Practice",
-        #                     "sendingPracticeName": "Test Practice",
-        #                     "sendingPracticeIcbOdsCode": "ODS_1",
-        #                     "sendingPracticeIcbName": "Test Practice",
-        #                     }]
-        #
-        # publish_spy.assert_called_once_with(TargetArn="test_arn",
-        #                                     Message="[{'eventId': 'event_id_1', 'eventType': 'REGISTRATIONS', 'requestingPracticeOdsCode': 'ODS_1', 'sendingPracticeOdsCode': 'ODS_1', 'requestingPracticeName': 'Test Practice', 'requestingPracticeIcbOdsCode': 'ODS_1', 'requestingPracticeIcbName': 'Test Practice', 'sendingPracticeName': 'Test Practice', 'sendingPracticeIcbOdsCode': 'ODS_1', 'sendingPracticeIcbName': 'Test Practice'}]",
-        #                                     MessageStructure='json')
+        expected_events = json.dumps([{"eventId": "event_id_1",
+                                       "eventType": "REGISTRATIONS",
+                                       "requestingPracticeOdsCode": "ODS_1",
+                                       "sendingPracticeOdsCode": "ODS_1",
+                                       "requestingPracticeName": "Test Practice",
+                                       "requestingPracticeIcbOdsCode": "ODS_1",
+                                       "requestingPracticeIcbName": "Test Practice",
+                                       "sendingPracticeName": "Test Practice",
+                                       "sendingPracticeIcbOdsCode": "ODS_1",
+                                       "sendingPracticeIcbName": "Test Practice",
+                                       }])
+
+        publish_spy.assert_called_once_with(TargetArn="test_arn",
+                                            Message=json.dumps({"default": expected_events}),
+                                            MessageStructure='json')
 
         assert result is True
 
@@ -149,7 +149,7 @@ class TestMain(unittest.TestCase):
         event = '[{"someEvent": 1}]'
 
         publish_spy.assert_called_once_with(TargetArn="test_arn",
-                                            Message=json.dumps({"default":event}),
+                                            Message=json.dumps({"default": event}),
                                             MessageStructure='json')
 
     def test_find_icb_ods_code_returns_none_when_organisation_does_not_have_rels(self):
@@ -250,3 +250,8 @@ class TestMain(unittest.TestCase):
         self.assertRaises(OdsPortalException, _fetch_organisation, an_ods_code)
 
         mock_PoolManager.assert_called_once_with('GET', ODS_PORTAL_URL + an_ods_code)
+
+    def test_should_throw_exception_when_lambda_fails(self):
+        lambda_input = {"Records": [{"body": ""}]}
+
+        self.assertRaises(JSONDecodeError, lambda_handler, lambda_input, None)

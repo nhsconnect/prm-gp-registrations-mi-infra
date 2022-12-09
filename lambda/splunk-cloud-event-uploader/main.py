@@ -67,5 +67,5 @@ def _send_events_to_splunk_cloud(events):
             print("Successfully sent event to Splunk Cloud with eventId: '" + event["eventId"] + "'", event)
         return True
     except Exception as e:
-        print("Unable to send events to Splunk Cloud:" + str(events), e)
+        print("Unable to send events to Splunk Cloud: ", e, str(events))
         raise UnableToSendEventToSplunkCloud()

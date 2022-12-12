@@ -34,10 +34,11 @@ resource "aws_route" "private" {
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.vpc.id
-  tags = {
-    Name        = "${var.environment}-gp-registrations-mi-private"
-    Environment = var.environment
-  }
+  tags  = merge(
+    local.common_tags, {
+      Name = "${var.environment}-gp-registrations-mi-private"
+    }
+  )
 }
 
 resource "aws_route_table_association" "private_a" {

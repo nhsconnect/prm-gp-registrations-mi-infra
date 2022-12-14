@@ -34,7 +34,12 @@ def _extract_events_from_sqs_messages(sqs_messages):
     event_records = sqs_messages["Records"]
     event_records_list = [json.loads(event_record["body"]) for event_record in
                           event_records]
-    events = [(json.loads(event_with_message["Message"])) for event_with_message in event_records_list][0]  # remove nested list created
+    events_nested_list = [(json.loads(event_with_message["Message"])) for event_with_message in event_records_list]
+    # flatten list:
+    events = []
+    for list_of_events in events_nested_list:
+        for event in list_of_events:
+            events.append(event)
     return events
 
 

@@ -1,22 +1,44 @@
 import datetime
 import json
+import logging
 import os
 
 import boto3
 
 
+class UnableToUploadEventToS3(RuntimeError):
+    pass
+
+
 def lambda_handler(sqs_messages, context):
-    print("Uploading event to s3...")
-    return _upload_events_to_s3(sqs_messages)
+    try:
+        print("Uploading event to S3...")
+        _upload_events_to_s3(sqs_messages)
+        return True
+    except UnableToUploadEventToS3 as exception:
+        logging.error("Failed to upload events to S3. " + str(exception))
+        raise exception
 
 
 def _upload_events_to_s3(sqs_messages):
+    print("Extracting events  - SQS Records: ", sqs_messages)
     events_list = _extract_events_from_sqs_messages(sqs_messages)
+    print("Successfully extracted events:", events_list)
     s3_bucket = boto3.client('s3')
-    for event in events_list:
-        s3_bucket.put_object(Bucket=os.environ["MI_EVENTS_OUTPUT_S3_BUCKET_NAME"], Key=_generate_s3_key(event),
-                             Body=json.dumps(event))
-    return True
+    print("Uploading events to S3...")
+    try:
+        for event in events_list:
+            key = _generate_s3_key(event)
+            event_id = event["eventId"]
+            print(f"Attempting to upload event (eventId: {event_id}) to S3, with Key: {key}")
+            s3_bucket.put_object(Bucket=os.environ["MI_EVENTS_OUTPUT_S3_BUCKET_NAME"], Key=key,
+                                            Body=json.dumps(event))
+
+            print("Successfully uploaded event with eventId: '" + event["eventId"] + "' to S3 ", event)
+        return True
+    except Exception as e:
+        print("Unable to upload events to S3: ", e, str(events_list))
+        raise UnableToUploadEventToS3()
 
 
 def _extract_events_from_sqs_messages(sqs_messages):

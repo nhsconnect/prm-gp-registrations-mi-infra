@@ -3,7 +3,7 @@ import os
 import unittest
 from unittest.mock import patch, MagicMock, call
 
-from main import _upload_events_to_s3, _extract_events_from_sqs_messages, _generate_s3_key
+from main import _upload_events_to_s3, _extract_events_from_sqs_messages, _generate_s3_key, UnableToUploadEventToS3
 
 
 class TestMain(unittest.TestCase):
@@ -61,3 +61,11 @@ class TestMain(unittest.TestCase):
         result = _generate_s3_key(event)
 
         assert result == expected_key
+
+    @patch('boto3.client')
+    def test_throws_exception_when_invalid_input_for_upload_events_to_s3(self, mock_boto):
+        put_spy = MagicMock()
+        mock_boto("s3").put_object = put_spy
+        event = '[{"incorrect event":"format"}]'
+        message_of_event = json.dumps({"Message": event})
+        self.assertRaises(UnableToUploadEventToS3, _upload_events_to_s3, {"Records": [{"body": message_of_event}]})

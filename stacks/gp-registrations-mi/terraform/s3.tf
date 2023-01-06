@@ -9,6 +9,7 @@ resource "aws_s3_bucket" "mi_events_output" {
     local.common_tags,
     {
       Name = "${var.environment}-prm-gp-registrations-mi-s3-mi-events"
+      ApplicationRole = "AwsS3Bucket"
     }
   )
 }

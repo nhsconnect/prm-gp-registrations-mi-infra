@@ -7,6 +7,7 @@ resource "aws_subnet" "public_a" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-public-a"
+      ApplicationRole = "AwsSubnet"
     }
   )
 }
@@ -20,6 +21,7 @@ resource "aws_subnet" "public_b" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-public-b"
+      ApplicationRole = "AwsSubnet"
     }
   )
 }
@@ -30,6 +32,7 @@ resource "aws_route_table" "public" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-public"
+      ApplicationRole = "AwsRouteTable"
     }
   )
 }
@@ -57,6 +60,7 @@ resource "aws_eip" "nat" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-nat"
+      ApplicationRole = "AwsEip"
     }
   )
 }
@@ -69,6 +73,7 @@ resource "aws_nat_gateway" "nat_gateway" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-nat-gateway"
+      ApplicationRole = "AwsNatGateway"
     }
   )
 }

@@ -19,6 +19,7 @@ resource "aws_lb" "nlb" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-nlb"
+      ApplicationRole = "AwsLb"
     }
   )
 }
@@ -40,6 +41,7 @@ resource "aws_lb_target_group" "nlb" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-nlb-tg"
+      ApplicationRole = "AwsLbTargetGroup"
     }
   )
 }
@@ -56,6 +58,7 @@ resource "aws_lb_listener" "nlb_listener" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-nlb-listener"
+      ApplicationRole = "AwsLbListener"
     }
   )
 }

@@ -6,6 +6,7 @@ resource "aws_api_gateway_vpc_link" "vpc_link" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-api-gateway-vpc-link"
+      ApplicationRole = "AwsApiGatewayVpcLink"
     }
   )
 }
@@ -17,6 +18,7 @@ resource "aws_api_gateway_rest_api" "rest_api" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-api-gateway-rest-api"
+      ApplicationRole = "AwsApiGatewayRestApi"
     }
   )
 }
@@ -106,6 +108,7 @@ resource "aws_api_gateway_stage" "api_gateway_stage" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-api-gateway-stage"
+      ApplicationRole = "AwsApiGatewayStage"
     }
   )
 }
@@ -129,6 +132,7 @@ resource "aws_cloudwatch_log_group" "access_logs" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi"
+      ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )
 }
@@ -141,6 +145,7 @@ resource "aws_cloudwatch_log_group" "execution_logs" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi"
+      ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )
 }

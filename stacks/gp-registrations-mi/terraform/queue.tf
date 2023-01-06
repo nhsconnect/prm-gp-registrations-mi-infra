@@ -7,6 +7,7 @@ resource "aws_sqs_queue" "incoming_mi_events_for_splunk_cloud_event_uploader" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-sqs-queue-for-splunk-cloud"
+      ApplicationRole = "AwsSqsQueue"
     }
   )
 }
@@ -19,6 +20,7 @@ resource "aws_sqs_queue" "incoming_mi_events_for_splunk_cloud_event_uploader_dlq
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-sqs-queue-for-splunk-uploader-dlq"
+      ApplicationRole = "AwsSqsQueue"
     }
   )
 }
@@ -41,6 +43,7 @@ resource "aws_sqs_queue" "incoming_mi_events_for_event_enrichment_lambda" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-sqs-queue-for-enrichment"
+      ApplicationRole = "AwsSqsQueue"
     }
   )
 }
@@ -53,6 +56,7 @@ resource "aws_sqs_queue" "incoming_mi_events_for_event_enrichment_lambda_dlq" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-sqs-queue-for-enrichment-dlq"
+      ApplicationRole = "AwsSqsQueue"
     }
   )
 }
@@ -75,6 +79,7 @@ resource "aws_sqs_queue" "incoming_mi_events_for_s3_event_uploader" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-sqs-queue-for-s3-uploader"
+      ApplicationRole = "AwsSqsQueue"
     }
   )
 }
@@ -87,6 +92,7 @@ resource "aws_sqs_queue" "incoming_mi_events_for_s3_event_uploader_dlq" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-sqs-queue-for-s3-uploader-dlq"
+      ApplicationRole = "AwsSqsQueue"
     }
   )
 }

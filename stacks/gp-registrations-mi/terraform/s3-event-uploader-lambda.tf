@@ -10,7 +10,13 @@ resource "aws_lambda_function" "s3_event_uploader_lambda" {
   source_code_hash = filebase64sha256(var.s3_event_uploader_lambda_zip)
   runtime = "python3.9"
   timeout = 15
-  tags          = local.common_tags
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-${var.s3_event_uploader_lambda_name}"
+      ApplicationRole = "AwsLambdaFunction"
+    }
+  )
 
   environment {
     variables = {
@@ -30,6 +36,7 @@ resource "aws_cloudwatch_log_group" "s3_event_uploader_lambda" {
     local.common_tags,
     {
       Name = "${var.environment}-${var.s3_event_uploader_lambda_name}"
+      ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )
   retention_in_days = 60

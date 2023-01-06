@@ -7,7 +7,7 @@ resource "aws_subnet" "private_a" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-private-a"
-
+      ApplicationRole = "AwsSubnet"
     }
   )
 }
@@ -21,7 +21,7 @@ resource "aws_subnet" "private_b" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-private-b"
-
+      ApplicationRole = "AwsSubnet"
     }
   )
 }
@@ -37,6 +37,7 @@ resource "aws_route_table" "private" {
   tags  = merge(
     local.common_tags, {
       Name = "${var.environment}-gp-registrations-mi-private"
+      ApplicationRole = "AwsRouteTable"
     }
   )
 }

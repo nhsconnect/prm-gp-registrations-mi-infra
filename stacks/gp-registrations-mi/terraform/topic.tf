@@ -6,6 +6,7 @@ resource "aws_sns_topic" "enriched_events_topic" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi-enriched-events-sns-topic"
+      ApplicationRole = "AwsSnsTopic"
     }
   )
 }

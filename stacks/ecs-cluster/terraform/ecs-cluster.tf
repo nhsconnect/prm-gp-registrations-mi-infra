@@ -1,6 +1,12 @@
 resource "aws_ecs_cluster" "gp_registrations_mi_cluster" {
   name = "${var.environment}-gp-registrations-mi"
-  tags = local.common_tags
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi-cluster"
+      ApplicationRole = "AwsEcsCluster"
+    }
+  )
   setting {
     name  = "containerInsights"
     value = "enabled"
@@ -14,6 +20,7 @@ resource "aws_cloudwatch_log_group" "gp_registrations_mi" {
     local.common_tags,
     {
       Name = "${var.environment}-gp-registrations-mi"
+      ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )
 }

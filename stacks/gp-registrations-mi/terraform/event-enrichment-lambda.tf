@@ -10,7 +10,13 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
   source_code_hash = filebase64sha256(var.event_enrichment_lambda_zip)
   runtime = "python3.9"
   timeout = 15
-  tags          = local.common_tags
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-gp-registrations-mi"
+      ApplicationRole = "AwsLambdaFunction"
+    }
+  )
 
   environment {
     variables = {
@@ -31,6 +37,7 @@ resource "aws_cloudwatch_log_group" "event_enrichment_lambda" {
     local.common_tags,
     {
       Name = "${var.environment}-${var.event_enrichment_lambda_name}"
+      ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )
   retention_in_days = 60

@@ -13,6 +13,7 @@ resource "aws_ecs_service" "mi_service" {
   task_definition = aws_ecs_task_definition.gp_registrations_mi.arn
   desired_count   = 1
   launch_type     = "FARGATE"
+  propagate_tags = "SERVICE"
 
   network_configuration {
     subnets         = split(",", data.aws_ssm_parameter.private_subnet_ids.value)

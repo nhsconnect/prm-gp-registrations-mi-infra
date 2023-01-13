@@ -13,7 +13,7 @@ locals {
     data_classification = "1"
     DataType            = "None"
     ProjectType         = "Public beta"
-    PublicFacing        = "Y"
+    PublicFacing        = "N"
     ServiceCategory     = "Bronze"
     OnOffPattern        = "AlwaysOn"
     BackupLocal         = "False"

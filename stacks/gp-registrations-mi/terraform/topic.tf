@@ -2,6 +2,10 @@ resource "aws_sns_topic" "enriched_events_topic" {
   name = "gp-registrations-mi-enriched-events-sns-topic"
   kms_master_key_id = "alias/aws/sns"
 
+  sqs_failure_feedback_role_arn = aws_iam_policy.sns_topic_enriched_mi_events_log_access.arn
+  sqs_success_feedback_role_arn = aws_iam_policy.sns_topic_enriched_mi_events_log_access.arn
+
+
   tags = merge(
     local.common_tags,
     {

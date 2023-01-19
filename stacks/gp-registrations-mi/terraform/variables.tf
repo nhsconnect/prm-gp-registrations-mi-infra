@@ -70,6 +70,10 @@ locals {
   api_stage_name = "${var.environment}-env"
 }
 
+variable "enriched_mi_events_sns_topic_name" {
+  default = "gp-registrations-mi-enriched-mi-events-sns-topic"
+}
+
 variable "splunk_cloud_url_param_name" {
   type        = string
   description = "SSM param containing splunk cloud url to send MI events to"

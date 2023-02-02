@@ -5,6 +5,15 @@ resource "aws_s3_bucket" "mi_events_output" {
     prevent_destroy = true
   }
 
+  lifecycle_rule {
+    enabled = true
+    id      = "expire-mi-objects-after-2-years"
+
+    expiration {
+      days = 730
+    }
+  }
+
   tags = merge(
     local.common_tags,
     {

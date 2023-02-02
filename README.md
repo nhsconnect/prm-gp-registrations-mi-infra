@@ -6,6 +6,7 @@ These instructions assume you are using:
 
 - [aws-vault](https://github.com/99designs/aws-vault) to validate your AWS credentials.
 - [dojo](https://github.com/kudulab/dojo) to provide an execution environment
+- [colima](https://github.com/abiosoft/colima) to run the docker dojo images
 
 ## Applying terraform
 
@@ -43,3 +44,11 @@ Error: `Error: Error inspecting states in the "s3" backend:
 S3 bucket does not exist.`
 
 Try deleting the .terraform and the plans (dev.tfplan/prod.tfplan)
+
+
+Error: `docker: Cannot connect to the Docker daemon at unix:///Users/jnewman/.colima/docker.sock. Is the docker daemon running?.`
+
+You need to install and start colima:
+```
+colima start
+```

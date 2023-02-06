@@ -140,19 +140,19 @@ pipelines:
                     source: prod.tfplan
                     is_file: yes
                 - fetch:
-                    stage: plan_dev
+                    stage: plan_prod
                     job: plan
                     source: lambda/build/splunk-cloud-event-uploader.zip
                     destination: lambda/build/
                     is_file: yes
                 - fetch:
-                    stage: plan_dev
+                    stage: plan_prod
                     job: plan
                     source: lambda/build/event-enrichment.zip
                     destination: lambda/build/
                     is_file: yes
                 - fetch:
-                    stage: plan_dev
+                    stage: plan_prod
                     job: plan
                     source: lambda/build/s3-event-uploader.zip
                     destination: lambda/build/

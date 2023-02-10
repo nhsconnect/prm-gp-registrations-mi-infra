@@ -15,8 +15,8 @@ resource "aws_sns_topic" "enriched_events_topic" {
   )
 }
 
-resource "aws_sns_topic" "enriched_events_topic" {
-  name = var.enriched_mi_events_sns_topic_name
+resource "aws_sns_topic" "error_alarm_alert_topic" {
+  name = "${var.environment}-error-alarm-alert-sns-topic"
 
   tags = merge(
     local.common_tags,

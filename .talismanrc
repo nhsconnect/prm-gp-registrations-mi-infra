@@ -1,0 +1,4 @@
+fileignoreconfig:
+- filename: lambda/failure-alert/main.py
+  checksum: 9d57b3bf7874e9c61fdb320d88edacdaf2ccea7a14782366610be1f5a990c180
+version: ""

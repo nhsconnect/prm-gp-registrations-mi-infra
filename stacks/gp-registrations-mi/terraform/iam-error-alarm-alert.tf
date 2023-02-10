@@ -57,3 +57,12 @@ resource "aws_cloudwatch_log_group" "error_alarm_alert_lambda" {
   )
   retention_in_days = 60
 }
+
+#SNS to Lambda
+resource "aws_lambda_permission" "allow_invocation_from_sns" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}-${var.error_alarm_alert_lambda_name}"
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.error_alarm_alert_topic.arn
+}

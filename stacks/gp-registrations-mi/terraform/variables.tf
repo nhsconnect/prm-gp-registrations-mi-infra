@@ -101,3 +101,14 @@ variable "s3_event_uploader_lambda_zip" {
   description = "Path to zipfile containing lambda code for uploading to s3 bucket"
   default     = "lambda/build/s3-event-uploader.zip"
 }
+
+variable "error_alarm_alert_lambda_zip" {
+  type        = string
+  description = "Path to zipfile containing lambda code for sending alerts to"
+  default     = "lambda/build/error-alarm-alert.zip"
+}
+
+variable "log_alerts_general_webhook_url_param_name" {
+  type        = string
+  description = "SSM parameter containing the general webhook url channel to send failure threshold succeeded notifications to"
+}

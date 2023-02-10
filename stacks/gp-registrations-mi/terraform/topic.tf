@@ -15,6 +15,19 @@ resource "aws_sns_topic" "enriched_events_topic" {
   )
 }
 
+resource "aws_sns_topic" "enriched_events_topic" {
+  name = var.enriched_mi_events_sns_topic_name
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.environment}-error-alarm-alert-topic"
+      ApplicationRole = "AwsSnsTopic"
+    }
+  )
+}
+
+#SQS
 resource "aws_sns_topic_subscription" "enriched_events_to_s3_event_uploader_sqs_target" {
   topic_arn = aws_sns_topic.enriched_events_topic.arn
   protocol  = "sqs"
@@ -27,6 +40,7 @@ resource "aws_sns_topic_subscription" "enriched_events_to_splunk_cloud_event_upl
   endpoint  = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.arn
 }
 
+#Cloudwatch
 resource "aws_cloudwatch_log_group" "sns_topic_enriched_mi_events" {
   name = "/sns/${var.environment}-${var.enriched_mi_events_sns_topic_name}"
   tags = merge(

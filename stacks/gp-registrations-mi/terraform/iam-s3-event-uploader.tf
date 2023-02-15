@@ -5,6 +5,7 @@ resource "aws_iam_role" "s3_event_uploader_role" {
 
   managed_policy_arns = [
     aws_iam_policy.mi_events_output_s3_put_access.arn,
+    aws_iam_policy.incoming_mi_events_for_s3_event_uploader_lambda_to_send_to_dlq_access.arn,
     aws_iam_policy.incoming_mi_events_for_s3_event_uploader_lambda_sqs_read_access.arn,
     aws_iam_policy.s3_event_uploader_lambda_cloudwatch_log_access.arn
   ]

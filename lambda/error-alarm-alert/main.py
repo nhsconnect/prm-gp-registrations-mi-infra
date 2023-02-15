@@ -20,15 +20,12 @@ def lambda_handler(event, context):
     ssm = boto3.client("ssm")
     secret_manager = SsmSecretManager(ssm)
 
-    # cloudwatch_dashboard_url = os.environ["CLOUDWATCH_DASHBOARD_URL"]
-    #
-    # text = (
-    #     f"## **There was an error in the data pipeline:** <br>"
-    #     f"See all the details in cloudwatch: {cloudwatch_dashboard_url}%<br>"
-    # )
+    cloudwatch_alarm_url = os.environ["CLOUDWATCH_ALARM_URL"]
 
     sns_message = json.loads(event['Records'][0]['Sns']['Message'])
-    error_alarm_text = f"##**{sns_message['AlarmName']}**\n{sns_message['AlarmDescription']}"
+    error_alarm_text = f"<h2>Alarm for the MI API has been triggered</h2>" \
+                       f"<p>**{sns_message['AlarmName']}**: {sns_message['AlarmDescription']}</p>" \
+                       f"<p><a href='${cloudwatch_alarm_url}'>Click here to see active alarms</a></p>"
 
     error_alarm_msg = {
         "text": error_alarm_text,

@@ -8,8 +8,8 @@ resource "aws_cloudwatch_metric_alarm" "s3_event_uploader_lambda_dlq_alarm" {
   statistic           = "Sum"
   threshold           = "0"
 
-  dimensions {
-    QueueName = "${aws_sqs_queue.incoming_mi_events_for_s3_event_uploader_dlq.name}"
+  dimensions = {
+    QueueName = aws_sqs_queue.incoming_mi_events_for_s3_event_uploader_dlq.name
   }
 
   alarm_description = "There is an item in the dlq that must be actioned by replaying the messages, or fixing the underlying issue. See cloudwatch logs for relevant resource for more details"
@@ -27,8 +27,8 @@ resource "aws_cloudwatch_metric_alarm" "splunk_cloud_event_uploader_lambda_dlq_a
   statistic           = "Sum"
   threshold           = "0"
 
-  dimensions {
-    QueueName = "${aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader_dlq.name}"
+  dimensions = {
+    QueueName = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader_dlq.name
   }
 
   alarm_description = "There is an item in the dlq that must be actioned by replaying the messages, or fixing the underlying issue. See cloudwatch logs for relevant resource for more details"

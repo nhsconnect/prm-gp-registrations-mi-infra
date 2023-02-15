@@ -49,6 +49,27 @@ data "aws_iam_policy_document" "incoming_mi_events_for_s3_event_uploader_lambda_
   }
 }
 
+#SQS - DLQ
+resource "aws_iam_policy" "incoming_mi_events_for_s3_event_uploader_lambda_to_send_to_dlq_access" {
+  name   = "${var.environment}-s3-event-uploader-lambda-send-to-dlq-access"
+  policy = data.aws_iam_policy_document.incoming_mi_events_for_s3_event_uploader_lambda_to_send_to_dlq_access.json
+}
+
+data "aws_iam_policy_document" "incoming_mi_events_for_s3_event_uploader_lambda_to_send_to_dlq_access" {
+  statement {
+
+    effect = "Allow"
+
+    actions = [
+      "sqs:SendMessage"
+    ]
+
+    resources = [
+      aws_sqs_queue.incoming_mi_events_for_s3_event_uploader_dlq.arn
+    ]
+  }
+}
+
 #Cloudwatch
 resource "aws_iam_policy" "s3_event_uploader_lambda_cloudwatch_log_access" {
   name   = "${var.environment}-s3_event_uploader_lambda_log_access"

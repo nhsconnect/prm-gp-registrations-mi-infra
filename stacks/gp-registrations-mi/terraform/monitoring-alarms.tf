@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_metric_alarm" "s3_event_uploader_lambda_dlq_alarm" {
-  alarm_name          = "${var.environment}-${aws_sqs_queue.incoming_mi_events_for_s3_event_uploader_dlq.name}-alarm"
+  alarm_name          = "${aws_sqs_queue.incoming_mi_events_for_s3_event_uploader_dlq.name}-alarm"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   metric_name         = "ApproximateNumberOfMessagesVisible"
@@ -18,7 +18,7 @@ resource "aws_cloudwatch_metric_alarm" "s3_event_uploader_lambda_dlq_alarm" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "splunk_cloud_event_uploader_lambda_dlq_alarm" {
-  alarm_name          = "${var.environment}-${aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader_dlq.name}-alarm"
+  alarm_name          = "${aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader_dlq.name}-alarm"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   metric_name         = "ApproximateNumberOfMessagesVisible"
@@ -38,7 +38,7 @@ resource "aws_cloudwatch_metric_alarm" "splunk_cloud_event_uploader_lambda_dlq_a
 
 
 resource "aws_cloudwatch_metric_alarm" "event_enrichment_lambda_dlq_alarm" {
-  alarm_name          = "${var.environment}-${aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda_dlq.name}-alarm"
+  alarm_name          = "${aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda_dlq.name}-alarm"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   metric_name         = "ApproximateNumberOfMessagesVisible"
@@ -57,7 +57,7 @@ resource "aws_cloudwatch_metric_alarm" "event_enrichment_lambda_dlq_alarm" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "enriched_events_sns_failure_alarm" {
-  alarm_name          = "${var.environment}-enriched-events-sns-failure-alarm"
+  alarm_name          = "${aws_sns_topic.enriched_events_topic.name}-alarm"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   metric_name         = "NumberOfNotificationsFailed"

@@ -1,5 +1,5 @@
 resource "aws_sns_topic" "enriched_events_topic" {
-  name = var.enriched_mi_events_sns_topic_name
+  name = "${var.environment}-var.enriched_mi_events_sns_topic_name"
   kms_master_key_id = "alias/aws/sns"
 
   sqs_failure_feedback_role_arn = aws_iam_role.sns_topic_enriched_mi_events_cloudwatch_log_access_role.arn

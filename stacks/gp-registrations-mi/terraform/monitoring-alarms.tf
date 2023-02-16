@@ -86,7 +86,7 @@ resource "aws_cloudwatch_metric_alarm" "event_enrichment_lambda_alarm" {
   threshold           = "0"
 
   dimensions = {
-    LambdaName = "${var.environment}-${var.event_enrichment_lambda_name}"
+    FunctionName = "${var.environment}-${var.event_enrichment_lambda_name}"
   }
 
   alarm_description = "There is an issue with running a lambda. See cloudwatch logs for relevant resource for more details."
@@ -105,7 +105,7 @@ resource "aws_cloudwatch_metric_alarm" "splunk_cloud_event_uploader_lambda_alarm
   threshold           = "0"
 
   dimensions = {
-    LambdaName = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
+    FunctionName = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
   }
 
   alarm_description = "There is an issue with running a lambda. See cloudwatch logs for relevant resource for more details."
@@ -124,7 +124,7 @@ resource "aws_cloudwatch_metric_alarm" "s3_event_uploader_lambda_alarm" {
   threshold           = "0"
 
   dimensions = {
-    LambdaName = "${var.environment}-${var.s3_event_uploader_lambda_name}"
+    FunctionName = "${var.environment}-${var.s3_event_uploader_lambda_name}"
   }
 
   alarm_description = "There is an issue with running a lambda. See cloudwatch logs for relevant resource for more details."

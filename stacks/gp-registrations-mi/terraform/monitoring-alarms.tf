@@ -74,3 +74,22 @@ resource "aws_cloudwatch_metric_alarm" "enriched_events_sns_failure_alarm" {
 
   alarm_actions = [aws_sns_topic.error_alarm_alert_topic.arn]
 }
+
+resource "aws_cloudwatch_metric_alarm" "event_enrichment_lambda_alarm" {
+  alarm_name          = "${var.environment}-${var.event_enrichment_lambda_name}-alarm"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  period              = "300"
+  statistic           = "Sum"
+  threshold           = "0"
+
+  dimensions = {
+    TopicName = aws_sns_topic.enriched_events_topic.name
+  }
+
+  alarm_description = "There is an issue with running a lambda. See cloudwatch logs for relevant resource for more details."
+
+  alarm_actions = [aws_sns_topic.error_alarm_alert_topic.arn]
+}

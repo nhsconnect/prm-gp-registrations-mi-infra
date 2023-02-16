@@ -46,15 +46,3 @@ resource "aws_sns_topic_subscription" "error_alarm_alert_lambda_target" {
   protocol  = "lambda"
   endpoint  = aws_lambda_function.error_alarm_alert_lambda.arn
 }
-
-#Cloudwatch
-resource "aws_cloudwatch_log_group" "sns_topic_enriched_mi_events" {
-  name = "/sns/${var.environment}-${var.enriched_mi_events_sns_topic_name}"
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "${var.environment}-${var.enriched_mi_events_sns_topic_name}-cloudwatch"
-    }
-  )
-  retention_in_days = 60
-}

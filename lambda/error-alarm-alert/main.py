@@ -26,7 +26,7 @@ def lambda_handler(event, context):
     error_alarm_text = f"<h1>Alarm for the MI API has been triggered</h1>" \
                        f"<h2>{sns_message['AlarmName']}</h2>" \
                        f"<p>{sns_message['AlarmDescription']}</p>" \
-                       f"<a href='https://{cloudwatch_alarm_url}'<Click here to see active alarms</a>"
+                       f"<a href='https://{cloudwatch_alarm_url}'>Click here to see active alarms</a>"
 
     error_alarm_msg = {
         "text": error_alarm_text,

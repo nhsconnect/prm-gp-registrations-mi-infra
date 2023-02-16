@@ -91,10 +91,10 @@ data "aws_iam_policy_document" "s3_event_uploader_lambda_cloudwatch_log_access" 
 }
 
 # s3 event uploader sqs queue
-resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_event_uploader" {
-  queue_url = aws_sqs_queue.incoming_mi_events_for_s3_event_uploader.id
-  policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events_for_s3_event_uploader.json
-}
+#resource "aws_sqs_queue_policy" "incoming_enriched_mi_events_for_s3_event_uploader" {
+#  queue_url = aws_sqs_queue.incoming_mi_events_for_s3_event_uploader.id
+#  policy    = data.aws_iam_policy_document.sqs_queue_incoming_enriched_mi_events_for_s3_event_uploader.json
+#}
 
 data "aws_iam_policy_document" "sqs_queue_incoming_enriched_mi_events_for_s3_event_uploader" {
   statement {

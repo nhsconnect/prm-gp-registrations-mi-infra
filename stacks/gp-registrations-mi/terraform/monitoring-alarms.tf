@@ -146,7 +146,7 @@ resource "aws_cloudwatch_metric_alarm" "api_gateway_5XX_errors_alarm" {
     ApiName = aws_api_gateway_rest_api.rest_api.name
   }
 
-  alarm_description = "There is a 4xx status code error observed in the api-gateway. See cloudwatch logs for relevant resource to find more details."
+  alarm_description = "There is a 5xx status code error observed in the api-gateway. See cloudwatch logs for relevant resource to find more details."
 
   alarm_actions = [aws_sns_topic.error_alarm_alert_topic.arn]
 }

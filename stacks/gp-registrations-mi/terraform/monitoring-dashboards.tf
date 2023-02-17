@@ -118,7 +118,7 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
         "properties" : {
           "period" : 120
           "region" : data.aws_region.current.name,
-          "title" : "S3 event uploader lambda - Error count",
+          "title" : "S3 event uploader lambda - Error logs",
           "query" : "SOURCE '${aws_cloudwatch_log_group.s3_event_uploader_lambda.name}' | fields @timestamp, message, @message | filter strcontains(message, 'ERROR')",
           "view" : "table",
         }

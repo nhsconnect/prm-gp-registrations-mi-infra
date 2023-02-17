@@ -57,7 +57,7 @@ resource "aws_cloudwatch_metric_alarm" "event_enrichment_lambda_dlq_alarm" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "enriched_events_sns_failure_alarm" {
-  alarm_name          = "${aws_sns_topic.enriched_events_topic.name}-alarm"
+  alarm_name          = "${aws_sns_topic.enriched_events_topic.name}-failure-alarm"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   metric_name         = "NumberOfNotificationsFailed"
@@ -150,24 +150,3 @@ resource "aws_cloudwatch_metric_alarm" "api_gateway_5XX_errors_alarm" {
 
   alarm_actions = [aws_sns_topic.error_alarm_alert_topic.arn]
 }
-
-resource "aws_cloudwatch_metric_alarm" "api_gateway_4XX_errors_alarm" {
-  alarm_name          = "${aws_api_gateway_rest_api.rest_api.name}-4XX-errors-alarm"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "1"
-  metric_name         = "4XXError"
-  namespace           = "AWS/ApiGateway"
-  period              = "300"
-  statistic           = "Sum"
-  threshold           = "0"
-
-  dimensions = {
-    ApiName = aws_api_gateway_rest_api.rest_api.name
-  }
-
-  alarm_description = "There is a 4xx status code error observed in the api-gateway. See cloudwatch logs for relevant resource to find more details."
-
-  alarm_actions = [aws_sns_topic.error_alarm_alert_topic.arn]
-}
-
-

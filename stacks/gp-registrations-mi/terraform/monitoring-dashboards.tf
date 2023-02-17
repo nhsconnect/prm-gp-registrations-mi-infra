@@ -75,6 +75,78 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
           "view" : "table",
         }
       },
+      {
+        "type" : "log",
+        "width" : 12,
+        "height" : 6,
+        "properties" : {
+          "period" : 120
+          "region" : data.aws_region.current.name,
+          "title" : "Event enrichment lambda - Error count",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.event_enrichment_lambda.name}' |  stats count(message) as count by bin(1d) as timestamp | filter strcontains(message, 'ERROR')",
+          "view" : "table",
+        }
+      },
+      {
+        "type" : "log",
+        "width" : 12,
+        "height" : 6,
+        "properties" : {
+          "period" : 120
+          "region" : data.aws_region.current.name,
+          "title" : "Event enrichment lambda - Error logs",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.event_enrichment_lambda.name}' | fields @timestamp, message, @message | filter strcontains(message, 'ERROR')",
+          "view" : "table",
+        }
+      },
+      {
+        "type" : "log",
+        "width" : 12,
+        "height" : 6,
+        "properties" : {
+          "period" : 120
+          "region" : data.aws_region.current.name,
+          "title" : "S3 event uploader lambda - Error count",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.s3_event_uploader_lambda.name}' |  stats count(message) as count by bin(1d) as timestamp | filter strcontains(message, 'ERROR')",
+          "view" : "table",
+        }
+      },
+      {
+        "type" : "log",
+        "width" : 12,
+        "height" : 6,
+        "properties" : {
+          "period" : 120
+          "region" : data.aws_region.current.name,
+          "title" : "S3 event uploader lambda - Error count",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.s3_event_uploader_lambda.name}' | fields @timestamp, message, @message | filter strcontains(message, 'ERROR')",
+          "view" : "table",
+        }
+      },
+      {
+        "type" : "log",
+        "width" : 12,
+        "height" : 6,
+        "properties" : {
+          "period" : 120
+          "region" : data.aws_region.current.name,
+          "title" : "Splunk cloud event uploader lambda - Error count",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.splunk_cloud_event_uploader_lambda.name}' |  stats count(message) as count by bin(1d) as timestamp | filter strcontains(message, 'ERROR')",
+          "view" : "table",
+        }
+      },
+      {
+        "type" : "log",
+        "width" : 12,
+        "height" : 6,
+        "properties" : {
+          "period" : 120
+          "region" : data.aws_region.current.name,
+          "title" : "Splunk cloud event uploader lambda - Error logs",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.splunk_cloud_event_uploader_lambda.name}' | fields @timestamp, message, @message | filter strcontains(message, 'ERROR')",
+          "view" : "table",
+        }
+      },
     ]
   })
 }

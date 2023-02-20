@@ -2,6 +2,7 @@
 resource "aws_sqs_queue" "incoming_mi_events_for_splunk_cloud_event_uploader" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-splunk-cloud-lambda"
   sqs_managed_sse_enabled = true
+  message_retention_seconds = 1209600
 
   tags = merge(
     local.common_tags,
@@ -15,6 +16,12 @@ resource "aws_sqs_queue" "incoming_mi_events_for_splunk_cloud_event_uploader" {
 resource "aws_sqs_queue" "incoming_mi_events_for_splunk_cloud_event_uploader_dlq" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-splunk-uploader-dlq"
   sqs_managed_sse_enabled = true
+  message_retention_seconds = 1209600
+
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader_dlq.arn
+    maxReceiveCount     = 10
+  })
 
   tags = merge(
     local.common_tags,
@@ -39,6 +46,11 @@ resource "aws_sqs_queue" "incoming_mi_events_for_event_enrichment_lambda" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-enrichment-lambda"
   sqs_managed_sse_enabled = true
 
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda_dlq.arn
+    maxReceiveCount     = 10
+  })
+
   tags = merge(
     local.common_tags,
     {
@@ -51,6 +63,7 @@ resource "aws_sqs_queue" "incoming_mi_events_for_event_enrichment_lambda" {
 resource "aws_sqs_queue" "incoming_mi_events_for_event_enrichment_lambda_dlq" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-enrichment-dlq"
   sqs_managed_sse_enabled = true
+  message_retention_seconds = 1209600
 
   tags = merge(
     local.common_tags,
@@ -87,6 +100,12 @@ resource "aws_sqs_queue" "incoming_mi_events_for_s3_event_uploader" {
 resource "aws_sqs_queue" "incoming_mi_events_for_s3_event_uploader_dlq" {
   name = "${var.environment}-gp-registrations-mi-events-queue-for-s3-uploader-dlq"
   sqs_managed_sse_enabled = true
+  message_retention_seconds = 1209600
+
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.incoming_mi_events_for_s3_event_uploader_dlq.arn
+    maxReceiveCount     = 10
+  })
 
   tags = merge(
     local.common_tags,

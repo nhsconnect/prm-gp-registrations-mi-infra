@@ -21,12 +21,14 @@ def lambda_handler(event, context):
     secret_manager = SsmSecretManager(ssm)
 
     cloudwatch_alarm_url = os.environ["CLOUDWATCH_ALARM_URL"]
+    cloudwatch_dashboard_url = os.environ["CLOUDWATCH_DASHBOARD_URL"]
 
     sns_message = json.loads(event['Records'][0]['Sns']['Message'])
     error_alarm_text = f"<h1>Alarm for the MI API has been triggered</h1>" \
                        f"<h2>{sns_message['AlarmName']}</h2>" \
                        f"<p>{sns_message['AlarmDescription']}</p>" \
-                       f"<a href='https://{cloudwatch_alarm_url}'>Click here to see active alarms</a>"
+                       f"<a href='https://{cloudwatch_dashboard_url}'>Click here to see the cloudwatch dashboard. </a>" \
+                       f"<a href='https://{cloudwatch_alarm_url}'>Click here to see the active alarms. </a>"
 
     error_alarm_msg = {
         "text": error_alarm_text,

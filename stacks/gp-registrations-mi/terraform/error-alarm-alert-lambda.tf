@@ -21,7 +21,8 @@ resource "aws_lambda_function" "error_alarm_alert_lambda" {
   environment {
     variables = {
       LOG_ALERTS_GENERAL_WEBHOOK_URL_PARAM_NAME = var.log_alerts_general_webhook_url_param_name,
-      CLOUDWATCH_ALARM_URL = "${data.aws_region.current.name}${var.cloudwatch_alarm_url}",
+      CLOUDWATCH_ALARM_URL = "${data.aws_region.current.name}.console.aws.amazon.com/cloudwatch/home#alarmsV2:?~(alarmStateFilter~'ALARM)",
+      CLOUDWATCH_DASHBOARD_URL = "${data.aws_region.current.name}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${aws_cloudwatch_dashboard.mi_api.dashboard_name}",
     }
   }
 }

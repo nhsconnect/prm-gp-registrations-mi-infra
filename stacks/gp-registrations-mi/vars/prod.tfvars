@@ -9,4 +9,3 @@ apigee_ips_param_name="/registrations/prod/user-input/gp-registrations-mi/apigee
 splunk_cloud_url_param_name="/registrations/prod/user-input/splunk-cloud-url"
 splunk_cloud_api_token_param_name="/registrations/prod/user-input/splunk-cloud-api-token"
 log_alerts_general_webhook_url_param_name="/registrations/prod/user-input/log-alerts-general-webhook-url"
-cloudwatch_alarm_url=".console.aws.amazon.com/cloudwatch/home#alarmsV2:?~(alarmStateFilter~'ALARM)"

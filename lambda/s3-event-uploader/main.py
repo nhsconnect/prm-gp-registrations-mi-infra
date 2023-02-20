@@ -1,6 +1,5 @@
 import datetime
 import json
-import logging
 import os
 
 import boto3
@@ -16,7 +15,7 @@ def lambda_handler(sqs_messages, context):
         _upload_events_to_s3(sqs_messages)
         return True
     except UnableToUploadEventToS3 as exception:
-        logging.error("Failed to upload events to S3. " + str(exception))
+        print("[ERROR] Failed to upload events to S3. " + str(exception))
         raise exception
 
 
@@ -37,7 +36,7 @@ def _upload_events_to_s3(sqs_messages):
             print("Successfully uploaded event with eventId: '" + event["eventId"] + "' to S3 ", event)
         return True
     except Exception as e:
-        print("Unable to upload events to S3: ", e, str(events_list))
+        print("[ERROR] Unable to upload events to S3: ", e, str(events_list))
         raise UnableToUploadEventToS3()
 
 

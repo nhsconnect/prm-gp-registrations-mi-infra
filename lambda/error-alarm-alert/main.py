@@ -48,8 +48,8 @@ def lambda_handler(event, context):
         })
 
     except ClientError as e:
-        print(e.response['Error']['Message'])
+        print("[ERROR] " + e.response['Error']['Message'])
     except Exception as e:
-        print("An error has occurred: ", e)
+        print("[ERROR] An error has occurred: ", e)
     else:
         print("Successfully sent alerts")

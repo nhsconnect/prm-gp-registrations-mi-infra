@@ -148,7 +148,7 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
         }
       },
       {
-        "type" : "line",
+        "type" : "log",
         "metrics": [
           [ "AWS/Lambda", "Errors", "FunctionName", "${var.environment}-${var.s3_event_uploader_lambda_name}"],
           [ "AWS/Lambda", "Errors", "FunctionName", "${var.environment}-${var.event_enrichment_lambda_name}"],

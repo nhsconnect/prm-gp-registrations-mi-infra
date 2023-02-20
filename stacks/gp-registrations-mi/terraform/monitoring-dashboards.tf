@@ -147,24 +147,6 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
           "view" : "table",
         }
       },
-      {
-        "type" : "log",
-        "metrics": [
-          [ "AWS/Lambda", "Errors", "FunctionName", "${var.environment}-${var.s3_event_uploader_lambda_name}"],
-          [ "AWS/Lambda", "Errors", "FunctionName", "${var.environment}-${var.event_enrichment_lambda_name}"],
-          [ "AWS/Lambda", "Errors", "FunctionName", "${var.environment}-${var.s3_event_uploader_lambda_name}"],
-        ],
-        "legend": {
-          "position": "right"
-        },
-        "period": 300,
-        "stat": "Sum",
-        "region": data.aws_region.current,
-        "liveData": false,
-        "title": "Lambda errors sum",
-        "view": "timeSeries",
-        "stacked": false
-      }
     ]
   })
 }

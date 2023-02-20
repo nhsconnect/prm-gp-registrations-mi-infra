@@ -11,7 +11,7 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
           "period" : 120
           "region" : data.aws_region.current.name,
           "title" : "MI_EVENTS_RECEIVED_THROUGH_API_GATEWAY_COUNT",
-          "query" : "SOURCE '${aws_cloudwatch_log_group.execution_logs.name}' |  stats count(message) as count by bin(1d) as timestamp | filter strcontains(@message, 'POST')",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.execution_logs.name}' |  stats count(@message) as count by bin(1d) as timestamp | filter strcontains(@message, 'POST')",
           "view" : "table"
         }
       },

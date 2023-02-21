@@ -22,7 +22,7 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
         "properties" : {
           "period" : 120
           "region" : data.aws_region.current.name,
-          "title" : "MI_EVENTS_RECEIVED_THROUGH_API_GATEWAY_LINE_GRAPH_COUNT",
+          "title" : "MI_EVENTS_RECEIVED_THROUGH_API_GATEWAY_LINE_GRAPH",
           "query" : "SOURCE '${aws_cloudwatch_log_group.access_logs.name}' |  stats count (@message) as all, sum ( status < 299 ) as s_2xx, sum ( status > 399 and status < 499 ) as s_4xx, sum ( status > 499 ) as s_5xx by bin (1d) as timestamp | filter httpMethod = 'POST'",
           "view" : "timeSeries"
         }
@@ -85,6 +85,18 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
           "title" : "All log messages",
           "query" : "SOURCE '${data.aws_ssm_parameter.cloud_watch_log_group.value}' | fields @timestamp, message, @message",
           "view" : "table",
+        }
+      },
+      {
+        "type" : "log",
+        "width" : 12,
+        "height" : 6,
+        "properties" : {
+          "period" : 120
+          "region" : data.aws_region.current.name,
+          "title" : "LAMBDA_EXECUTIONS_LINE_GRAPH",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.event_enrichment_lambda.name}' | SOURCE '${aws_cloudwatch_log_group.s3_event_uploader_lambda.name}' | SOURCE '${aws_cloudwatch_log_group.splunk_cloud_event_uploader_lambda.name}' |  stats count (strcontains(@message, '[LAMBDA_STARTED]')) as all, sum ( strcontains(@message, '[LAMBDA_SUCCESSFUL]')) as LAMBDA_SUCCESSFUL, sum (strcontains(@message, 'LAMBDA_FAILED')) as LAMBDA_FAILED, sum (strcontains(@message, 'LAMBDA_FINISHED')) as LAMBDA_FINISHED by bin (1d) as timestamp",
+          "view" : "timeSeries"
         }
       },
       {

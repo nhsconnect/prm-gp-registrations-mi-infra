@@ -11,7 +11,7 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
           "period" : 120
           "region" : data.aws_region.current.name,
           "title" : "MI_EVENTS_RECEIVED_THROUGH_API_GATEWAY_COUNT",
-          "query" : "SOURCE '${aws_cloudwatch_log_group.execution_logs.name}' |  stats count(@message) as count by bin(1d) as timestamp | filter strcontains(@message, 'POST')",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.access_logs.name}' |  stats count (@message) as all, sum ( status < 299 ) as s_2xx, sum ( status > 399 and status < 499 ) as s_4xx, sum ( status > 499 ) as s_5xx by bin (1d) as timestamp | filter httpMethod = 'POST'",
           "view" : "table"
         }
       },
@@ -22,9 +22,9 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
         "properties" : {
           "period" : 120
           "region" : data.aws_region.current.name,
-          "title" : "MI_EVENTS_RECEIVED_COUNT",
-          "query" : "SOURCE '${data.aws_ssm_parameter.cloud_watch_log_group.value}' |  stats count(message) as count by bin(1d) as timestamp | filter strcontains(message, 'Incoming request')",
-          "view" : "table"
+          "title" : "MI_EVENTS_RECEIVED_THROUGH_API_GATEWAY_LINE_GRAPH_COUNT",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.access_logs.name}' |  stats count (@message) as all, sum ( status < 299 ) as s_2xx, sum ( status > 399 and status < 499 ) as s_4xx, sum ( status > 499 ) as s_5xx by bin (1d) as timestamp | filter httpMethod = 'POST'",
+          "view" : "line"
         }
       },
       {

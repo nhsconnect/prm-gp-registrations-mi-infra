@@ -46,8 +46,8 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
         "properties" : {
           "period" : 120
           "region" : data.aws_region.current.name,
-          "title" : "INVALID_REQUESTS_COUNT",
-          "query" : "SOURCE '${data.aws_ssm_parameter.cloud_watch_log_group.value}' |  stats count(message) as count by bin(1d) as timestamp | filter strcontains(message, 'Invalid')",
+          "title" : "EXCEPTION_FAILED_REQUEST_COUNT",
+          "query" : "SOURCE '${data.aws_ssm_parameter.cloud_watch_log_group.value}' |   stats count(@message) as count by bin(1d) as timestamp | filter strcontains(@message, 'Exception') and strcontains(@message, 'WARN')",
           "view" : "table"
         }
       },

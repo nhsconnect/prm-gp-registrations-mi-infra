@@ -11,7 +11,7 @@ resource "aws_cloudwatch_dashboard" "mi_api" {
           "period" : 120
           "region" : data.aws_region.current.name,
           "title" : "MI_EVENTS_RECEIVED_THROUGH_API_GATEWAY_COUNT",
-          "query" : "SOURCE '${aws_cloudwatch_log_group.access_logs.name}' |  stats count (@message) as all, sum ( status < 299 ) as s_2xx, sum ( status = 400 ) as s_400, sum ( status = 401 ) as s_401, sum ( status = 403 ) as s_403, sum ( status = 404 ) as s_404, sum ( status = 415 ) as s_415, sum ( status > 415 and status < 500 ) as s_416+,  sum ( status > 499 ) as s_5xx by bin (1d) as timestamp | filter httpMethod = 'POST'",
+          "query" : "SOURCE '${aws_cloudwatch_log_group.access_logs.name}' |  stats count (@message) as all, sum ( status < 299 ) as s_2xx, sum ( status = 400 ) as s_400, sum ( status = 401 ) as s_401, sum ( status = 403 ) as s_403, sum ( status = 404 ) as s_404, sum ( status = 415 ) as s_415, sum ( status > 415 and status < 500 ) as s_416_to_499,  sum ( status > 499 ) as s_5xx by bin (1d) as timestamp | filter httpMethod = 'POST'",
           "view" : "table"
         }
       },

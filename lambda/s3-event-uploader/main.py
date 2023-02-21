@@ -11,12 +11,16 @@ class UnableToUploadEventToS3(RuntimeError):
 
 def lambda_handler(sqs_messages, context):
     try:
+        print("[LAMBDA_STARTED][s3-event-uploader-lambda]")
         print("Uploading event to S3...")
         _upload_events_to_s3(sqs_messages)
+        print("[LAMBDA_SUCCESSFUL][s3-event-uploader-lambda]: Successfully uploaded events to S3")
         return True
     except UnableToUploadEventToS3 as exception:
-        print("[ERROR] Failed to upload events to S3. " + str(exception))
+        print("[LAMBDA_FAILED][s3-event-uploader-lambda][ERROR] Failed to upload events to S3. " + str(exception))
         raise exception
+    finally:
+        print("[LAMBDA_FINISHED][s3-event-uploader-lambda]")
 
 
 def _upload_events_to_s3(sqs_messages):

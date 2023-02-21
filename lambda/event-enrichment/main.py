@@ -27,14 +27,17 @@ class SsmSecretManager:
 
 def lambda_handler(sqs_messages, context):
     try:
+        print("[LAMBDA_STARTED][event-enrichment-lambda]")
         print("Enriching events - SQS Records: ", sqs_messages)
         enriched_events = _enrich_events(sqs_messages)
-        print("Successfully enriched events:", enriched_events)
+        print("[LAMBDA_SUCCESSFUL][event-enrichment-lambda]: Successfully enriched events:", enriched_events)
         _publish_enriched_events_to_sns_topic(enriched_events)
         return True
     except Exception as exception:
-        print("Unable to enrich events. " + str(exception))
+        print("[LAMBDA_FAILED][event-enrichment-lambda][ERROR]: Unable to enrich events. " + str(exception))
         raise exception
+    finally:
+        print("[LAMBDA_FINISHED][event-enrichment-lambda]")
 
 
 def _enrich_events(sqs_messages):

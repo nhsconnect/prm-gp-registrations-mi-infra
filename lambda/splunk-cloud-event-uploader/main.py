@@ -19,14 +19,17 @@ class SsmSecretManager:
 
 def lambda_handler(sqs_messages, context):
     try:
+        print("[LAMBDA_STARTED][splunk-cloud-event-uploader-lambda]")
         print("Sending events to splunk cloud: ", sqs_messages)
         events = _extract_events_from_sqs_messages(sqs_messages)
         _send_events_to_splunk_cloud(events)
-        print("Successfully sent events to Splunk Cloud", sqs_messages)
+        print("[LAMBDA_SUCCESSFUL][splunk-cloud-event-uploader-lambda]: Successfully sent events to Splunk Cloud", sqs_messages)
         return True
     except UnableToSendEventToSplunkCloud as exception:
-        print("[ERROR] Failed to send events to Splunk Cloud. " + str(exception))
+        print("[LAMBDA_FAILED][splunk-cloud-event-uploader-lambda][ERROR] Failed to send events to Splunk Cloud. " + str(exception))
         raise exception
+    finally:
+        print("[LAMBDA_FINISHED][splunk-cloud-event-uploader-lambda]")
 
 
 def _extract_events_from_sqs_messages(sqs_messages):

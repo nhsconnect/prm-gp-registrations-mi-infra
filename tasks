@@ -40,7 +40,6 @@ function assume_role() {
 export TF_DATA_DIR=.terraform/${stack_env}/${stack_name}
 
 function tf_init() {
-  echo "Assuming role..."
   assume_role
   echo "Running terraform init..."
   terraform init \
@@ -48,7 +47,7 @@ function tf_init() {
     -backend-config bucket=${state_bucket} \
     -backend-config dynamodb_table=${state_lock_table} \
     -backend-config region=${state_region} \
-    ${tf_dir}
+    -chdir=${tf_dir}
     echo "Finished running terraform init..."
 }
 

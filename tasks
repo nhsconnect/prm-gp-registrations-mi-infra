@@ -40,13 +40,16 @@ function assume_role() {
 export TF_DATA_DIR=.terraform/${stack_env}/${stack_name}
 
 function tf_init() {
+  echo "Assuming role..."
   assume_role
+  echo "Running terraform init..."
   terraform init \
     -backend-config key=${s3_state_key} \
     -backend-config bucket=${state_bucket} \
     -backend-config dynamodb_table=${state_lock_table} \
     -backend-config region=${state_region} \
     ${tf_dir}
+    echo "Finished running terraform init..."
 }
 
 
@@ -73,9 +76,7 @@ function build_lambda {
 echo "--- ${task} ---"
 case "${task}" in
 validate)
-  echo "Initialising tf_init"
   tf_init
-  echo "Running terraform validate"
   terraform validate -chdir=${tf_dir}
   ;;
 dojo-validate)

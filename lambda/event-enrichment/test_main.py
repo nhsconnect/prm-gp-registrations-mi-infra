@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 
 from main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
     OdsPortalException, _enrich_events, \
-    _publish_enriched_events_to_sns_topic, lambda_handler
+    _publish_enriched_events_to_sns_topic, lambda_handler, _fetch_supplier_details
 
 A_VALID_TEST_ORGANISATION = {
     "Name": "Test Practice",
@@ -255,3 +255,14 @@ class TestMain(unittest.TestCase):
         lambda_input = {"Records": [{"body": ""}]}
 
         self.assertRaises(JSONDecodeError, lambda_handler, lambda_input, None)
+
+    @patch.dict(os.environ, {"SDS_FHIR_API_URL": "some_url.net?"})
+    @patch('urllib3.PoolManager.request',
+           return_value=type('', (object,), {"status": 200, "data": """{}"""})())
+    def test_fetch_supplier_details(self, mock_PoolManager):
+        expected_sds_fhir_api_url = "some_url.net?"
+        an_ods_code = "ODS_1"
+
+        _fetch_supplier_details(an_ods_code)
+
+        mock_PoolManager.assert_called_once_with('GET', expected_sds_fhir_api_url + an_ods_code)

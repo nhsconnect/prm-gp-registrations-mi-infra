@@ -76,7 +76,7 @@ echo "--- ${task} ---"
 case "${task}" in
 validate)
   tf_init
-  terraform validate ${tf_dir}
+  terraform validate -chdir=${tf_dir}
   ;;
 dojo-validate)
   dojo "./tasks validate ${stack_name} ${stack_env}"

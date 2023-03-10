@@ -23,8 +23,6 @@ function assume_role() {
     role_arn=$(aws ssm get-parameters --region ${state_region} --names ${role_arn_param} --query 'Parameters[0].Value' --output text)
     session_name="gp-registrations-mi-${env_name}-session"
 
-
-
     sts=$(
       aws sts assume-role \
         --role-arn $role_arn \
@@ -75,7 +73,9 @@ function build_lambda {
 echo "--- ${task} ---"
 case "${task}" in
 validate)
+  echo "Initialising tf_init"
   tf_init
+  echo "Running terraform validate"
   terraform validate -chdir=${tf_dir}
   ;;
 dojo-validate)

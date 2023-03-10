@@ -1,4 +1,4 @@
 fileignoreconfig:
-- filename: lambda/failure-alert/main.py
-  checksum: 9d57b3bf7874e9c61fdb320d88edacdaf2ccea7a14782366610be1f5a990c180
+- filename: Dojofile
+  checksum: 92d6354d33bed3f4313f90c380624fa4d69a88986afdaccee3203321ee2a897b
 version: ""

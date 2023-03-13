@@ -256,11 +256,15 @@ class TestMain(unittest.TestCase):
 
         self.assertRaises(JSONDecodeError, lambda_handler, lambda_input, None)
 
-    @patch.dict(os.environ, {"SDS_FHIR_API_URL": "some_url.net?"})
-    @patch.dict(os.environ, {"SDS_FHIR_API_KEY": "test-api-key"})
+    @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
     @patch('urllib3.PoolManager.request',
            return_value=type('', (object,), {"status": 200, "data": """{}"""})())
-    def test_fetch_supplier_details(self, mock_PoolManager):
+    @patch('boto3.client')
+    def test_fetch_supplier_details(self, mock_boto3_client, mock_PoolManager):
+        mock_boto3_client("ssm").get_parameter.side_effect = [{'Parameter': {'Value': "test-api-key"}},
+                                                              {'Parameter': {'Value': "some_url.net?"}}]
+
         expected_sds_fhir_api_url = "some_url.net?"
         an_ods_code = "ODS_1"
         expected_headers = {"apiKey": "test-api-key"}

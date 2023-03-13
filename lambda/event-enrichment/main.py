@@ -125,9 +125,11 @@ def _publish_enriched_events_to_sns_topic(enriched_events):
 
 def _fetch_supplier_details(ods_code):
     http = urllib3.PoolManager()
+    ssm = boto3.client("ssm")
+    secret_manager = SsmSecretManager(ssm)
 
-    sds_fhir_api_url = os.environ["SDS_FHIR_API_URL"]
-    sds_fhir_api_key = os.environ["SDS_FHIR_API_KEY"]
+    sds_fhir_api_key = secret_manager.get_secret(os.environ["SDS_FHIR_API_KEY_PARAM_NAME"])
+    sds_fhir_api_url = secret_manager.get_secret(os.environ["SDS_FHIR_API_URL_PARAM_NAME"])
 
     headers = {'apiKey': sds_fhir_api_key}
     http.request(method='GET', url=sds_fhir_api_url + ods_code, headers=headers)

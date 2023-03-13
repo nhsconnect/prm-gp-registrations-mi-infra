@@ -122,3 +122,4 @@ def _publish_enriched_events_to_sns_topic(enriched_events):
         Message=json.dumps({'default': json.dumps(enriched_events)}),
         MessageStructure='json'
     )
+

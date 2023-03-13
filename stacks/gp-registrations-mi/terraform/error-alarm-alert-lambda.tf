@@ -3,7 +3,7 @@ variable "error_alarm_alert_lambda_name" {
 }
 
 resource "aws_lambda_function" "error_alarm_alert_lambda" {
-  filename      = var.error_alarm_alert_lambda_zip
+  filename      = path.root + "/" + error_alarm_alert_lambda_zip
   function_name = "${var.environment}-${var.error_alarm_alert_lambda_name}"
   role          = aws_iam_role.error_alarm_alert_lambda_role.arn
   handler       = "main.lambda_handler"

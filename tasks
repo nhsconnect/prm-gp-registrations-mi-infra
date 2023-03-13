@@ -41,7 +41,7 @@ export TF_DATA_DIR=.terraform/${stack_env}/${stack_name}
 
 function tf_init() {
   assume_role
-  terraform -chdir=${tf_dir} init \
+  terraform -chdir=${tf_dir} init  \
     -backend-config key=${s3_state_key} \
     -backend-config bucket=${state_bucket} \
     -backend-config dynamodb_table=${state_lock_table} \
@@ -84,9 +84,16 @@ plan)
   build_lambda event-enrichment
   build_lambda s3-event-uploader
   tf_init
+  var_file=$(eval "pwd")/stacks/${stack_name}/vars/${stack_env}.tfvars
+  plan=$(eval "pwd")/${stack_env}.tfplan
+  TF_DATA_DIR=$(eval "pwd").terraform
+  echo "Running plan..."
+  ls -a
+  echo "Parent files above-------"
+  ls -a ${tf_dir}
   terraform -chdir=${tf_dir} plan -var environment=$env_name \
-    -var-file=stacks/${stack_name}/vars/${stack_env}.tfvars \
-    -out=${stack_env}.tfplan
+    -var-file=${var_file} \
+    -out=../${stack_env}.tfplan
   ;;
 dojo-plan)
   dojo "./tasks plan ${stack_name} ${stack_env}"

@@ -7,7 +7,6 @@ ODS_PORTAL_URL = "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations
 ICB_ROLE_ID = "RO98"
 EMPTY_ORGANISATION = {"Name": None}
 
-
 class OdsPortalException(Exception):
     pass
 
@@ -123,3 +122,10 @@ def _publish_enriched_events_to_sns_topic(enriched_events):
         MessageStructure='json'
     )
 
+
+def _fetch_supplier_details(ods_code):
+    http = urllib3.PoolManager()
+
+    sds_fhir_api_url = os.environ["SDS_FHIR_API_URL"]
+
+    http.request('GET', sds_fhir_api_url + ods_code)

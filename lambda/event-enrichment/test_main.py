@@ -257,12 +257,17 @@ class TestMain(unittest.TestCase):
         self.assertRaises(JSONDecodeError, lambda_handler, lambda_input, None)
 
     @patch.dict(os.environ, {"SDS_FHIR_API_URL": "some_url.net?"})
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY": "test-api-key"})
     @patch('urllib3.PoolManager.request',
            return_value=type('', (object,), {"status": 200, "data": """{}"""})())
     def test_fetch_supplier_details(self, mock_PoolManager):
         expected_sds_fhir_api_url = "some_url.net?"
         an_ods_code = "ODS_1"
+        expected_headers = {"apiKey": "test-api-key"}
 
         _fetch_supplier_details(an_ods_code)
 
-        mock_PoolManager.assert_called_once_with('GET', expected_sds_fhir_api_url + an_ods_code)
+        mock_PoolManager.assert_called_once_with(method='GET',
+                                                 url=expected_sds_fhir_api_url + an_ods_code,
+                                                 headers=expected_headers
+                                                 )

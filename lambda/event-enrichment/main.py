@@ -127,5 +127,7 @@ def _fetch_supplier_details(ods_code):
     http = urllib3.PoolManager()
 
     sds_fhir_api_url = os.environ["SDS_FHIR_API_URL"]
+    sds_fhir_api_key = os.environ["SDS_FHIR_API_KEY"]
 
-    http.request('GET', sds_fhir_api_url + ods_code)
+    headers = {'apiKey': sds_fhir_api_key}
+    http.request(method='GET', url=sds_fhir_api_url + ods_code, headers=headers)

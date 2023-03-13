@@ -1,4 +1,8 @@
 fileignoreconfig:
 - filename: lambda/failure-alert/main.py
   checksum: 9d57b3bf7874e9c61fdb320d88edacdaf2ccea7a14782366610be1f5a990c180
+- filename: lambda/event-enrichment/test_main.py
+  checksum: 322d372491b7fd43853a33ac813103c6e918bca4e45395b31d1bea9bd9aa7ca3
+- filename: lambda/event-enrichment/main.py
+  checksum: 53383bdcb9c48a28772dbf984bf9924f2fa387a664f9b814cdbb09e357242a73
 version: ""

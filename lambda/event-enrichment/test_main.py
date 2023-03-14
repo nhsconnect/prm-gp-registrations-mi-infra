@@ -27,6 +27,26 @@ A_VALID_TEST_ORGANISATION = {
     }
 }
 
+SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE = {
+    "entry": [
+        {
+            "resource": {
+                "extension": [
+                    {
+                        "url": "https://fhir.nhs.uk/StructureDefinition/Extension-SDS-ManufacturingOrganisation",
+                        "valueReference": {
+                            "identifier": {
+                                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                                "value": "SUPPLIER-ODS"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
+
 
 class TestMain(unittest.TestCase):
 
@@ -259,7 +279,7 @@ class TestMain(unittest.TestCase):
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
     @patch('urllib3.PoolManager.request',
-           return_value=type('', (object,), {"status": 200, "data": """{}"""})())
+           return_value=type('', (object,), {"status": 200, "data": json.dumps(SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE)})())
     @patch('boto3.client')
     def test_fetch_supplier_details(self, mock_boto3_client, mock_PoolManager):
         mock_boto3_client("ssm").get_parameter.side_effect = [{'Parameter': {'Value': "test-api-key"}},
@@ -269,9 +289,12 @@ class TestMain(unittest.TestCase):
         an_ods_code = "ODS_1"
         expected_headers = {"apiKey": "test-api-key"}
 
-        _fetch_supplier_details(an_ods_code)
+        response = _fetch_supplier_details(an_ods_code)
 
         mock_PoolManager.assert_called_once_with(method='GET',
                                                  url=expected_sds_fhir_api_url + an_ods_code,
                                                  headers=expected_headers
                                                  )
+        expected_response = SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE
+
+        assert response == expected_response

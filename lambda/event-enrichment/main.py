@@ -132,4 +132,8 @@ def _fetch_supplier_details(ods_code):
     sds_fhir_api_url = secret_manager.get_secret(os.environ["SDS_FHIR_API_URL_PARAM_NAME"])
 
     headers = {'apiKey': sds_fhir_api_key}
-    http.request(method='GET', url=sds_fhir_api_url + ods_code, headers=headers)
+    response = http.request(method='GET', url=sds_fhir_api_url + ods_code, headers=headers)
+    response_content = json.loads(response.data)
+
+    return response_content
+

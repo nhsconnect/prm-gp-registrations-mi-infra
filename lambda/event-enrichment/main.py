@@ -1,11 +1,14 @@
 import json
 import os
+from typing import Optional
+
 import boto3
 import urllib3
 
 ODS_PORTAL_URL = "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations/"
 ICB_ROLE_ID = "RO98"
 EMPTY_ORGANISATION = {"Name": None}
+
 
 class OdsPortalException(Exception):
     pass
@@ -24,7 +27,7 @@ class SsmSecretManager:
         return response["Parameter"]["Value"]
 
 
-def lambda_handler(sqs_messages, context):
+def lambda_handler(sqs_messages: dict, context):
     try:
         print("[LAMBDA_STARTED][event-enrichment-lambda]")
         print("Enriching events - SQS Records: ", sqs_messages)
@@ -39,7 +42,7 @@ def lambda_handler(sqs_messages, context):
         print("[LAMBDA_FINISHED][event-enrichment-lambda]")
 
 
-def _enrich_events(sqs_messages):
+def _enrich_events(sqs_messages: dict) -> list:
     events_records = sqs_messages["Records"]
     events = [json.loads(event["body"]) for event in events_records]
     for event in events:
@@ -60,7 +63,7 @@ def _enrich_events(sqs_messages):
     return events
 
 
-def _find_icb_ods_code(practice_organisation):
+def _find_icb_ods_code(practice_organisation: dict) -> Optional[str]:
     print("Finding ICB ODS code for practice organisation", practice_organisation)
     if not practice_organisation.get("Rels"):
         print("No ICB ODS code for practice organisation", practice_organisation)
@@ -83,12 +86,12 @@ def _find_icb_ods_code(practice_organisation):
         return None
 
 
-def _is_icb(organisation_details):
+def _is_icb(organisation_details: dict) -> bool:
     return organisation_details["Status"] == "Active" and organisation_details["Target"]["PrimaryRoleId"][
         "id"] == ICB_ROLE_ID
 
 
-def _fetch_organisation(ods_code: str):
+def _fetch_organisation(ods_code: Optional[str]) -> dict:
     if ods_code is None:
         return EMPTY_ORGANISATION
 
@@ -110,7 +113,7 @@ def _fetch_organisation(ods_code: str):
     return response_content["Organisation"]
 
 
-def _publish_enriched_events_to_sns_topic(enriched_events):
+def _publish_enriched_events_to_sns_topic(enriched_events: list):
     print("Publishing enriched events to SNS", enriched_events)
     enriched_events_sns_topic_arn = os.environ["ENRICHED_EVENTS_SNS_TOPIC_ARN"]
 
@@ -123,7 +126,7 @@ def _publish_enriched_events_to_sns_topic(enriched_events):
     )
 
 
-def _fetch_supplier_details(ods_code):
+def _fetch_supplier_details(ods_code: str) -> dict:
     http = urllib3.PoolManager()
     ssm = boto3.client("ssm")
     secret_manager = SsmSecretManager(ssm)

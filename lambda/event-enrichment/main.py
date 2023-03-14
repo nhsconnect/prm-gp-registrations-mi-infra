@@ -140,8 +140,17 @@ def _fetch_supplier_details(ods_code: str) -> dict:
 
     return response_content
 
+def _has_supplier_ods_code(extension: dict) -> bool:
+    return "SDS-ManufacturingOrganisation" in extension["url"] \
+        and "ods-organization-code" in extension["valueReference"]["identifier"]["system"]
+
 
 def _find_ods_code_from_supplier_details(sds_supplier_details: dict) -> Optional[str]:
-    supplier_ods_code = sds_supplier_details["entry"][0]["resource"]["extension"][0]["valueReference"]["identifier"]["value"]
+    supplier_ods_code = None
+
+    for entry in sds_supplier_details["entry"]:
+        for extension in entry["resource"]["extension"]:
+            if _has_supplier_ods_code(extension):
+                supplier_ods_code = extension["valueReference"]["identifier"]["value"]
 
     return supplier_ods_code

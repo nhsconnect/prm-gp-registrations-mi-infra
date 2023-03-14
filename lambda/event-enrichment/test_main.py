@@ -299,9 +299,58 @@ class TestMain(unittest.TestCase):
 
         assert response == expected_response
 
-    def test_find_ods_code_from_supplier_details(self):
-        result = _find_ods_code_from_supplier_details(SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE)
+    def test_find_ods_code_from_supplier_details_given_3_entries(self):
+        supplier_ods_code = "SUPPLIER_2"
+        sds_fhir_api_ods_response = {
+            "entry": [
+                {
+                    "resource": {
+                        "extension": []
+                    }
+                },
+                {
+                    "resource": {
+                        "extension": [
+                            {
+                                "url": "https://fhir.nhs.uk/StructureDefinition/Extension-SDS-ManufacturingOrganisation",
+                                "valueReference": {
+                                    "identifier": {
+                                        "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                                        "value": supplier_ods_code
+                                    }
+                                }
+                            },
+                            {
+                                "url": "https://fhir.nhs.uk/StructureDefinition/Extension-SDS-ManufacturingOrganisation",
+                                "valueReference": {
+                                    "identifier": {
+                                        "system": "https://fhir.nhs.uk/Id/some_id",
+                                        "value": "some_value"
+                                    }
+                                }
+                            },
+                            {
+                                "url": "https://fhir.nhs.uk/StructureDefinition/Extension-SDS-NhsServiceInteractionId",
+                                "valueReference": {
+                                    "identifier": {
+                                        "system": "https://fhir.nhs.uk/Id/nhsServiceInteractionId",
+                                        "value": "urn:nhs:names:services:lrsquery:GET_RESOURCE_PERMISSIONS_INUK01"
+                                    }
+                                }
+                            },
+                        ]
+                    }
+                },
+                {
+                    "resource": {
+                        "extension": []
+                    }
+                },
+            ]
+        }
 
-        expected_result = SUPPLIER_ODS_CODE
+        result = _find_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+
+        expected_result = supplier_ods_code
 
         assert result == expected_result

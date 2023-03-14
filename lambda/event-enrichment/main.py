@@ -147,10 +147,16 @@ def _has_supplier_ods_code(extension: dict) -> bool:
 
 def _find_ods_code_from_supplier_details(sds_supplier_details: dict) -> Optional[str]:
     supplier_ods_code = None
+    extension = None # set extension to none for error logging purposes
 
-    for entry in sds_supplier_details["entry"]:
-        for extension in entry["resource"]["extension"]:
-            if _has_supplier_ods_code(extension):
-                supplier_ods_code = extension["valueReference"]["identifier"]["value"]
+    try:
+        for entry in sds_supplier_details["entry"]:
+            for extension in entry["resource"]["extension"]:
+                if _has_supplier_ods_code(extension):
+                    supplier_ods_code = extension["valueReference"]["identifier"]["value"]
+    except Exception as exception:
+        print("Unable to find supplier ODS code from SDS FHIR API response", exception)
+        print("Failed extension when trying to find supplier ODS code from SDS FHIR API response", extension)
+        return None
 
     return supplier_ods_code

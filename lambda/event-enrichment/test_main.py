@@ -354,3 +354,63 @@ class TestMain(unittest.TestCase):
         expected_result = supplier_ods_code
 
         assert result == expected_result
+
+    def test_return_none_when_supplier_details_has_no_ods_code(self):
+        supplier_ods_code = "SUPPLIER_2"
+        sds_fhir_api_ods_response = {
+            "entry": [
+                {
+                    "resource": {
+                        "extension": []
+                    }
+                },
+                {
+                    "resource": {
+                        "extension": [
+                            {
+                                "url": "https://fhir.nhs.uk/StructureDefinition/Extension-SDS-ManufacturingOrganisation",
+                                "valueReference": {
+                                    "identifier": {
+                                        "system": "https://fhir.nhs.uk/Id/ods-organization-code"
+                                    }
+                                }
+                            },
+                            {
+                                "url": "https://fhir.nhs.uk/StructureDefinition/Extension-SDS-ManufacturingOrganisation",
+                                "valueReference": {
+                                    "identifier": {
+                                        "system": "https://fhir.nhs.uk/Id/some_id",
+                                        "value": "some_value"
+                                    }
+                                }
+                            },
+                            {
+                                "url": "https://fhir.nhs.uk/StructureDefinition/Extension-SDS-NhsServiceInteractionId",
+                                "valueReference": {
+                                    "identifier": {
+                                        "system": "https://fhir.nhs.uk/Id/nhsServiceInteractionId",
+                                        "value": "urn:nhs:names:services:lrsquery:GET_RESOURCE_PERMISSIONS_INUK01"
+                                    }
+                                }
+                            },
+                        ]
+                    }
+                },
+                {
+                    "resource": {
+                        "extension": []
+                    }
+                },
+            ]
+        }
+
+        result = _find_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+
+        assert result is None
+
+    def test_return_none_when_supplier_details_is_empty(self):
+        sds_fhir_api_ods_response = {}
+
+        result = _find_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+
+        assert result is None

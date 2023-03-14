@@ -140,3 +140,8 @@ def _fetch_supplier_details(ods_code: str) -> dict:
 
     return response_content
 
+
+def _find_ods_code_from_supplier_details(sds_supplier_details: dict) -> Optional[str]:
+    supplier_ods_code = sds_supplier_details["entry"][0]["resource"]["extension"][0]["valueReference"]["identifier"]["value"]
+
+    return supplier_ods_code

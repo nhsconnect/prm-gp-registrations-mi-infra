@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 
 from main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
     OdsPortalException, _enrich_events, \
-    _publish_enriched_events_to_sns_topic, lambda_handler, _fetch_supplier_details
+    _publish_enriched_events_to_sns_topic, lambda_handler, _fetch_supplier_details, _find_ods_code_from_supplier_details
 
 A_VALID_TEST_ORGANISATION = {
     "Name": "Test Practice",
@@ -27,6 +27,7 @@ A_VALID_TEST_ORGANISATION = {
     }
 }
 
+SUPPLIER_ODS_CODE = "SUPPLIER_123"
 SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE = {
     "entry": [
         {
@@ -37,7 +38,7 @@ SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE = {
                         "valueReference": {
                             "identifier": {
                                 "system": "https://fhir.nhs.uk/Id/ods-organization-code",
-                                "value": "SUPPLIER-ODS"
+                                "value": SUPPLIER_ODS_CODE
                             }
                         }
                     }
@@ -49,7 +50,6 @@ SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE = {
 
 
 class TestMain(unittest.TestCase):
-
     @patch('boto3.client')
     @patch('urllib3.PoolManager.request',
            return_value=type('', (object,), {"status": 200, "data": """{"Organisation": {"Name": "Test Practice", "Rels": {
@@ -298,3 +298,10 @@ class TestMain(unittest.TestCase):
         expected_response = SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE
 
         assert response == expected_response
+
+    def test_find_ods_code_from_supplier_details(self):
+        result = _find_ods_code_from_supplier_details(SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE)
+
+        expected_result = SUPPLIER_ODS_CODE
+
+        assert result == expected_result

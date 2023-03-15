@@ -6,7 +6,8 @@ from unittest.mock import patch, MagicMock
 
 from main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
     OdsPortalException, _enrich_events, \
-    _publish_enriched_events_to_sns_topic, lambda_handler, _fetch_supplier_details, _find_ods_code_from_supplier_details
+    _publish_enriched_events_to_sns_topic, lambda_handler, _fetch_supplier_details, \
+    _find_ods_code_from_supplier_details, _has_supplier_ods_code
 
 A_VALID_TEST_ORGANISATION = {
     "Name": "Test Practice",
@@ -414,3 +415,43 @@ class TestMain(unittest.TestCase):
         result = _find_ods_code_from_supplier_details(sds_fhir_api_ods_response)
 
         assert result is None
+
+    def test_return_none_when_supplier_details_has_entry_resources_but_no_extension(self):
+        sds_fhir_api_ods_response = {"entry": [
+                {
+                    "resource": {}
+                }
+            ]
+        }
+
+        result = _find_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+
+        assert result is None
+
+    def test_has_supplier_ods_code_no_SDS_ManufacturingOrganisation_fail(self):
+        extension_response = {
+            "url": "https://fhir.nhs.uk/StructureDefinition/Extension-",
+            "valueReference": {
+                "identifier": {
+                    "system": "https://fhir.nhs.uk/Id/ods-organization-code"
+                }
+            }
+        }
+
+        result = _has_supplier_ods_code(extension_response)
+
+        assert result is False
+
+    def test_has_supplier_ods_code_no_ods_organization_code_fail(self):
+        extension_response = {
+            "url": "https://fhir.nhs.uk/StructureDefinition/Extension-SDS-ManufacturingOrganisation",
+            "valueReference": {
+                "identifier": {
+                    "system": "https://fhir.nhs.uk/Id/"
+                }
+            }
+        }
+
+        result = _has_supplier_ods_code(extension_response)
+
+        assert result is False

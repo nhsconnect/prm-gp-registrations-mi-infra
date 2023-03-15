@@ -160,3 +160,4 @@ def _find_ods_code_from_supplier_details(sds_supplier_details: dict) -> Optional
         return None
 
     return supplier_ods_code
+

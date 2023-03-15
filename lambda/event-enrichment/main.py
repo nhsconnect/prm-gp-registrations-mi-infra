@@ -17,7 +17,12 @@ class OdsPortalException(Exception):
 class UnableToGetIcbInformation(Exception):
     pass
 
+
 class UnableToFetchSupplierDetailsFromSDSFHIRException(Exception):
+    pass
+
+
+class UnableToMapSupplierOdsCodeToSupplierNameException(Exception):
     pass
 
 
@@ -184,5 +189,7 @@ def get_supplier_name(practice_ods_code):
         "X26": "TEST_SUPPLIER",
     }
 
-    return supplier_name_mapping[supplier_ods_code]
-
+    try:
+        return supplier_name_mapping[supplier_ods_code]
+    except KeyError:
+        raise UnableToMapSupplierOdsCodeToSupplierNameException("Unable to map supplier ODS code found from SDS FHI API: " + supplier_ods_code + " to a known supplier name. Practice ODS code from event: " + practice_ods_code + ".")

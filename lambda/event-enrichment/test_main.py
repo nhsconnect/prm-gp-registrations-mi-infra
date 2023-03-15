@@ -7,8 +7,9 @@ from unittest.mock import patch, MagicMock
 from main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
     OdsPortalException, _enrich_events, \
     _publish_enriched_events_to_sns_topic, lambda_handler, _fetch_supplier_details, \
-    _find_supplier_ods_code_from_supplier_details, _has_supplier_ods_code, UnableToFetchSupplierDetailsFromSDSFHIRException, \
-    get_supplier_name
+    _find_supplier_ods_code_from_supplier_details, _has_supplier_ods_code, \
+    UnableToFetchSupplierDetailsFromSDSFHIRException, \
+    get_supplier_name, UnableToMapSupplierOdsCodeToSupplierNameException
 
 A_VALID_TEST_ORGANISATION = {
     "Name": "Test Practice",
@@ -479,7 +480,7 @@ class TestMain(unittest.TestCase):
     @patch('urllib3.PoolManager.request',
            return_value=type('', (object,), {"status": 200, "data": generate_successful_sds_fhir_api_response("X26")})())
     @patch('boto3.client')
-    def test_returns_supplier_name_given_an_ods_code(self, mock_boto3_client, _):
+    def test_returns_supplier_name_given_a_practice_ods_code(self, mock_boto3_client, _):
         mock_boto3_client("ssm").get_parameter.side_effect = [{'Parameter': {'Value': "test-api-key"}},
                                                               {'Parameter': {'Value': "some_url.net?"}}]
 
@@ -487,3 +488,15 @@ class TestMain(unittest.TestCase):
 
         expected_supplier_name = "TEST_SUPPLIER"
         assert supplier_name == expected_supplier_name
+
+
+    @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
+    @patch('urllib3.PoolManager.request',
+           return_value=type('', (object,), {"status": 200, "data": generate_successful_sds_fhir_api_response("NON_MATCHING_SUPPLIER_ODS")})())
+    @patch('boto3.client')
+    def test_returns_supplier_name_given_a_practice_ods_code(self, mock_boto3_client, _):
+        mock_boto3_client("ssm").get_parameter.side_effect = [{'Parameter': {'Value': "test-api-key"}},
+                                                              {'Parameter': {'Value': "some_url.net?"}}]
+
+        self.assertRaises(UnableToMapSupplierOdsCodeToSupplierNameException, get_supplier_name, "PRACTICE_ODS_123")

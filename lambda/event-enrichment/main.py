@@ -129,7 +129,7 @@ def _publish_enriched_events_to_sns_topic(enriched_events: list):
     )
 
 
-def _fetch_supplier_details(ods_code: str) -> dict:
+def _fetch_supplier_details(practice_ods_code: str) -> dict:
     http = urllib3.PoolManager()
     ssm = boto3.client("ssm")
     secret_manager = SsmSecretManager(ssm)
@@ -138,12 +138,12 @@ def _fetch_supplier_details(ods_code: str) -> dict:
     sds_fhir_api_url = secret_manager.get_secret(os.environ["SDS_FHIR_API_URL_PARAM_NAME"])
 
     headers = {'apiKey': sds_fhir_api_key}
-    response = http.request(method='GET', url=sds_fhir_api_url + ods_code, headers=headers)
+    response = http.request(method='GET', url=sds_fhir_api_url + practice_ods_code, headers=headers)
 
     if response.status != 200:
         raise UnableToFetchSupplierDetailsFromSDSFHIRException(
-            "Unable to fetch supplier details from SDS FHIR API with ods code: "
-            + ods_code
+            "Unable to fetch supplier details from SDS FHIR API with practice ods code: "
+            + practice_ods_code
             + ". Response status code: "
             + str(response.status),
             response
@@ -158,12 +158,12 @@ def _has_supplier_ods_code(extension: dict) -> bool:
         and "ods-organization-code" in extension["valueReference"]["identifier"]["system"]
 
 
-def _find_ods_code_from_supplier_details(sds_supplier_details: dict) -> Optional[str]:
+def _find_supplier_ods_code_from_supplier_details(supplier_details: dict) -> Optional[str]:
     supplier_ods_code = None
     extension = None # set extension to none for error logging purposes
 
     try:
-        for entry in sds_supplier_details["entry"]:
+        for entry in supplier_details["entry"]:
             for extension in entry["resource"]["extension"]:
                 if _has_supplier_ods_code(extension):
                     supplier_ods_code = extension["valueReference"]["identifier"]["value"]
@@ -173,4 +173,16 @@ def _find_ods_code_from_supplier_details(sds_supplier_details: dict) -> Optional
         return None
 
     return supplier_ods_code
+
+
+def get_supplier_name(practice_ods_code):
+    supplier_details = _fetch_supplier_details(practice_ods_code)
+    supplier_ods_code = _find_supplier_ods_code_from_supplier_details(supplier_details)
+
+    supplier_name_mapping = {
+        "YGJ": "EMIS",
+        "X26": "TEST_SUPPLIER",
+    }
+
+    return supplier_name_mapping[supplier_ods_code]
 

@@ -7,7 +7,8 @@ from unittest.mock import patch, MagicMock
 from main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
     OdsPortalException, _enrich_events, \
     _publish_enriched_events_to_sns_topic, lambda_handler, _fetch_supplier_details, \
-    _find_ods_code_from_supplier_details, _has_supplier_ods_code, UnableToFetchSupplierDetailsFromSDSFHIRException
+    _find_supplier_ods_code_from_supplier_details, _has_supplier_ods_code, UnableToFetchSupplierDetailsFromSDSFHIRException, \
+    get_supplier_name
 
 A_VALID_TEST_ORGANISATION = {
     "Name": "Test Practice",
@@ -28,9 +29,8 @@ A_VALID_TEST_ORGANISATION = {
     }
 }
 
-SUPPLIER_ODS_CODE = "SUPPLIER_123"
-SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE = {
-    "entry": [
+def generate_successful_sds_fhir_api_response(supplier_ods_code: str) -> str:
+    return json.dumps({"entry": [
         {
             "resource": {
                 "extension": [
@@ -39,15 +39,15 @@ SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE = {
                         "valueReference": {
                             "identifier": {
                                 "system": "https://fhir.nhs.uk/Id/ods-organization-code",
-                                "value": SUPPLIER_ODS_CODE
+                                "value": supplier_ods_code
                             }
                         }
                     }
                 ]
             }
         }
-    ]
-}
+    ]})
+
 
 
 class TestMain(unittest.TestCase):
@@ -280,7 +280,7 @@ class TestMain(unittest.TestCase):
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
     @patch('urllib3.PoolManager.request',
-           return_value=type('', (object,), {"status": 200, "data": json.dumps(SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE)})())
+           return_value=type('', (object,), {"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})())
     @patch('boto3.client')
     def test_fetch_supplier_details(self, mock_boto3_client, mock_PoolManager):
         mock_boto3_client("ssm").get_parameter.side_effect = [{'Parameter': {'Value': "test-api-key"}},
@@ -296,7 +296,7 @@ class TestMain(unittest.TestCase):
                                                  url=expected_sds_fhir_api_url + an_ods_code,
                                                  headers=expected_headers
                                                  )
-        expected_response = SDS_FHIR_RESPONSE_WITH_SUPPLIER_ODS_CODE
+        expected_response = json.loads(generate_successful_sds_fhir_api_response("ODS_1"))
 
         assert response == expected_response
 
@@ -318,7 +318,7 @@ class TestMain(unittest.TestCase):
                                                  url=expected_sds_fhir_api_url + an_ods_code,
                                                  headers=expected_headers)
 
-    def test_find_ods_code_from_supplier_details_given_3_entries(self):
+    def test_find_supplier_ods_code_from_supplier_details_given_3_entries(self):
         supplier_ods_code = "SUPPLIER_2"
         sds_fhir_api_ods_response = {
             "entry": [
@@ -368,7 +368,7 @@ class TestMain(unittest.TestCase):
             ]
         }
 
-        result = _find_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+        result = _find_supplier_ods_code_from_supplier_details(sds_fhir_api_ods_response)
 
         expected_result = supplier_ods_code
 
@@ -422,14 +422,14 @@ class TestMain(unittest.TestCase):
             ]
         }
 
-        result = _find_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+        result = _find_supplier_ods_code_from_supplier_details(sds_fhir_api_ods_response)
 
         assert result is None
 
     def test_return_none_when_supplier_details_is_empty(self):
         sds_fhir_api_ods_response = {}
 
-        result = _find_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+        result = _find_supplier_ods_code_from_supplier_details(sds_fhir_api_ods_response)
 
         assert result is None
 
@@ -441,7 +441,7 @@ class TestMain(unittest.TestCase):
             ]
         }
 
-        result = _find_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+        result = _find_supplier_ods_code_from_supplier_details(sds_fhir_api_ods_response)
 
         assert result is None
 
@@ -472,3 +472,18 @@ class TestMain(unittest.TestCase):
         result = _has_supplier_ods_code(extension_response)
 
         assert result is False
+
+
+    @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
+    @patch('urllib3.PoolManager.request',
+           return_value=type('', (object,), {"status": 200, "data": generate_successful_sds_fhir_api_response("X26")})())
+    @patch('boto3.client')
+    def test_returns_supplier_name_given_an_ods_code(self, mock_boto3_client, _):
+        mock_boto3_client("ssm").get_parameter.side_effect = [{'Parameter': {'Value': "test-api-key"}},
+                                                              {'Parameter': {'Value': "some_url.net?"}}]
+
+        supplier_name = get_supplier_name("PRACTICE_ODS_123")
+
+        expected_supplier_name = "TEST_SUPPLIER"
+        assert supplier_name == expected_supplier_name

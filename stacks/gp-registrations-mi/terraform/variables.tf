@@ -118,3 +118,12 @@ variable "cloudwatch_alarm_url" {
   description = "SSM parameter containing the cloudwatch alarm url (without region prepended)"
 }
 
+variable "sds_fhir_api_key_param_name" {
+  type        = string
+  description = "SSM param containing SDS FHIR API token to retrieve supplier details"
+}
+
+variable "sds_fhir_api_url_param_name" {
+  type        = string
+  description = "SSM param containing SDS FHIR API url to retrieve supplier details"
+}

@@ -21,7 +21,9 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
   environment {
     variables = {
       SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.url,
-      ENRICHED_EVENTS_SNS_TOPIC_ARN = aws_sns_topic.enriched_events_topic.arn
+      ENRICHED_EVENTS_SNS_TOPIC_ARN = aws_sns_topic.enriched_events_topic.arn,
+      SDS_FHIR_API_KEY_PARAM_NAME = var.sds_fhir_api_key_param_name,
+      SDS_FHIR_API_URL_PARAM_NAME = var.sds_fhir_api_url_param_name,
     }
   }
 }

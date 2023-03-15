@@ -495,8 +495,21 @@ class TestMain(unittest.TestCase):
     @patch('urllib3.PoolManager.request',
            return_value=type('', (object,), {"status": 200, "data": generate_successful_sds_fhir_api_response("NON_MATCHING_SUPPLIER_ODS")})())
     @patch('boto3.client')
-    def test_returns_supplier_name_given_a_practice_ods_code(self, mock_boto3_client, _):
+    def test_throws_exception_when_unable_to_map_known_supplier_name_to_ods_code(self, mock_boto3_client, _):
         mock_boto3_client("ssm").get_parameter.side_effect = [{'Parameter': {'Value': "test-api-key"}},
                                                               {'Parameter': {'Value': "some_url.net?"}}]
 
         self.assertRaises(UnableToMapSupplierOdsCodeToSupplierNameException, get_supplier_name, "PRACTICE_ODS_123")
+
+    @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
+    @patch('urllib3.PoolManager.request',
+           return_value=type('', (object,), {"status": 200, "data": """{}"""})())
+    @patch('boto3.client')
+    def test_returns_none_when_supplier_ods_code_is_not_found_from_sds_fhir_api_response(self, mock_boto3_client, _):
+        mock_boto3_client("ssm").get_parameter.side_effect = [{'Parameter': {'Value': "test-api-key"}},
+                                                              {'Parameter': {'Value': "some_url.net?"}}]
+
+        supplier_name = get_supplier_name("PRACTICE_ODS_123")
+
+        assert supplier_name is None

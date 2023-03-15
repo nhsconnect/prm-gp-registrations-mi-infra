@@ -173,16 +173,22 @@ def _find_supplier_ods_code_from_supplier_details(supplier_details: dict) -> Opt
                 if _has_supplier_ods_code(extension):
                     supplier_ods_code = extension["valueReference"]["identifier"]["value"]
     except Exception as exception:
-        print("Unable to find supplier ODS code from SDS FHIR API response. Exception type: " + str(type(exception)) + ". Exception: " + str(exception))
+        print("Unable to find supplier ODS code from SDS FHIR API response. Exception type: "
+              + str(type(exception))
+              + ". Exception: "
+              + str(exception))
         print("Failed extension when trying to find supplier ODS code from SDS FHIR API response. Extension: ", extension)
         return None
 
     return supplier_ods_code
 
 
-def get_supplier_name(practice_ods_code):
+def get_supplier_name(practice_ods_code: str) -> Optional[str]:
     supplier_details = _fetch_supplier_details(practice_ods_code)
     supplier_ods_code = _find_supplier_ods_code_from_supplier_details(supplier_details)
+
+    if supplier_ods_code is None:
+        return None
 
     supplier_name_mapping = {
         "YGJ": "EMIS",
@@ -192,4 +198,9 @@ def get_supplier_name(practice_ods_code):
     try:
         return supplier_name_mapping[supplier_ods_code]
     except KeyError:
-        raise UnableToMapSupplierOdsCodeToSupplierNameException("Unable to map supplier ODS code found from SDS FHI API: " + supplier_ods_code + " to a known supplier name. Practice ODS code from event: " + practice_ods_code + ".")
+        raise UnableToMapSupplierOdsCodeToSupplierNameException(
+            "Unable to map supplier ODS code found from SDS FHI API: "
+            + str(supplier_ods_code)
+            + " to a known supplier name. Practice ODS code from event: "
+            + practice_ods_code + "."
+        )

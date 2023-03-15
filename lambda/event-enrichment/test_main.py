@@ -7,7 +7,7 @@ from unittest.mock import patch, MagicMock
 from main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
     OdsPortalException, _enrich_events, \
     _publish_enriched_events_to_sns_topic, lambda_handler, _fetch_supplier_details, \
-    _find_ods_code_from_supplier_details, _has_supplier_ods_code
+    _find_ods_code_from_supplier_details, _has_supplier_ods_code, UnableToFetchSupplierDetailsFromSDSFHIRException
 
 A_VALID_TEST_ORGANISATION = {
     "Name": "Test Practice",
@@ -300,6 +300,24 @@ class TestMain(unittest.TestCase):
 
         assert response == expected_response
 
+    @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
+    @patch('urllib3.PoolManager.request',
+           return_value=type('', (object,), {"status": 404, "data": """{}"""})())
+    @patch('boto3.client')
+    def test_fetch_supplier_details_throws_exception_when_non_200_status(self, mock_boto3_client, mock_PoolManager):
+        an_ods_code = "ODS_1"
+        mock_boto3_client("ssm").get_parameter.side_effect = [{'Parameter': {'Value': "test-api-key"}},
+                                                              {'Parameter': {'Value': "some_url.net?"}}]
+
+        self.assertRaises(UnableToFetchSupplierDetailsFromSDSFHIRException, _fetch_supplier_details, an_ods_code)
+
+        expected_sds_fhir_api_url = "some_url.net?"
+        expected_headers = {"apiKey": "test-api-key"}
+        mock_PoolManager.assert_called_once_with(method='GET',
+                                                 url=expected_sds_fhir_api_url + an_ods_code,
+                                                 headers=expected_headers)
+
     def test_find_ods_code_from_supplier_details_given_3_entries(self):
         supplier_ods_code = "SUPPLIER_2"
         sds_fhir_api_ods_response = {
@@ -357,7 +375,6 @@ class TestMain(unittest.TestCase):
         assert result == expected_result
 
     def test_return_none_when_supplier_details_has_no_ods_code(self):
-        supplier_ods_code = "SUPPLIER_2"
         sds_fhir_api_ods_response = {
             "entry": [
                 {

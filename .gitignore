@@ -2,4 +2,7 @@
 *.tfplan
 .idea
 
+*/*/__pycache__
+*/*/_trial_temp
+
 lambda/build

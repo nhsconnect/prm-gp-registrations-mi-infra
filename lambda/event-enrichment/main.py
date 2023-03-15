@@ -17,6 +17,9 @@ class OdsPortalException(Exception):
 class UnableToGetIcbInformation(Exception):
     pass
 
+class UnableToFetchSupplierDetailsFromSDSFHIRException(Exception):
+    pass
+
 
 class SsmSecretManager:
     def __init__(self, ssm):
@@ -136,6 +139,16 @@ def _fetch_supplier_details(ods_code: str) -> dict:
 
     headers = {'apiKey': sds_fhir_api_key}
     response = http.request(method='GET', url=sds_fhir_api_url + ods_code, headers=headers)
+
+    if response.status != 200:
+        raise UnableToFetchSupplierDetailsFromSDSFHIRException(
+            "Unable to fetch supplier details from SDS FHIR API with ods code: "
+            + ods_code
+            + ". Response status code: "
+            + str(response.status),
+            response
+        )
+
     response_content = json.loads(response.data)
 
     return response_content

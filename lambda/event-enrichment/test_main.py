@@ -49,26 +49,28 @@ def generate_successful_sds_fhir_api_response(supplier_ods_code: str) -> str:
         }
     ]})
 
+def generate_successful_organisation(practice_ods_code: str):
+    return {"Organisation": {"Name": "Test Practice", "Rels": {
+                "Rel": [
+                    {
+                        "Status": "Active",
+                        "Target": {
+                            "OrgId": {
+                                "extension": practice_ods_code
+                            },
+                            "PrimaryRoleId": {
+                                "id": "RO98"
+                            }
+                        }
+                    }
+                ]
+            }}}
 
 
 class TestMain(unittest.TestCase):
     @patch('boto3.client')
     @patch('urllib3.PoolManager.request',
-           return_value=type('', (object,), {"status": 200, "data": """{"Organisation": {"Name": "Test Practice", "Rels": {
-        "Rel": [
-            {
-                "Status": "Active",
-                "Target": {
-                    "OrgId": {
-                        "extension": "ODS_1"
-                    },
-                    "PrimaryRoleId": {
-                        "id": "RO98"
-                    }
-                }
-            }
-        ]
-    }}}"""})())
+           return_value=type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})())
     @patch.dict(os.environ, {"SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL": "test_url"})
     @patch.dict(os.environ, {"ENRICHED_EVENTS_SNS_TOPIC_ARN": "test_arn"})
     def test_should_publish_enriched_event_with_lambda_handler(self, mock_request, mock_boto):
@@ -99,25 +101,16 @@ class TestMain(unittest.TestCase):
 
         assert result is True
 
+    @patch('urllib3.PoolManager.request')
     @patch('boto3.client')
-    @patch('urllib3.PoolManager.request',
-           return_value=type('', (object,), {"status": 200, "data": """{"Organisation": {"Name": "Test Practice", "Rels": {
-        "Rel": [
-            {
-                "Status": "Active",
-                "Target": {
-                    "OrgId": {
-                        "extension": "ODS_1"
-                    },
-                    "PrimaryRoleId": {
-                        "id": "RO98"
-                    }
-                }
-            }
+    def test_should_enrich_events_with_all_fields_from_organisation(self, mock_boto_client,mock_request):
+        mock_request.side_effect = [
+            type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))}),
+            type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))}),
+            type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))}),
+            type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})
         ]
-    }}}"""})())
-    def test_should_enrich_events_with_empty_fields_if_unable_to_fetch_organisation(self, mock_boto_client,
-                                                                                    mock_request):
+
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}"""
 
         lambda_input = {"Records": [{"body": events}]}
@@ -140,7 +133,7 @@ class TestMain(unittest.TestCase):
     @patch('boto3.client')
     @patch('urllib3.PoolManager.request',
            return_value=type('', (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})())
-    def test_should_enrich_events_with_all_fields_from_organisation(self, mock_boto_client, mock_request):
+    def test_should_enrich_events_with_empty_fields_if_unable_to_fetch_organisation(self, mock_boto_client, mock_request):
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ods_1", "sendingPracticeOdsCode": "ods_2"}"""
 
         lambda_input = {"Records": [{"body": events}]}

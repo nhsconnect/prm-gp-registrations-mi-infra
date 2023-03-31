@@ -3,11 +3,11 @@ variable "splunk_cloud_event_uploader_lambda_name" {
 }
 
 resource "aws_lambda_function" "splunk_cloud_event_uploader_lambda" {
-  filename      = var.splunk_cloud_event_uploader_lambda_zip
+  filename      = "${path.cwd}/${var.splunk_cloud_event_uploader_lambda_zip}"
   function_name = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
   role          = aws_iam_role.splunk_cloud_event_uploader_lambda_role.arn
   handler       = "main.lambda_handler"
-  source_code_hash = filebase64sha256(var.splunk_cloud_event_uploader_lambda_zip)
+  source_code_hash = filebase64sha256("${path.cwd}/${var.splunk_cloud_event_uploader_lambda_zip}")
   runtime = "python3.9"
   timeout = 15
   tags = merge(

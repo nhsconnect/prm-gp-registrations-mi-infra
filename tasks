@@ -43,12 +43,11 @@ export TF_DATA_DIR=.terraform/${stack_env}/${stack_name}
 
 function tf_init() {
   assume_role
-  terraform init \
+  terraform -chdir=${tf_dir} init \
     -backend-config key=${s3_state_key} \
     -backend-config bucket=${state_bucket} \
     -backend-config dynamodb_table=${state_lock_table} \
-    -backend-config region=${state_region} \
-    ${tf_dir}
+    -backend-config region=${state_region}
 }
 
 
@@ -76,7 +75,7 @@ echo "--- ${task} ---"
 case "${task}" in
 validate)
   tf_init
-  terraform validate ${tf_dir}
+  terraform -chdir=${tf_dir} validate
   ;;
 dojo-validate)
   dojo "./tasks validate ${stack_name} ${stack_env}"
@@ -86,29 +85,31 @@ plan)
   build_lambda splunk-cloud-event-uploader
   build_lambda event-enrichment
   build_lambda s3-event-uploader
+  var_file=$(eval "pwd")/stacks/${stack_name}/vars/${stack_env}.tfvars
+  plan_output=$(eval "pwd")/stacks/${stack_name}/terraform/${stack_env}.tfplan
   tf_init
-  terraform plan -var environment=$env_name \
-    -var-file=stacks/${stack_name}/vars/${stack_env}.tfvars \
-    -out=${stack_env}.tfplan ${tf_dir}
+  terraform -chdir=${tf_dir} plan -var environment=$env_name \
+    -var-file=${var_file} \
+    -out=${plan_output}
   ;;
 dojo-plan)
   dojo "./tasks plan ${stack_name} ${stack_env}"
   ;;
 apply)
   tf_init
-  terraform apply ${stack_env}.tfplan
+  terraform -chdir=${tf_dir} apply ${stack_env}.tfplan
   ;;
 dojo-apply)
   dojo "./tasks apply ${stack_name} ${stack_env}"
   ;;
 format)
-  terraform fmt stacks/${stack_name}/terraform
+  terraform -chdir=${tf_dir} fmt
   ;;
 destroy)
   tf_init
-  terraform destroy -var environment=$env_name \
-    -var-file=stacks/${stack_name}/vars/${stack_env}.tfvars \
-    ${tf_dir}
+  var_file=$(eval "pwd")/stacks/${stack_name}/vars/${stack_env}.tfvars
+  terraform -chdir=${tf_dir} destroy -var environment=$env_name \
+    -var-file=${var_file}
   ;;
 build-lambda)
   build_lambda error-alarm-alert

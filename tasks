@@ -86,10 +86,11 @@ plan)
   build_lambda event-enrichment
   build_lambda s3-event-uploader
   tf_init
+  echo "tf_init finished"
   var_file=$(eval "pwd")/stacks/${stack_name}/vars/${stack_env}.tfvars
   plan_output=$(eval "pwd")/stacks/${stack_name}/terraform/${stack_env}.tfplan
-  echo ${var_file}
-  echo ${plan_output}
+  echo "var_file = ${var_file}"
+  echo "plan_output = ${plan_output}"
   terraform -chdir=${tf_dir} plan -var environment=$env_name \
     -var-file=${var_file} \
     -out=${plan_output}

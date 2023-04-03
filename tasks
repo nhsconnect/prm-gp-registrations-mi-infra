@@ -90,7 +90,7 @@ plan)
   var_file=$(eval "pwd")/stacks/${stack_name}/vars/${stack_env}.tfvars
   plan_output=$(eval "pwd")/stacks/${stack_name}/terraform/${stack_env}.tfplan
   echo "var_file = ${var_file}"
-  echo "plan_output = ${plan_output}"
+  RUN echo "plan_output = ${plan_output}"
   terraform -chdir=${tf_dir} plan -var environment=$env_name \
     -var-file=${var_file} \
     -out=${stack_env}.tfplan

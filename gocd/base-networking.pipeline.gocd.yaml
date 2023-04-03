@@ -31,7 +31,11 @@ pipelines:
                 - docker
               artifacts:
                 - build:
-                    source: dev.tfplan
+                    source: stacks/base-networking/terraform/dev.tfplan
+                    destination: stacks/base-networking/terraform
+                - build:
+                    source: stacks/base-networking/terraform/.terraform.lock.hcl
+                    destination: stacks/base-networking/terraform
               tasks:
                 - exec:
                     command: /bin/bash
@@ -48,7 +52,14 @@ pipelines:
                 - fetch:
                     stage: plan_dev
                     job: plan
-                    source: dev.tfplan
+                    source: stacks/base-networking/terraform/dev.tfplan
+                    destination: stacks/base-networking/terraform
+                    is_file: yes
+                - fetch:
+                    stage: plan_dev
+                    job: plan
+                    source: stacks/base-networking/terraform/.terraform.lock.hcl
+                    destination: stacks/base-networking/terraform
                     is_file: yes
                 - exec:
                     command: /bin/bash
@@ -63,7 +74,11 @@ pipelines:
                 - docker
               artifacts:
                 - build:
-                    source: prod.tfplan
+                    source: stacks/base-networking/terraform/prod.tfplan
+                    destination: stacks/base-networking/terraform
+                - build:
+                    source: stacks/base-networking/terraform/.terraform.lock.hcl
+                    destination: stacks/base-networking/terraform
               tasks:
                 - exec:
                     command: /bin/bash
@@ -83,7 +98,14 @@ pipelines:
                 - fetch:
                     stage: plan_prod
                     job: plan
-                    source: prod.tfplan
+                    source: stacks/base-networking/terraform/prod.tfplan
+                    destination: stacks/base-networking/terraform
+                    is_file: yes
+                - fetch:
+                    stage: plan_prod
+                    job: plan
+                    source: stacks/base-networking/terraform/.terraform.lock.hcl
+                    destination: stacks/base-networking/terraform
                     is_file: yes
                 - exec:
                     command: /bin/bash

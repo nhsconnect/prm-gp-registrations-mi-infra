@@ -93,7 +93,7 @@ plan)
   echo "plan_output = ${plan_output}"
   terraform -chdir=${tf_dir} plan -var environment=$env_name \
     -var-file=${var_file} \
-    -out=${plan_output}
+    -out=${stack_env}.tfplan
   ;;
 dojo-plan)
   dojo "./tasks plan ${stack_name} ${stack_env}"

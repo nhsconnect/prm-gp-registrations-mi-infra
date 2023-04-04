@@ -46,11 +46,6 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - cp dev.tfplan stacks/base-networking/terraform
-                - exec:
-                    command: /bin/bash
-                    arguments:
-                      - -c
                       - ls -lsa
                 - exec:
                     command: /bin/bash

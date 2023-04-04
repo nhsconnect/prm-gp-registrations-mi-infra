@@ -34,7 +34,11 @@ pipelines:
                 - docker
               artifacts:
                 - build:
-                    source: dev.tfplan
+                    source: stacks/gp-registrations-mi/terraform/dev.tfplan
+                    destination: stacks/gp-registrations-mi/terraform
+                - build:
+                    source: stacks/gp-registrations-mi/terraform/.terraform.lock.hcl
+                    destination: stacks/gp-registrations-mi/terraform
                 - build:
                     source: lambda/build/error-alarm-alert.zip
                     destination: lambda/build/
@@ -63,7 +67,14 @@ pipelines:
                 - fetch:
                     stage: plan_dev
                     job: plan
-                    source: dev.tfplan
+                    source: stacks/gp-registrations-mi/terraform/dev.tfplan
+                    destination: stacks/gp-registrations-mi/terraform
+                    is_file: yes
+                - fetch:
+                    stage: plan_dev
+                    job: plan
+                    source: stacks/gp-registrations-mi/terraform/.terraform.lock.hcl
+                    destination: stacks/gp-registrations-mi/terraform
                     is_file: yes
                 - fetch:
                     stage: plan_dev
@@ -117,7 +128,11 @@ pipelines:
                 - docker
               artifacts:
                 - build:
-                    source: prod.tfplan
+                    source: stacks/gp-registrations-mi/terraform/prod.tfplan
+                    destination: stacks/gp-registrations-mi/terraform
+                - build:
+                    source: stacks/gp-registrations-mi/terraform/.terraform.lock.hcl
+                    destination: stacks/gp-registrations-mi/terraform
                 - build:
                     source: lambda/build/error-alarm-alert.zip
                     destination: lambda/build/
@@ -149,7 +164,14 @@ pipelines:
                 - fetch:
                     stage: plan_prod
                     job: plan
-                    source: prod.tfplan
+                    source: stacks/gp-registrations-mi/terraform/prod.tfplan
+                    destination: stacks/gp-registrations-mi/terraform
+                    is_file: yes
+                - fetch:
+                    stage: plan_prod
+                    job: plan
+                    source: stacks/gp-registrations-mi/terraform/.terraform.lock.hcl
+                    destination: stacks/gp-registrations-mi/terraform
                     is_file: yes
                 - fetch:
                     stage: plan_prod

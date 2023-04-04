@@ -31,7 +31,11 @@ pipelines:
                 - docker
               artifacts:
                 - build:
-                    source: dev.tfplan
+                    source: stacks/ecs-cluster/terraform/dev.tfplan
+                    destination: stacks/ecs-cluster/terraform
+                - build:
+                    source: stacks/ecs-cluster/terraform/.terraform.lock.hcl
+                    destination: stacks/ecs-cluster/terraform
               tasks:
                 - exec:
                     command: /bin/bash
@@ -48,7 +52,14 @@ pipelines:
                 - fetch:
                     stage: plan_dev
                     job: plan
-                    source: dev.tfplan
+                    source: stacks/ecs-cluster/terraform/dev.tfplan
+                    destination: stacks/ecs-cluster/terraform
+                    is_file: yes
+                - fetch:
+                    stage: plan_dev
+                    job: plan
+                    source: stacks/ecs-cluster/terraform/.terraform.lock.hcl
+                    destination: stacks/ecs-cluster/terraform
                     is_file: yes
                 - exec:
                     command: /bin/bash
@@ -63,7 +74,11 @@ pipelines:
                 - docker
               artifacts:
                 - build:
-                    source: prod.tfplan
+                    source: stacks/ecs-cluster/terraform/prod.tfplan
+                    destination: stacks/ecs-cluster/terraform
+                - build:
+                    source: stacks/ecs-cluster/terraform/.terraform.lock.hcl
+                    destination: stacks/ecs-cluster/terraform
               tasks:
                 - exec:
                     command: /bin/bash
@@ -83,7 +98,14 @@ pipelines:
                 - fetch:
                     stage: plan_prod
                     job: plan
-                    source: prod.tfplan
+                    source: stacks/ecs-cluster/terraform/prod.tfplan
+                    destination: stacks/ecs-cluster/terraform
+                    is_file: yes
+                - fetch:
+                    stage: plan_prod
+                    job: plan
+                    source: stacks/ecs-cluster/terraform/.terraform.lock.hcl
+                    destination: stacks/ecs-cluster/terraform
                     is_file: yes
                 - exec:
                     command: /bin/bash

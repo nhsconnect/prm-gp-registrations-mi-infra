@@ -3,10 +3,10 @@ import os
 import unittest
 from unittest.mock import patch, MagicMock, call
 
-from main import _upload_events_to_s3, _extract_events_from_sqs_messages, _generate_s3_key, UnableToUploadEventToS3
+from s3_event_uploader_main import _upload_events_to_s3, _extract_events_from_sqs_messages, _generate_s3_key, UnableToUploadEventToS3
 
 
-class TestMain(unittest.TestCase):
+class TestS3EventUploaderMain(unittest.TestCase):
     @patch('boto3.client')
     @patch.dict(os.environ, {"MI_EVENTS_OUTPUT_S3_BUCKET_NAME": "test_bucket_name"})
     def test_should_upload_events_to_s3(self, mock_boto_client):

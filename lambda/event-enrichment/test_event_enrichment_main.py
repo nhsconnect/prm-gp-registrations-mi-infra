@@ -4,7 +4,7 @@ import unittest
 from json import JSONDecodeError
 from unittest.mock import patch, MagicMock
 
-from main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
+from event_enrichment_main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
     OdsPortalException, _enrich_events, \
     _publish_enriched_events_to_sns_topic, lambda_handler, _fetch_supplier_details, \
     _find_supplier_ods_code_from_supplier_details, _has_supplier_ods_code, \
@@ -67,7 +67,7 @@ def generate_successful_organisation(practice_ods_code: str):
             }}}
 
 
-class TestMain(unittest.TestCase):
+class TestEventEnrichmentMain(unittest.TestCase):
     @patch('boto3.client')
     @patch('urllib3.PoolManager.request',
            return_value=type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})())

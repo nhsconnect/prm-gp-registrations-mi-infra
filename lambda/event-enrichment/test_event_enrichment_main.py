@@ -7,7 +7,7 @@ from unittest.mock import patch, MagicMock
 from event_enrichment_main import _find_icb_ods_code, ICB_ROLE_ID, _fetch_organisation, ODS_PORTAL_URL, EMPTY_ORGANISATION, \
     OdsPortalException, _enrich_events, \
     _publish_enriched_events_to_sns_topic, lambda_handler, _fetch_supplier_details, \
-    _find_supplier_ods_code_from_supplier_details, _has_supplier_ods_code, \
+    _find_supplier_ods_codes_from_supplier_details, _has_supplier_ods_code, \
     UnableToFetchSupplierDetailsFromSDSFHIRException, \
     get_supplier_name, UnableToMapSupplierOdsCodeToSupplierNameException
 
@@ -130,15 +130,20 @@ class TestEventEnrichmentMain(unittest.TestCase):
                             }]
         assert result == expected_events
 
-    @patch('boto3.client')
-    @patch('urllib3.PoolManager.request',
-           return_value=type('', (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})())
-    def test_should_enrich_events_with_empty_fields_if_unable_to_fetch_organisation(self, mock_boto_client, mock_request):
+    @patch('boto3.client')     
+    @patch('urllib3.PoolManager.request', side_effect=[type('', (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})(), 
+                                                       type('', (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})(),
+                                                       type('', (object,),{"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})(),
+                                                       type('', (object,),{"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})()
+                                                       ])
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
+    @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
+    def test_should_enrich_events_with_empty_fields_if_unable_to_fetch_organisation(self, mock_boto_client, mock_requests):
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ods_1", "sendingPracticeOdsCode": "ods_2"}"""
 
         lambda_input = {"Records": [{"body": events}]}
 
-        result = _enrich_events(lambda_input)
+        result  = _enrich_events(lambda_input)
 
         expected_events = [{"eventId": "event_id_1",
                             "eventType": "REGISTRATIONS",
@@ -150,6 +155,8 @@ class TestEventEnrichmentMain(unittest.TestCase):
                             "sendingPracticeName": None,
                             "sendingPracticeIcbOdsCode": None,
                             "sendingPracticeIcbName": None,
+                            "requestingSupplierName":"UNKNOWN",
+                            "sendingSupplierName":"UNKNOWN"
                             }]
         assert result == expected_events
 
@@ -312,7 +319,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
                                                  url=expected_sds_fhir_api_url + an_ods_code,
                                                  headers=expected_headers)
 
-    def test_find_supplier_ods_code_from_supplier_details_given_3_entries(self):
+    def test_find_supplier_ods_codes_from_supplier_details_given_3_entries(self):
         supplier_ods_code = "SUPPLIER_2"
         sds_fhir_api_ods_response = {
             "entry": [
@@ -362,11 +369,11 @@ class TestEventEnrichmentMain(unittest.TestCase):
             ]
         }
 
-        result = _find_supplier_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+        result = _find_supplier_ods_codes_from_supplier_details(sds_fhir_api_ods_response)
 
         expected_result = supplier_ods_code
 
-        assert result == expected_result
+        assert expected_result in result
 
     def test_return_none_when_supplier_details_has_no_ods_code(self):
         sds_fhir_api_ods_response = {
@@ -416,14 +423,14 @@ class TestEventEnrichmentMain(unittest.TestCase):
             ]
         }
 
-        result = _find_supplier_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+        result = _find_supplier_ods_codes_from_supplier_details(sds_fhir_api_ods_response)
 
         assert result is None
 
     def test_return_none_when_supplier_details_is_empty(self):
         sds_fhir_api_ods_response = {}
 
-        result = _find_supplier_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+        result = _find_supplier_ods_codes_from_supplier_details(sds_fhir_api_ods_response)
 
         assert result is None
 
@@ -435,7 +442,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
             ]
         }
 
-        result = _find_supplier_ods_code_from_supplier_details(sds_fhir_api_ods_response)
+        result = _find_supplier_ods_codes_from_supplier_details(sds_fhir_api_ods_response)
 
         assert result is None
 

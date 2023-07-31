@@ -40,11 +40,17 @@ def lambda_handler(sqs_messages: dict, context):
         print("[LAMBDA_STARTED][event-enrichment-lambda]")
         print("Enriching events - SQS Records: ", sqs_messages)
         enriched_events = _enrich_events(sqs_messages)
-        print("[LAMBDA_SUCCESSFUL][event-enrichment-lambda]: Successfully enriched events:", enriched_events)
+        print(
+            "[LAMBDA_SUCCESSFUL][event-enrichment-lambda]: Successfully enriched events:",
+            enriched_events,
+        )
         _publish_enriched_events_to_sns_topic(enriched_events)
         return True
     except Exception as exception:
-        print("[LAMBDA_FAILED][event-enrichment-lambda][ERROR]: Unable to enrich events. " + str(exception))
+        print(
+            "[LAMBDA_FAILED][event-enrichment-lambda][ERROR]: Unable to enrich events. "
+            + str(exception)
+        )
         raise exception
     finally:
         print("[LAMBDA_FINISHED][event-enrichment-lambda]")
@@ -55,18 +61,50 @@ def _enrich_events(sqs_messages: dict) -> list:
     events = [json.loads(event["body"]) for event in events_records]
     for event in events:
         if event["eventType"] == "DEGRADES":
-            print("Skipping enrichment for degrades event with eventId: " + event["eventId"])
+            print(
+                f"Skipping enrichment for degrades event with eventId: {event['eventId']}."
+            )
             continue
-
-        requesting_practice_organisation = _fetch_organisation(event["requestingPracticeOdsCode"])
+        
+        # set requesting practice info
+        requesting_practice_organisation = _fetch_organisation(
+            event["requestingPracticeOdsCode"]
+        )
         event["requestingPracticeName"] = requesting_practice_organisation["Name"]
-        event["requestingPracticeIcbOdsCode"] = _find_icb_ods_code(requesting_practice_organisation)
-        event["requestingPracticeIcbName"] = _fetch_organisation(event["requestingPracticeIcbOdsCode"])["Name"]
+        event["requestingPracticeIcbOdsCode"] = _find_icb_ods_code(
+            requesting_practice_organisation
+        )
+        event["requestingPracticeIcbName"] = _fetch_organisation(
+            event["requestingPracticeIcbOdsCode"]
+        )["Name"]
 
-        sending_practice_organisation = _fetch_organisation(event["sendingPracticeOdsCode"])
+        # set sending practice info
+        sending_practice_organisation = _fetch_organisation(
+            event["sendingPracticeOdsCode"]
+        )
         event["sendingPracticeName"] = sending_practice_organisation["Name"]
-        event["sendingPracticeIcbOdsCode"] = _find_icb_ods_code(sending_practice_organisation)
-        event["sendingPracticeIcbName"] = _fetch_organisation(event["sendingPracticeIcbOdsCode"])["Name"]
+        event["sendingPracticeIcbOdsCode"] = _find_icb_ods_code(
+            sending_practice_organisation
+        )
+        event["sendingPracticeIcbName"] = _fetch_organisation(
+            event["sendingPracticeIcbOdsCode"]
+        )["Name"]
+
+        # set requesting supplier info
+        requesting_supplier_name = get_supplier_name(event["requestingPracticeOdsCode"])
+        event["requestingSupplierName"] = (
+            requesting_supplier_name
+            if requesting_supplier_name is not None
+            else "UNKNOWN"
+        )
+
+        # set sending supplier info
+        sending_supplier_name = get_supplier_name(event["sendingPracticeOdsCode"])
+        event["sendingSupplierName"] = (
+            sending_supplier_name 
+            if sending_supplier_name is not None 
+            else "UNKNOWN"
+        )
 
     return events
 
@@ -80,23 +118,38 @@ def _find_icb_ods_code(practice_organisation: dict) -> Optional[str]:
     try:
         organisation_relationships = practice_organisation["Rels"]["Rel"]
         organisation_rel_containing_icb_code = next(
-            organisation_details for organisation_details in organisation_relationships if
-            _is_icb(organisation_details))
+            organisation_details
+            for organisation_details in organisation_relationships
+            if _is_icb(organisation_details)
+        )
 
         if organisation_rel_containing_icb_code:
-            print("Found organisation rel containing ICB ODS code: ", organisation_rel_containing_icb_code)
-            return organisation_rel_containing_icb_code["Target"]["OrgId"]["extension"]  # ODS code
+            print(
+                "Found organisation rel containing ICB ODS code: ",
+                organisation_rel_containing_icb_code,
+            )
+            return organisation_rel_containing_icb_code["Target"]["OrgId"][
+                "extension"
+            ]  # ODS code
         else:
-            print("No organisation rel containing ICB ODS code for organisation", practice_organisation)
+            print(
+                "No organisation rel containing ICB ODS code for organisation",
+                practice_organisation,
+            )
             return None
     except Exception as e:
-        print("Unable to find ICB information for practice " + str(practice_organisation), e)
+        print(
+            "Unable to find ICB information for practice " + str(practice_organisation),
+            e,
+        )
         return None
 
 
 def _is_icb(organisation_details: dict) -> bool:
-    return organisation_details["Status"] == "Active" and organisation_details["Target"]["PrimaryRoleId"][
-        "id"] == ICB_ROLE_ID
+    return (
+        organisation_details["Status"] == "Active"
+        and organisation_details["Target"]["PrimaryRoleId"]["id"] == ICB_ROLE_ID
+    )
 
 
 def _fetch_organisation(ods_code: Optional[str]) -> dict:
@@ -105,7 +158,7 @@ def _fetch_organisation(ods_code: Optional[str]) -> dict:
 
     print("Attempting to retrieve organisation with ODS code: " + ods_code)
     http = urllib3.PoolManager()
-    response = http.request('GET', ODS_PORTAL_URL + ods_code)
+    response = http.request("GET", ODS_PORTAL_URL + ods_code)
 
     if response.status == 404:
         print("Unable to find organisation with ODS code: " + ods_code)
@@ -113,8 +166,12 @@ def _fetch_organisation(ods_code: Optional[str]) -> dict:
 
     if response.status != 200:
         raise OdsPortalException(
-            "Unable to fetch organisation data for ODS code:" + ods_code + ". Response status code: " + str(
-                response.status), response)
+            "Unable to fetch organisation data for ODS code:"
+            + ods_code
+            + ". Response status code: "
+            + str(response.status),
+            response,
+        )
 
     print("Successfully retrieved organisation with ODS code: " + ods_code)
     response_content = json.loads(response.data)
@@ -125,12 +182,12 @@ def _publish_enriched_events_to_sns_topic(enriched_events: list):
     print("Publishing enriched events to SNS", enriched_events)
     enriched_events_sns_topic_arn = os.environ["ENRICHED_EVENTS_SNS_TOPIC_ARN"]
 
-    print("Sending:", json.dumps({'default': json.dumps(enriched_events)}))
-    sns = boto3.client('sns')
+    print("Sending:", json.dumps({"default": json.dumps(enriched_events)}))
+    sns = boto3.client("sns")
     sns.publish(
         TargetArn=enriched_events_sns_topic_arn,
-        Message=json.dumps({'default': json.dumps(enriched_events)}),
-        MessageStructure='json'
+        Message=json.dumps({"default": json.dumps(enriched_events)}),
+        MessageStructure="json",
     )
 
 
@@ -139,68 +196,85 @@ def _fetch_supplier_details(practice_ods_code: str) -> dict:
     ssm = boto3.client("ssm")
     secret_manager = SsmSecretManager(ssm)
 
-    sds_fhir_api_key = secret_manager.get_secret(os.environ["SDS_FHIR_API_KEY_PARAM_NAME"])
-    sds_fhir_api_url = secret_manager.get_secret(os.environ["SDS_FHIR_API_URL_PARAM_NAME"])
+    sds_fhir_api_key = secret_manager.get_secret(
+        os.environ["SDS_FHIR_API_KEY_PARAM_NAME"]
+    )
+    sds_fhir_api_url = secret_manager.get_secret(
+        os.environ["SDS_FHIR_API_URL_PARAM_NAME"]
+    )
 
-    headers = {'apiKey': sds_fhir_api_key}
-    response = http.request(method='GET', url=sds_fhir_api_url + practice_ods_code, headers=headers)
+    headers = {"apiKey": sds_fhir_api_key}
+    response = http.request(
+        method="GET", url=sds_fhir_api_url + practice_ods_code, headers=headers
+    )
 
     if response.status != 200:
         raise UnableToFetchSupplierDetailsFromSDSFHIRException(
-            "Unable to fetch supplier details from SDS FHIR API with practice ods code: "
-            + practice_ods_code
-            + ". Response status code: "
-            + str(response.status),
-            response
+            f"Unable to fetch supplier details from SDS FHIR API with practice ods code: {practice_ods_code}.\n"
+            + f"Response status code: {str(response.status)} ",
+            response,
         )
 
     response_content = json.loads(response.data)
 
     return response_content
 
+
 def _has_supplier_ods_code(extension: dict) -> bool:
-    return "SDS-ManufacturingOrganisation" in extension["url"] \
-        and "ods-organization-code" in extension["valueReference"]["identifier"]["system"]
+    return (
+        "SDS-ManufacturingOrganisation" in extension["url"]
+        and "ods-organization-code"
+        in extension["valueReference"]["identifier"]["system"]
+    )
 
 
-def _find_supplier_ods_code_from_supplier_details(supplier_details: dict) -> Optional[str]:
-    supplier_ods_code = None
-    extension = None # set extension to none for error logging purposes
+def _find_supplier_ods_codes_from_supplier_details(supplier_details: dict) -> list:
+    supplier_ods_codes = []
+    extension = None  # set extension to none for error logging purposes
 
     try:
         for entry in supplier_details["entry"]:
             for extension in entry["resource"]["extension"]:
                 if _has_supplier_ods_code(extension):
-                    supplier_ods_code = extension["valueReference"]["identifier"]["value"]
+                    supplier_ods_codes.append(
+                        extension["valueReference"]["identifier"]["value"]
+                    )
     except Exception as exception:
-        print("Unable to find supplier ODS code from SDS FHIR API response. Exception type: "
-              + str(type(exception))
-              + ". Exception: "
-              + str(exception))
-        print("Failed extension when trying to find supplier ODS code from SDS FHIR API response. Extension: ", extension)
-        return None
+        print(
+            f"Unable to find supplier ODS code from SDS FHIR API response. Exception type: {str(type(exception))}\n"
+            + " Exception: {str(exception)}"
+        )
+        return []
 
-    return supplier_ods_code
+    return supplier_ods_codes
 
 
 def get_supplier_name(practice_ods_code: str) -> Optional[str]:
+    """uses the SDS FHIR API to get the system supplier from an ODS code"""
     supplier_details = _fetch_supplier_details(practice_ods_code)
-    supplier_ods_code = _find_supplier_ods_code_from_supplier_details(supplier_details)
-
-    if supplier_ods_code is None:
-        return None
+    supplier_ods_codes = _find_supplier_ods_codes_from_supplier_details(
+        supplier_details
+    )
 
     supplier_name_mapping = {
         "YGJ": "EMIS",
-        "X26": "TEST_SUPPLIER",
+        "YGA": "SystmOne",
+        "YGC": "Vision",
     }
 
-    try:
-        return supplier_name_mapping[supplier_ods_code]
-    except KeyError:
-        raise UnableToMapSupplierOdsCodeToSupplierNameException(
-            "Unable to map supplier ODS code found from SDS FHI API: "
-            + str(supplier_ods_code)
-            + " to a known supplier name. Practice ODS code from event: "
-            + practice_ods_code + "."
-        )
+    supplier_name = None
+
+    if len(supplier_ods_codes) > 0:
+        for supplier_ods_code in supplier_ods_codes:
+            try:
+                supplier_name = supplier_name_mapping[supplier_ods_code]
+                if supplier_name is not None:
+                    break
+            except KeyError:
+                print(
+                    f"Unable to map supplier ODS code(s) found from SDS FHI API: {str(supplier_ods_codes)}"
+                    + " to a known supplier name. Practice ODS code from event: {practice_ods_code}."
+                )
+                continue
+    
+    return supplier_name

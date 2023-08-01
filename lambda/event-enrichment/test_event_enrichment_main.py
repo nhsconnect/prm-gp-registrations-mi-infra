@@ -80,25 +80,32 @@ def generate_successful_organisation(practice_ods_code: str):
         }
     }
 
+def generate_side_effect(num_successful_organisation_to_generate: int,
+                         num_succesful_sds_fhir_api_responses_to_generate: int) -> list:
+    side_effect_list = []
 
-class TestEventEnrichmentMain(unittest.TestCase):
+    for _ in range(num_successful_organisation_to_generate):
+        side_effect_list.append(type('', (object,),{"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})())
+
+    for _ in range(num_succesful_sds_fhir_api_responses_to_generate):
+        side_effect_list.append(type('', (object,),{"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})())
+
+    return side_effect_list
+
+
+class TestEventEnrichmentMain(unittest.TestCase):       
+    
+
+    @patch('urllib3.PoolManager.request', side_effect=generate_side_effect(4,2))
     @patch("boto3.client")
-    @patch(
-        "urllib3.PoolManager.request",
-        return_value=type(
-            "",
-            (object,),
-            {
-                "status": 200,
-                "data": json.dumps(generate_successful_organisation("ODS_1")),
-            },
-        )(),
-    )
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
+    @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
     @patch.dict(os.environ, {"SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL": "test_url"})
     @patch.dict(os.environ, {"ENRICHED_EVENTS_SNS_TOPIC_ARN": "test_arn"})
     def test_should_publish_enriched_event_with_lambda_handler(
-        self, mock_request, mock_boto
+        self, mock_boto, mock_request
     ):
+
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}"""
 
         lambda_input = {"Records": [{"body": events}]}
@@ -121,6 +128,8 @@ class TestEventEnrichmentMain(unittest.TestCase):
                     "sendingPracticeName": "Test Practice",
                     "sendingPracticeIcbOdsCode": "ODS_1",
                     "sendingPracticeIcbName": "Test Practice",
+                    "requestingSupplierName":"UNKNOWN",
+                    "sendingSupplierName":"UNKNOWN",
                 }
             ]
         )
@@ -177,22 +186,8 @@ class TestEventEnrichmentMain(unittest.TestCase):
         side_effect=[
             type("", (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})(),
             type("", (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})(),
-            type(
-                "",
-                (object,),
-                {
-                    "status": 200,
-                    "data": generate_successful_sds_fhir_api_response("ODS_1"),
-                },
-            )(),
-            type(
-                "",
-                (object,),
-                {
-                    "status": 200,
-                    "data": generate_successful_sds_fhir_api_response("ODS_1"),
-                },
-            )(),
+            type("", (object,), {"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})(),
+            type("", (object,), {"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})(),
         ],
     )
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})

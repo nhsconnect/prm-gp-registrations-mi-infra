@@ -133,75 +133,20 @@ class TestEventEnrichmentMain(unittest.TestCase):
 
         assert result is True
 
-    @patch("urllib3.PoolManager.request")
+    @patch('urllib3.PoolManager.request', side_effect=[type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})(), 
+                                                       type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})(),
+                                                       type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})(),
+                                                       type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})(),
+                                                       type('', (object,),{"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})(),
+                                                       type('', (object,),{"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})()
+                                                       ])
     @patch("boto3.client")
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
     def test_should_enrich_events_with_all_fields_from_organisation(
         self, mock_boto_client, mock_request
     ):
-        mock_request.side_effect = [
-            type(
-                "",
-                (object,),
-                {
-                    "status": 200,
-                    "data": json.dumps(generate_successful_organisation("ODS_1")),
-                },
-            ),
-            type(
-                "",
-                (object,),
-                {
-                    "status": 200,
-                    "data": json.dumps(generate_successful_organisation("ODS_1")),
-                },
-            ),
-            type(
-                "",
-                (object,),
-                {
-                    "status": 200,
-                    "data": json.dumps(generate_successful_organisation("ODS_1")),
-                },
-            ),
-            type(
-                "",
-                (object,),
-                {
-                    "status": 200,
-                    "data": json.dumps(generate_successful_organisation("ODS_1")),
-                },
-            ),
-            type(
-                "",
-                (object,),
-                {
-                    "status": 200,
-                    "data": json.dumps(generate_successful_sds_fhir_api_response("ODS_1")),
-                },
-            ),
-            type(
-                "",
-                (object,),
-                {
-                    "status": 200,
-                    "data": json.dumps(generate_successful_sds_fhir_api_response("ODS_1")),
-                },
-            ),
-
-        ]
-
-
-    #             @patch('boto3.client')     
-    # @patch('urllib3.PoolManager.request', side_effect=[type('', (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})(), 
-    #                                                    type('', (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})(),
-    #                                                    type('', (object,),{"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})(),
-    #                                                    type('', (object,),{"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})()
-    #                                                    ])
-    # @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
-    # @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
-
+       
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}"""
 
         lambda_input = {"Records": [{"body": events}]}

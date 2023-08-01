@@ -142,13 +142,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
 
         assert result is True
 
-    @patch('urllib3.PoolManager.request', side_effect=[type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})(), 
-                                                       type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})(),
-                                                       type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})(),
-                                                       type('', (object,), {"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})(),
-                                                       type('', (object,),{"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})(),
-                                                       type('', (object,),{"status": 200, "data": generate_successful_sds_fhir_api_response("ODS_1")})()
-                                                       ])
+    @patch('urllib3.PoolManager.request', side_effect=generate_side_effect(4,2))
     @patch("boto3.client")
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
@@ -457,7 +451,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
 
         assert expected_result in result
 
-    def test_return_none_when_supplier_details_has_no_ods_code(self):
+    def test_return_empty_list_when_supplier_details_has_no_ods_code(self):
         sds_fhir_api_ods_response = {
             "entry": [
                 {"resource": {"extension": []}},
@@ -501,7 +495,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
             sds_fhir_api_ods_response
         )
 
-        assert result is None
+        assert not result 
 
     def test_return_none_when_supplier_details_is_empty(self):
         sds_fhir_api_ods_response = {}

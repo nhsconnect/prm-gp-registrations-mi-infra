@@ -497,14 +497,14 @@ class TestEventEnrichmentMain(unittest.TestCase):
 
         assert not result 
 
-    def test_return_none_when_supplier_details_is_empty(self):
+    def test_return_empty_list_when_supplier_details_is_empty(self):
         sds_fhir_api_ods_response = {}
 
         result = _find_supplier_ods_codes_from_supplier_details(
             sds_fhir_api_ods_response
         )
 
-        assert result is None
+        assert not result
 
     def test_return_empty_list_when_supplier_details_has_entry_resources_but_no_extension(
         self,
@@ -539,16 +539,10 @@ class TestEventEnrichmentMain(unittest.TestCase):
 
         assert result is False
 
+    
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
-    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
-    @patch(
-        "urllib3.PoolManager.request",
-        return_value=type(
-            "",
-            (object,),
-            {"status": 200, "data": generate_successful_sds_fhir_api_response("X26")},
-        )(),
-    )
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})    
+    @patch("urllib3.PoolManager.request", return_value=type("", (object,), {"status":200, "data":generate_successful_sds_fhir_api_response("YGJ")}))
     @patch("boto3.client")
     def test_returns_supplier_name_given_a_practice_ods_code(
         self, mock_boto3_client, _
@@ -558,9 +552,9 @@ class TestEventEnrichmentMain(unittest.TestCase):
             {"Parameter": {"Value": "some_url.net?"}},
         ]
 
-        supplier_name = get_supplier_name("PRACTICE_ODS_123")
+        supplier_name = get_supplier_name("test_supplier_ods_code")
 
-        expected_supplier_name = "TEST_SUPPLIER"
+        expected_supplier_name = "EMIS"
         assert supplier_name == expected_supplier_name
 
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})

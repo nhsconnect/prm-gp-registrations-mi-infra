@@ -6,7 +6,7 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
   filename      = "${path.cwd}/${var.event_enrichment_lambda_zip}"
   function_name = "${var.environment}-${var.event_enrichment_lambda_name}"
   role          = aws_iam_role.event_enrichment_lambda_role.arn
-  handler       = "main.lambda_handler"
+  handler       = "event_enrichment_main.lambda_handler"
   source_code_hash = filebase64sha256("${path.cwd}/${var.event_enrichment_lambda_zip}")
   runtime = "python3.9"
   timeout = 15

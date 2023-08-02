@@ -559,28 +559,6 @@ class TestEventEnrichmentMain(unittest.TestCase):
 
 
 
-    # @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
-    # @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
-    # @patch("urllib3.PoolManager.request", 
-    #        return_value=type( "", (object,), {"status": 200, "data": generate_successful_sds_fhir_api_response("NON_MATCHING_SUPPLIER_ODS")})())
-    # @patch("boto3.client")
-    # def test_throws_exception_when_unable_to_map_ods_code_to_known_supplier_name(
-    #     self, mock_boto3_client, _
-    # ):
-    #     mock_boto3_client("ssm").get_parameter.side_effect = [
-    #         {"Parameter": {"Value": "test-api-key"}},
-    #         {"Parameter": {"Value": "some_url.net?"}},
-    #     ]
-
-    #     self.assertRaises(
-    #         UnableToMapSupplierOdsCodeToSupplierNameException,
-    #         get_supplier_name,
-    #         "PRACTICE_ODS_123",
-    #     )
-
-
-
-
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
     @patch(

@@ -3,7 +3,7 @@ import os
 import unittest
 from unittest.mock import patch, call
 
-from main import _send_events_to_splunk_cloud, lambda_handler, UnableToSendEventToSplunkCloud, \
+from splunk_cloud_event_uploader_main import _send_events_to_splunk_cloud, lambda_handler, UnableToSendEventToSplunkCloud, \
     _extract_events_from_sqs_messages
 
 TEST_URL = "test_url/some_path"

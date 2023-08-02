@@ -263,18 +263,22 @@ def get_supplier_name(practice_ods_code: str) -> Optional[str]:
     }
 
     supplier_name = None
-
-    if len(supplier_ods_codes) > 0:
-        for supplier_ods_code in supplier_ods_codes:
-            try:
-                supplier_name = supplier_name_mapping[supplier_ods_code]
-                if supplier_name is not None:
-                    break
-            except KeyError:
-                print(
-                    f"Unable to map supplier ODS code(s) found from SDS FHI API: {str(supplier_ods_codes)}"
-                    + " to a known supplier name. Practice ODS code from event: {practice_ods_code}."
-                )
-                continue
     
+    for supplier_ods_code in supplier_ods_codes:
+        try:
+            supplier_name = supplier_name_mapping[supplier_ods_code]
+            if supplier_name is not None:
+                break
+        except KeyError:
+            continue
+    
+    if supplier_name is None:
+        raise UnableToMapSupplierOdsCodeToSupplierNameException()
+        # print(
+        #     f"Unable to map supplier ODS code(s) found from SDS FHI API: {str(supplier_ods_codes)}"
+        #     + " to a known supplier name. Practice ODS code from event: {practice_ods_code}."
+        # )    
+
     return supplier_name
+    
+    

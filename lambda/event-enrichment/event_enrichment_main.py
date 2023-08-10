@@ -193,7 +193,7 @@ def _publish_enriched_events_to_sns_topic(enriched_events: list):
 
 def _fetch_supplier_details(practice_ods_code: str) -> dict:
 
-    if practice_ods_code is None:
+    if not practice_ods_code or practice_ods_code.isspace():
         return EMPTY_ORGANISATION
 
     http = urllib3.PoolManager()
@@ -256,7 +256,7 @@ def _find_supplier_ods_codes_from_supplier_details(supplier_details: dict) -> li
 def get_supplier_name(practice_ods_code: str) -> Optional[str]:
     """uses the SDS FHIR API to get the system supplier from an ODS code"""
 
-    if (practice_ods_code is None):
+    if not practice_ods_code or practice_ods_code.isspace():
         return None
 
     supplier_details = _fetch_supplier_details(practice_ods_code)

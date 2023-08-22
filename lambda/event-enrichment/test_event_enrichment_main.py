@@ -80,23 +80,42 @@ def generate_successful_organisation(practice_ods_code: str):
         }
     }
 
-def generate_side_effect(num_successful_organisation_to_generate: int,
-                         num_succesful_sds_fhir_api_responses_to_generate: int) -> list:
+
+def generate_side_effect(
+    num_successful_organisation_to_generate: int,
+    num_succesful_sds_fhir_api_responses_to_generate: int,
+) -> list:
     side_effect_list = []
 
     for _ in range(num_successful_organisation_to_generate):
-        side_effect_list.append(type('', (object,),{"status": 200, "data": json.dumps(generate_successful_organisation("ODS_1"))})())
+        side_effect_list.append(
+            type(
+                "",
+                (object,),
+                {
+                    "status": 200,
+                    "data": json.dumps(generate_successful_organisation("ODS_1")),
+                },
+            )()
+        )
 
     for _ in range(num_succesful_sds_fhir_api_responses_to_generate):
-        side_effect_list.append(type('', (object,),{"status": 200, "data": generate_successful_sds_fhir_api_response("YGJ")})())
+        side_effect_list.append(
+            type(
+                "",
+                (object,),
+                {
+                    "status": 200,
+                    "data": generate_successful_sds_fhir_api_response("YGJ"),
+                },
+            )()
+        )
 
     return side_effect_list
 
 
-class TestEventEnrichmentMain(unittest.TestCase):       
-    
-
-    @patch('urllib3.PoolManager.request', side_effect=generate_side_effect(4,2))
+class TestEventEnrichmentMain(unittest.TestCase):
+    @patch("urllib3.PoolManager.request", side_effect=generate_side_effect(4, 2))
     @patch("boto3.client")
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
@@ -105,7 +124,6 @@ class TestEventEnrichmentMain(unittest.TestCase):
     def test_should_publish_enriched_event_with_lambda_handler(
         self, mock_boto, mock_request
     ):
-
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1", "reportingSystemSupplier": "EMIS"}"""
 
         lambda_input = {"Records": [{"body": events}]}
@@ -122,15 +140,15 @@ class TestEventEnrichmentMain(unittest.TestCase):
                     "eventType": "REGISTRATIONS",
                     "requestingPracticeOdsCode": "ODS_1",
                     "sendingPracticeOdsCode": "ODS_1",
-                    "reportingSystemSupplier":"EMIS",
+                    "reportingSystemSupplier": "EMIS",
                     "requestingPracticeName": "Test Practice",
                     "requestingPracticeIcbOdsCode": "ODS_1",
                     "requestingPracticeIcbName": "Test Practice",
                     "sendingPracticeName": "Test Practice",
                     "sendingPracticeIcbOdsCode": "ODS_1",
                     "sendingPracticeIcbName": "Test Practice",
-                    "requestingSupplierName":"EMIS",
-                    "sendingSupplierName":"EMIS"                    
+                    "requestingSupplierName": "EMIS",
+                    "sendingSupplierName": "EMIS",
                 }
             ]
         )
@@ -143,14 +161,13 @@ class TestEventEnrichmentMain(unittest.TestCase):
 
         assert result is True
 
-    @patch('urllib3.PoolManager.request', side_effect=generate_side_effect(4,2))
+    @patch("urllib3.PoolManager.request", side_effect=generate_side_effect(4, 2))
     @patch("boto3.client")
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
     def test_should_enrich_events_with_all_fields_from_organisation(
         self, mock_boto_client, mock_request
     ):
-       
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1", "reportingSystemSupplier":"EMIS"}"""
 
         lambda_input = {"Records": [{"body": events}]}
@@ -169,21 +186,69 @@ class TestEventEnrichmentMain(unittest.TestCase):
                 "sendingPracticeName": "Test Practice",
                 "sendingPracticeIcbOdsCode": "ODS_1",
                 "sendingPracticeIcbName": "Test Practice",
-                "requestingSupplierName":"EMIS",
-                "sendingSupplierName":"EMIS",
-                "reportingSystemSupplier": "EMIS"
+                "requestingSupplierName": "EMIS",
+                "sendingSupplierName": "EMIS",
+                "reportingSystemSupplier": "EMIS",
             }
         ]
         assert result == expected_events
 
-    @patch("boto3.client") 
+    @patch("urllib3.PoolManager.request", side_effect=generate_side_effect(4, 2))
+    @patch("boto3.client")
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
+    @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
+    def test_should_correct_for_emis_sending_asid_code(
+        self, mock_boto_client, mock_request
+    ):
+        """A temporary test to test that we can correct"""
+        
+        events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1", "reportingSystemSupplier":"200000000260"}"""
+
+        lambda_input = {"Records": [{"body": events}]}
+
+        result = _enrich_events(lambda_input)
+
+        expected_events = [
+            {
+                "eventId": "event_id_1",
+                "eventType": "REGISTRATIONS",
+                "requestingPracticeOdsCode": "ODS_1",
+                "sendingPracticeOdsCode": "ODS_1",
+                "requestingPracticeName": "Test Practice",
+                "requestingPracticeIcbOdsCode": "ODS_1",
+                "requestingPracticeIcbName": "Test Practice",
+                "sendingPracticeName": "Test Practice",
+                "sendingPracticeIcbOdsCode": "ODS_1",
+                "sendingPracticeIcbName": "Test Practice",
+                "requestingSupplierName": "EMIS",
+                "sendingSupplierName": "EMIS",
+                "reportingSystemSupplier": "EMIS",
+            }
+        ]
+        assert result == expected_events
+
+    @patch("boto3.client")
     @patch(
         "urllib3.PoolManager.request",
         side_effect=[
             type("", (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})(),
             type("", (object,), {"status": 404, "data": A_VALID_TEST_ORGANISATION})(),
-            type("", (object,), {"status": 200, "data": generate_successful_sds_fhir_api_response("YGJ")})(),
-            type("", (object,), {"status": 200, "data": generate_successful_sds_fhir_api_response("YGJ")})(),
+            type(
+                "",
+                (object,),
+                {
+                    "status": 200,
+                    "data": generate_successful_sds_fhir_api_response("YGJ"),
+                },
+            )(),
+            type(
+                "",
+                (object,),
+                {
+                    "status": 200,
+                    "data": generate_successful_sds_fhir_api_response("YGJ"),
+                },
+            )(),
         ],
     )
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
@@ -211,7 +276,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
                 "sendingPracticeIcbName": None,
                 "requestingSupplierName": "EMIS",
                 "sendingSupplierName": "EMIS",
-                "reportingSystemSupplier": "EMIS"
+                "reportingSystemSupplier": "EMIS",
             }
         ]
         assert result == expected_events
@@ -498,7 +563,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
             sds_fhir_api_ods_response
         )
 
-        assert not result 
+        assert not result
 
     def test_return_empty_list_when_supplier_details_is_empty(self):
         sds_fhir_api_ods_response = {}
@@ -542,10 +607,16 @@ class TestEventEnrichmentMain(unittest.TestCase):
 
         assert result is False
 
-    
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
-    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})    
-    @patch("urllib3.PoolManager.request", return_value=type("", (object,), {"status":200, "data":generate_successful_sds_fhir_api_response("YGJ")}))
+    @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})
+    @patch(
+        "urllib3.PoolManager.request",
+        return_value=type(
+            "",
+            (object,),
+            {"status": 200, "data": generate_successful_sds_fhir_api_response("YGJ")},
+        ),
+    )
     @patch("boto3.client")
     def test_returns_supplier_name_given_a_practice_ods_code(
         self, mock_boto3_client, _
@@ -559,8 +630,6 @@ class TestEventEnrichmentMain(unittest.TestCase):
 
         expected_supplier_name = "EMIS"
         assert supplier_name == expected_supplier_name
-
-
 
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "api-url-param-name"})
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "api-key-ssm-param-name"})

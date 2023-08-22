@@ -106,6 +106,13 @@ def _enrich_events(sqs_messages: dict) -> list:
             else "UNKNOWN"
         )
 
+        # temporary fix for EMIS wrong reportingSystemSupplier data        
+        reporting_system_supplier = event["reportingSystemSupplier"]
+        if reporting_system_supplier.isnumeric():
+            print(f"TEMP FIX. Reporting system supplier received: {reporting_system_supplier}. Changed to 'EMIS'.")
+            event["reportingSystemSupplier"] = "EMIS"            
+
+
     return events
 
 

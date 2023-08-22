@@ -106,7 +106,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
         self, mock_boto, mock_request
     ):
 
-        events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}"""
+        events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1", "reportingSystemSupplier": "EMIS"}"""
 
         lambda_input = {"Records": [{"body": events}]}
 
@@ -122,6 +122,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
                     "eventType": "REGISTRATIONS",
                     "requestingPracticeOdsCode": "ODS_1",
                     "sendingPracticeOdsCode": "ODS_1",
+                    "reportingSystemSupplier":"EMIS",
                     "requestingPracticeName": "Test Practice",
                     "requestingPracticeIcbOdsCode": "ODS_1",
                     "requestingPracticeIcbName": "Test Practice",
@@ -129,7 +130,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
                     "sendingPracticeIcbOdsCode": "ODS_1",
                     "sendingPracticeIcbName": "Test Practice",
                     "requestingSupplierName":"EMIS",
-                    "sendingSupplierName":"EMIS",
+                    "sendingSupplierName":"EMIS"                    
                 }
             ]
         )
@@ -150,7 +151,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
         self, mock_boto_client, mock_request
     ):
        
-        events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1"}"""
+        events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1", "reportingSystemSupplier":"EMIS"}"""
 
         lambda_input = {"Records": [{"body": events}]}
 
@@ -170,6 +171,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
                 "sendingPracticeIcbName": "Test Practice",
                 "requestingSupplierName":"EMIS",
                 "sendingSupplierName":"EMIS",
+                "reportingSystemSupplier": "EMIS"
             }
         ]
         assert result == expected_events
@@ -189,7 +191,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
     def test_should_enrich_events_with_empty_fields_if_unable_to_fetch_organisation(
         self, mock_boto_client, mock_requests
     ):
-        events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ods_1", "sendingPracticeOdsCode": "ods_2"}"""
+        events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ods_1", "sendingPracticeOdsCode": "ods_2","reportingSystemSupplier":"EMIS"}"""
 
         lambda_input = {"Records": [{"body": events}]}
 
@@ -209,6 +211,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
                 "sendingPracticeIcbName": None,
                 "requestingSupplierName": "EMIS",
                 "sendingSupplierName": "EMIS",
+                "reportingSystemSupplier": "EMIS"
             }
         ]
         assert result == expected_events

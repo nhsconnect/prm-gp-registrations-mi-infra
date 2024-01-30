@@ -9,7 +9,7 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
   handler       = "event_enrichment_main.lambda_handler"
   source_code_hash = filebase64sha256("${path.cwd}/${var.event_enrichment_lambda_zip}")
   runtime = "python3.9"
-  timeout = 15
+  timeout = 300
   tags = merge(
     local.common_tags,
     {

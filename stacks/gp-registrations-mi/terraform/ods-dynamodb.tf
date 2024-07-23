@@ -30,7 +30,6 @@ resource "aws_dynamodb_table" "mi-api-ods_dynamodb_table" {
     type = "N"
   }
 
-
   tags = {
     Name        = "mi_enrichment_practice_ods"
     Environment = var.environment
@@ -51,7 +50,6 @@ resource "aws_iam_policy" "dynamodb_policy_ods_enrichment_lambda" {
           "dynamodb:GetItem",
           "dynamodb:UpdateItem",
           "dynamodb:PutItem",
-
         ],
         "Resource" : [
           aws_dynamodb_table.mi-api-ods_dynamodb_table.arn

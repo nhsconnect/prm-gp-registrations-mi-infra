@@ -36,7 +36,6 @@ data "aws_iam_policy_document" "event_enrichment_lambda_ssm_access" {
     actions = [
       "ssm:GetParameter"
     ]
-
     resources = [
       "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.sds_fhir_api_key_param_name}",
       "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.sds_fhir_api_url_param_name}",
@@ -78,7 +77,6 @@ data "aws_iam_policy_document" "incoming_event_enrichment_lambda_to_send_to_dlq_
     actions = [
       "sqs:SendMessage"
     ]
-
     resources = [
       aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda_dlq.arn
     ]

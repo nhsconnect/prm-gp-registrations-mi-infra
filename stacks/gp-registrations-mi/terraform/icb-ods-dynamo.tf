@@ -18,7 +18,6 @@ resource "aws_dynamodb_table" "mi-api-icb-ods_dynamodb_table" {
     Name        = "dynamodb-table-1"
     Environment = var.environment
   }
-
 }
 
 resource "aws_iam_policy" "dynamodb_policy_icb_ods_enrichment_lambda" {
@@ -40,7 +39,6 @@ resource "aws_iam_policy" "dynamodb_policy_icb_ods_enrichment_lambda" {
           aws_dynamodb_table.mi-api-ods_dynamodb_table.arn
         ]
       }
-
     ]
   })
 }
@@ -61,7 +59,6 @@ resource "aws_iam_policy" "dynamodb_policy_bulk_icb_ods_data_lambda" {
           aws_dynamodb_table.mi-api-icb-ods_dynamodb_table.arn
         ]
       }
-
     ]
   })
 }

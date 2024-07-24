@@ -19,7 +19,8 @@ resource "aws_iam_role" "bulk_ods_lambda_role" {
   managed_policy_arns = [
     aws_iam_policy.dynamodb_policy_bulk_icb_ods_data_lambda.arn,
     aws_iam_policy.dynamodb_policy_bulk_ods_data_lambda.arn,
-    aws_iam_policy.bulk_ods_update_lambda_cloudwatch_log_access.arn
+    aws_iam_policy.bulk_ods_update_lambda_cloudwatch_log_access.arn,
+    aws_iam_policy.s3_ods_csv_document_data_policy.arn
   ]
 }
 

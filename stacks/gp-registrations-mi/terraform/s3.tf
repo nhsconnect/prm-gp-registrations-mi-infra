@@ -5,15 +5,6 @@ resource "aws_s3_bucket" "mi_events_output" {
     prevent_destroy = true
   }
 
-  lifecycle_rule {
-    enabled = true
-    id      = "expire-mi-objects-after-2-years"
-
-    expiration {
-      days = 730
-    }
-  }
-
   tags = merge(
     local.common_tags,
     {
@@ -21,6 +12,19 @@ resource "aws_s3_bucket" "mi_events_output" {
       ApplicationRole = "AwsS3Bucket"
     }
   )
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "mi_events_lifecycle" {
+  bucket = aws_s3_bucket.mi_events_output.id
+
+  rule {
+    id = "expire-mi-objects-after-2-years"
+    status = "Enabled"
+
+    expiration {
+      days = 730
+    }
+  }
 }
 
 resource "aws_s3_bucket_acl" "mi_events_output" {

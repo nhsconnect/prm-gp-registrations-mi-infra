@@ -59,6 +59,9 @@ pipelines:
                       - TF_VAR_gp_registrations_mi_image_tag=$GO_DEPENDENCY_LABEL_GP_REGISTRATIONS_MI_IMAGE ./tasks dojo-plan gp-registrations-mi dev
       - apply_dev:
           clean_workspace: true
+          approval:
+            type: manual
+            allow_only_on_success: true
           jobs:
             apply:
               resources:

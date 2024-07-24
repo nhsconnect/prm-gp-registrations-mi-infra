@@ -15,7 +15,7 @@ resource "aws_dynamodb_table" "mi-api-icb-ods_dynamodb_table" {
   }
 
   tags = {
-    Name        = "dynamodb-table-1"
+    Name        = "mi_enrichment_icb_ods"
     Environment = var.environment
   }
 }

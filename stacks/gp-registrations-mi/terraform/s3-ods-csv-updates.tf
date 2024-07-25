@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "ods-csv-files-bucket" {
+resource "aws_s3_bucket" "ods_csv_files" {
   bucket        = "${terraform.workspace}-ods-csv-files"
   force_destroy = true
 
@@ -8,11 +8,11 @@ resource "aws_s3_bucket" "ods-csv-files-bucket" {
   }
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "mi_events_lifecycle" {
-  bucket = aws_s3_bucket.mi_events_output.id
+resource "aws_s3_bucket_lifecycle_configuration" "csv_ods" {
+  bucket = aws_s3_bucket.ods_csv_files.id
 
   rule {
-    id = "expire-ods-csv-after-3-months"
+    id     = "expire-ods-csv-after-3-months"
     status = "Enabled"
 
     expiration {
@@ -21,8 +21,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "mi_events_lifecycle" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "ods-csv-files-bucket_output" {
-  bucket = aws_s3_bucket.ods-csv-files-bucket.id
+resource "aws_s3_bucket_public_access_block" "ods_csv_files" {
+  bucket = aws_s3_bucket.ods_csv_files.id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -30,28 +30,28 @@ resource "aws_s3_bucket_public_access_block" "ods-csv-files-bucket_output" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_versioning" "mi_events_output" {
-  bucket = aws_s3_bucket.ods-csv-files-bucket.id
+resource "aws_s3_bucket_versioning" "ods_csv_files" {
+  bucket = aws_s3_bucket.ods_csv_files.id
 
   versioning_configuration {
     status = "Enabled"
   }
 }
 
-resource "aws_s3_bucket_ownership_controls" "s3_bucket_acl_ownership" {
-  bucket = aws_s3_bucket.ods-csv-files-bucket.id
+resource "aws_s3_bucket_ownership_controls" "ods_csv_files" {
+  bucket = aws_s3_bucket.ods_csv_files.id
   rule {
     object_ownership = "ObjectWriter"
   }
 }
 
-resource "aws_s3_bucket_acl" "bucket_acl" {
-  bucket     = aws_s3_bucket.ods-csv-files-bucket.id
-  acl        = "private"
+resource "aws_s3_bucket_acl" "ods_csv_files" {
+  bucket = aws_s3_bucket.ods_csv_files.id
+  acl    = "private"
 }
 
-resource "aws_iam_policy" "s3_ods_csv_document_data_policy" {
-  name = "${terraform.workspace}_${aws_s3_bucket.ods-csv-files-bucket.bucket}_get_document_data_policy"
+resource "aws_iam_policy" "ods_csv_files_data_policy" {
+  name = "${terraform.workspace}_${aws_s3_bucket.ods_csv_files.bucket}_get_document_data_policy"
 
   policy = jsonencode({
     "Version" : "2012-10-17",
@@ -62,8 +62,22 @@ resource "aws_iam_policy" "s3_ods_csv_document_data_policy" {
           "s3:GetObject",
           "s3:PutObject",
         ],
-        "Resource" : ["${aws_s3_bucket.ods-csv-files-bucket}/*"]
+        "Resource" : ["${aws_s3_bucket.ods_csv_files.arn}/*"]
       }
     ]
   })
+}
+
+resource "aws_s3_object" "initial_gp_ods_csv" {
+  bucket = aws_s3_bucket.ods_csv_files.id
+  key    = "init/initial-gps-ods-csv"
+  source = "../ods-csv/initial-gps-ods-csv.csv"
+  etag   = filemd5("")
+}
+
+resource "aws_s3_object" "initial_icb_ods_csv" {
+  bucket = aws_s3_bucket.ods_csv_files.id
+  key    = "init/initial-icb-ods-csv"
+  source = "../ods-csv/initial-gps-ods-csv.csv"
+  etag   = filemd5("")
 }

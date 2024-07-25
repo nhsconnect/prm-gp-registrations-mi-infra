@@ -1,17 +1,29 @@
-resource "aws_dynamodb_table" "mi-api-icb-ods_dynamodb_table" {
+resource "aws_dynamodb_table" "mi_api_icb_ods" {
   name                        = "${var.environment}_mi_enrichment_icb_ods"
   billing_mode                = "PAY_PER_REQUEST"
   deletion_protection_enabled = false
-  hash_key       = "IcbOdsCode"
+  hash_key                    = "IcbOdsCode"
 
   attribute {
     name = "IcbOdsCode"
     type = "S"
   }
 
-  attribute {
-    name = "IcbName"
-    type = "S"
+
+  import_table {
+    input_format           = "CSV"
+    input_compression_type = "NONE"
+    s3_bucket_source {
+      bucket     = aws_s3_bucket.ods_csv_files.id
+      key_prefix = aws_s3_object.initial_icb_ods.key
+    }
+
+    input_format_options {
+      csv {
+        delimiter   = ","
+        header_list = ["IcbOdsCode", "IcbName"]
+      }
+    }
   }
 
   tags = {
@@ -21,7 +33,7 @@ resource "aws_dynamodb_table" "mi-api-icb-ods_dynamodb_table" {
 }
 
 resource "aws_iam_policy" "dynamodb_policy_icb_ods_enrichment_lambda" {
-  name = "${var.environment}_${aws_dynamodb_table.mi-api-icb-ods_dynamodb_table.name}_policy"
+  name = "${var.environment}_${aws_dynamodb_table.mi_api_icb_ods.name}_policy"
   path = "/"
 
   policy = jsonencode({
@@ -33,10 +45,9 @@ resource "aws_iam_policy" "dynamodb_policy_icb_ods_enrichment_lambda" {
           "dynamodb:GetItem",
           "dynamodb:UpdateItem",
           "dynamodb:PutItem",
-
         ],
         "Resource" : [
-          aws_dynamodb_table.mi-api-ods_dynamodb_table.arn
+          aws_dynamodb_table.mi_api_icb_ods.arn
         ]
       }
     ]
@@ -44,7 +55,7 @@ resource "aws_iam_policy" "dynamodb_policy_icb_ods_enrichment_lambda" {
 }
 
 resource "aws_iam_policy" "dynamodb_policy_bulk_icb_ods_data_lambda" {
-  name = "${var.environment}_mi_bulk_${aws_dynamodb_table.mi-api-icb-ods_dynamodb_table.name}_policy"
+  name = "${var.environment}_mi_bulk_${aws_dynamodb_table.mi_api_icb_ods.name}_policy"
   path = "/"
 
   policy = jsonencode({
@@ -56,7 +67,7 @@ resource "aws_iam_policy" "dynamodb_policy_bulk_icb_ods_data_lambda" {
           "dynamodb:UpdateItem",
         ],
         "Resource" : [
-          aws_dynamodb_table.mi-api-icb-ods_dynamodb_table.arn
+          aws_dynamodb_table.mi_api_icb_ods.arn
         ]
       }
     ]

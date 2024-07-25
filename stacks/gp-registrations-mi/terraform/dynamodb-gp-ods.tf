@@ -1,33 +1,13 @@
-resource "aws_dynamodb_table" "mi-api-ods_dynamodb_table" {
+resource "aws_dynamodb_table" "mi_api_gp_ods" {
   name                        = "${var.environment}_mi_enrichment_practice_ods"
   billing_mode                = "PAY_PER_REQUEST"
   deletion_protection_enabled = false
 
-  hash_key       = "PracticeOdsCode"
+  hash_key = "PracticeOdsCode"
 
   attribute {
     name = "PracticeOdsCode"
     type = "S"
-  }
-
-  attribute {
-    name = "PracticeName"
-    type = "S"
-  }
-
-  attribute {
-    name = "IcbOdsCode"
-    type = "S"
-  }
-
-  attribute {
-    name = "SupplierName"
-    type = "S"
-  }
-
-  attribute {
-    name = "SDSLastUpdated"
-    type = "N"
   }
 
   tags = {
@@ -35,10 +15,24 @@ resource "aws_dynamodb_table" "mi-api-ods_dynamodb_table" {
     Environment = var.environment
   }
 
+  import_table {
+    input_format           = "CSV"
+    input_compression_type = "NONE"
+    s3_bucket_source {
+      bucket     = aws_s3_bucket.ods_csv_files.id
+      key_prefix = aws_s3_object.initial_gp_ods.key
+    }
+    input_format_options {
+      csv {
+        delimiter   = ","
+        header_list = ["PracticeOdsCode", "PracticeName", "IcbOdsCode"]
+      }
+    }
+  }
 }
 
 resource "aws_iam_policy" "dynamodb_policy_ods_enrichment_lambda" {
-  name = "${var.environment}_${aws_dynamodb_table.mi-api-ods_dynamodb_table.name}_policy"
+  name = "${var.environment}_${aws_dynamodb_table.mi_api_gp_ods.name}_policy"
   path = "/"
 
   policy = jsonencode({
@@ -52,10 +46,9 @@ resource "aws_iam_policy" "dynamodb_policy_ods_enrichment_lambda" {
           "dynamodb:PutItem",
         ],
         "Resource" : [
-          aws_dynamodb_table.mi-api-ods_dynamodb_table.arn
+          aws_dynamodb_table.mi_api_gp_ods.arn
         ]
       }
-
     ]
   })
 }
@@ -73,10 +66,9 @@ resource "aws_iam_policy" "dynamodb_policy_bulk_ods_data_lambda" {
           "dynamodb:UpdateItem",
         ],
         "Resource" : [
-          aws_dynamodb_table.mi-api-ods_dynamodb_table.arn
+          aws_dynamodb_table.mi_api_gp_ods.arn
         ]
       }
-
     ]
   })
 }

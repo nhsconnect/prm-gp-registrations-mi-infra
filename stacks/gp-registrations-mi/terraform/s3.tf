@@ -8,17 +8,17 @@ resource "aws_s3_bucket" "mi_events_output" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-prm-gp-registrations-mi-s3-mi-events"
+      Name            = "${var.environment}-prm-gp-registrations-mi-s3-mi-events"
       ApplicationRole = "AwsS3Bucket"
     }
   )
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "mi_events_lifecycle" {
+resource "aws_s3_bucket_lifecycle_configuration" "mi_events_output" {
   bucket = aws_s3_bucket.mi_events_output.id
 
   rule {
-    id = "expire-mi-objects-after-2-years"
+    id     = "expire-mi-objects-after-2-years"
     status = "Enabled"
 
     expiration {

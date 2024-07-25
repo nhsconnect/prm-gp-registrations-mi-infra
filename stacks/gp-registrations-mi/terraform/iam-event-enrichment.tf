@@ -1,5 +1,5 @@
 #Lambda
-resource "aws_iam_role" "event_enrichment_lambda_role" {
+resource "aws_iam_role" "event_enrichment_lambda" {
   name               = "${var.environment}-event-enrichment-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = [
@@ -13,7 +13,7 @@ resource "aws_iam_role" "event_enrichment_lambda_role" {
   ]
 }
 
-resource "aws_iam_role" "bulk_ods_lambda_role" {
+resource "aws_iam_role" "bulk_ods_lambda" {
   name               = "${var.environment}-bulk-ods-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = [

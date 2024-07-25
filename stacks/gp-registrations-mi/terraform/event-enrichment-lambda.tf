@@ -3,17 +3,17 @@ variable "event_enrichment_lambda_name" {
 }
 
 resource "aws_lambda_function" "event_enrichment_lambda" {
-  filename      = "${path.cwd}/${var.event_enrichment_lambda_zip}"
-  function_name = "${var.environment}-${var.event_enrichment_lambda_name}"
-  role          = aws_iam_role.event_enrichment_lambda_role.arn
-  handler       = "event_enrichment_main.lambda_handler"
+  filename         = "${path.cwd}/${var.event_enrichment_lambda_zip}"
+  function_name    = "${var.environment}-${var.event_enrichment_lambda_name}"
+  role             = aws_iam_role.event_enrichment_lambda_role.arn
+  handler          = "event_enrichment_main.lambda_handler"
   source_code_hash = filebase64sha256("${path.cwd}/${var.event_enrichment_lambda_zip}")
-  runtime = "python3.12"
-  timeout = 300
+  runtime          = "python3.12"
+  timeout          = 300
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi"
+      Name            = "${var.environment}-gp-registrations-mi"
       ApplicationRole = "AwsLambdaFunction"
     }
   )
@@ -21,9 +21,9 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
   environment {
     variables = {
       SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.url,
-      ENRICHED_EVENTS_SNS_TOPIC_ARN = aws_sns_topic.enriched_events_topic.arn,
-      SDS_FHIR_API_KEY_PARAM_NAME = var.sds_fhir_api_key_param_name,
-      SDS_FHIR_API_URL_PARAM_NAME = var.sds_fhir_api_url_param_name,
+      ENRICHED_EVENTS_SNS_TOPIC_ARN             = aws_sns_topic.enriched_events_topic.arn,
+      SDS_FHIR_API_KEY_PARAM_NAME               = var.sds_fhir_api_key_param_name,
+      SDS_FHIR_API_URL_PARAM_NAME               = var.sds_fhir_api_url_param_name,
     }
   }
 }
@@ -35,7 +35,7 @@ resource "aws_lambda_event_source_mapping" "sqs_queue_event_enrichment_lambda_tr
     filter {
       pattern = jsonencode({
         body = {
-          eventType :  [ { "anything-but": [ "DEGRADES" ] } ]
+          eventType : [{ "anything-but" : ["DEGRADES"] }]
         }
       })
     }
@@ -47,7 +47,7 @@ resource "aws_cloudwatch_log_group" "event_enrichment_lambda" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-${var.event_enrichment_lambda_name}"
+      Name            = "${var.environment}-${var.event_enrichment_lambda_name}"
       ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )

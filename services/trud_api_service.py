@@ -10,9 +10,9 @@ class TrudItem(Enum):
 
 
 class TrudApiService:
-    def __init__(self):
-        self.api_key = ''
-        self.api_url = ''
+    def __init__(self, api_key, api_url):
+        self.api_key = api_key
+        self.api_url = api_url
 
     def get_release_list(self, item_number: TrudItem, is_latest=False):
         latest = '?latest' if is_latest else ''
@@ -36,4 +36,6 @@ class TrudApiService:
 
     def unzipping_files(self, zip_file, path=None, byte: bool = False):
         myzip = ZipFile(BytesIO(zip_file) if byte else zip_file)
-        return myzip.extract(path)
+        if path in myzip.namelist():
+            return myzip.extract(path)
+        return None

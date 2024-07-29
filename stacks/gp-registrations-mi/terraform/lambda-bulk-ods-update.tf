@@ -1,7 +1,7 @@
 resource "aws_lambda_function" "ods_bulk_update" {
   filename         = "${path.cwd}/${var.ods_bulk_update_lambda_name}"
   function_name    = "${var.environment}-${var.ods_bulk_update_lambda_name}"
-  role             = aws_iam_role.bulk_ods_lambda_role.arn
+  role             = aws_iam_role.bulk_ods_lambda.arn
   handler          = "ods_bulk_update.lambda_handler"
   source_code_hash = filebase64sha256("${path.cwd}/${var.bulk_ods_update_lambda_zip}")
   runtime          = "python3.12"

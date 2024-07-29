@@ -1,4 +1,5 @@
 import csv
+import sys
 
 from services.trud_api_service import TrudApiService, TrudItem
 
@@ -22,7 +23,7 @@ def get_gp_latest_ods_csv(service):
     release_list_response = service.get_release_list(TrudItem.NHS_ODS_WEEKLY, True)
     download_file = service.get_download_file(release_list_response[0].get('archiveFileUrl'))
     epraccur_zip_file = service.unzipping_files(download_file,'Data/epraccur.zip', True)
-    epraccur_csv_file = service.unzipping_files(epraccur_zip_file, 'epraccur.zip')
+    epraccur_csv_file = service.unzipping_files(epraccur_zip_file, 'epraccur.csv')
     create_modify_csv(epraccur_csv_file, 'full_modify_gps_ods.csv', GP_FILE_HEADERS , ['OdsCode', 'GpName', 'IcbOdsCode'])
 
 def get_icb_latest_ods_csv(service):
@@ -33,12 +34,19 @@ def get_icb_latest_ods_csv(service):
 
         is_quarterly_release = release.endswith('.0.0')
         zip_file_path = ICB_MONTHLY_FILE_PATH if not is_quarterly_release else ICB_QUARTERLY_FILE_PATH
-        output_name = 'update_icb' + release if not is_quarterly_release else 'full_icb' + release
+        output_name = 'update_icb_' + release if not is_quarterly_release else 'full_icb_' + release + '.csv'
         csv_file_name = ICB_MONTHLY_FILE_NAME if not is_quarterly_release else ICB_QUARTERLY_FILE_NAME
 
-        epraccur_zip_file = service.unzipping_files(download_file, zip_file_path, True)
-        epraccur_csv_file = service.unzipping_files(epraccur_zip_file, csv_file_name)
-        create_modify_csv(epraccur_csv_file, output_name, GP_FILE_HEADERS , ['OdsCode', 'IcbName'])
+        if epraccur_zip_file:= service.unzipping_files(download_file, zip_file_path, True):
+            if epraccur_csv_file := service.unzipping_files(epraccur_zip_file, csv_file_name):
+                create_modify_csv(epraccur_csv_file, output_name, ICB_FILE_HEADERS , ['OdsCode', 'IcbName'])
 
-trud_service = TrudApiService()
-get_gp_latest_ods_csv(trud_service)
+
+if __name__ == "__main__":
+    try:
+        trud_service = TrudApiService(sys.argv[1], sys.argv[2])
+        get_gp_latest_ods_csv(trud_service)
+        get_icb_latest_ods_csv(trud_service)
+        print("\nOds download process complete.")
+    except Exception as e:
+        print(f"\nExiting Process! {e}")

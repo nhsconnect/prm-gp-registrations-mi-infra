@@ -1,0 +1,22 @@
+name: 'pr-gp-registrations-mi'
+on:
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  pull-requests: write
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
+jobs:
+  terraform_plan:
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [ dev ]
+    uses: ./.github/workflows/base-gp-registrations-mi-plan.yml
+    with:
+      environment: ${{ matrix.environment }}
+    secrets: inherit
+

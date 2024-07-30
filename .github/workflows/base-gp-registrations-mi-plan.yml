@@ -1,0 +1,64 @@
+name: 'gp-registrations-mi-task'
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Which Environment settings to use."
+        required: true
+        type: "string"
+        default: "dev"
+
+jobs:
+  terraform_process:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}
+          role-skip-session-tagging: true
+
+      - name: View AWS Role
+        run: aws sts get-caller-identity
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: Terraform Init
+        id: init
+        run: | 
+          terraform init -backend-config key=${{ secrets.AWS_STATE_S3_KEY }} \
+          -backend-config bucket=${{ secrets.AWS_STATE_BUCKET }} \
+          -backend-config dynamodb_table=${{ secrets.AWS_STATE_LOCK_TABLE }} \
+          -backend-config region=${{ vars.AWS_REGION }}
+        working-directory: ./stacks/gp-registrations-mi/terraform
+        shell: bash
+
+      - name: terraform validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ./stacks/gp-registrations-mi/terraform
+
+      - name: Terraform Format
+        run: terraform fmt -check
+        working-directory: ./stacks/gp-registrations-mi/terraform
+
+      - name: Build lambdas
+        run: | 
+            ./tasks build-lambda
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan -input=false -var environment=${{ matrix.environment }} -no-color -var-file=./stacks/gp-registrations-mi/vars/${{ matrix.environment }}.tfvars -out /stacks/gp-registrations-mi/terraform/${{ matrix.sandbox-name }}.tfplan
+        working-directory: ./stacks/gp-registrations-mi/terraform
+        shell: bash

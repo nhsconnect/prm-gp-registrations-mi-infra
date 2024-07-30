@@ -1,0 +1,34 @@
+name: 'base-gp-registrations-mi-apply'
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Which Environment settings to use."
+        required: true
+        type: "string"
+        default: "dev"
+
+jobs:
+  apply_terraform:
+    name: Applying terraform on ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Make virtual environment
+        run: |
+            python3 -m venv ./venv
+            ./venv/bin/pip3 install --upgrade pip requests
+
+      - name: Get ods csv files
+        if: github.ref == 'refs/heads/master'
+        run: |
+          PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 stacks/gp-registrations-mi/scripts/get_latest_ods_csv.py ${{ secrets.TRUD_API_KEY }} ${{ vars.TRUD_API_URL }}
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/master'
+        run: terraform apply -auto-approve -input=false tf.plan
+        working-directory: ./stacks/gp-registrations-mi/terraform

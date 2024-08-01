@@ -1,7 +1,7 @@
 resource "aws_dynamodb_table" "mi_api_gp_ods" {
   name                        = "${var.environment}_mi_enrichment_practice_ods"
   billing_mode                = "PAY_PER_REQUEST"
-  deletion_protection_enabled = false
+  deletion_protection_enabled = true
 
   hash_key = "PracticeOdsCode"
 

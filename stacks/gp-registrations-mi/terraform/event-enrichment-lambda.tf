@@ -7,7 +7,7 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
   function_name    = "${var.environment}-${var.event_enrichment_lambda_name}"
   role             = aws_iam_role.event_enrichment_lambda_role.arn
   handler          = "event_enrichment_main.lambda_handler"
-  source_code_hash = filebase64sha256("${path.cwd}/${var.event_enrichment_lambda_zip}")
+  source_code_hash = filebase64sha256(var.event_enrichment_lambda_zip)
   runtime          = "python3.12"
   timeout          = 300
   tags = merge(

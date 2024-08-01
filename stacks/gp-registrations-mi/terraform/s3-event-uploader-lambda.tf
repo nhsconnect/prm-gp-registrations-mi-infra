@@ -3,17 +3,17 @@ variable "s3_event_uploader_lambda_name" {
 }
 
 resource "aws_lambda_function" "s3_event_uploader_lambda" {
-  filename      = "${path.cwd}/${var.s3_event_uploader_lambda_zip}"
-  function_name = "${var.environment}-${var.s3_event_uploader_lambda_name}"
-  role          = aws_iam_role.s3_event_uploader_role.arn
-  handler       = "s3_event_uploader_main.lambda_handler"
-  source_code_hash = filebase64sha256("${path.cwd}/${var.s3_event_uploader_lambda_zip}")
-  runtime = "python3.9"
-  timeout = 15
+  filename         = "${path.cwd}/${var.s3_event_uploader_lambda_zip}"
+  function_name    = "${var.environment}-${var.s3_event_uploader_lambda_name}"
+  role             = aws_iam_role.s3_event_uploader_role.arn
+  handler          = "s3_event_uploader_main.lambda_handler"
+  source_code_hash = filebase64sha256(var.s3_event_uploader_lambda_zip)
+  runtime          = "python3.9"
+  timeout          = 15
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-${var.s3_event_uploader_lambda_name}"
+      Name            = "${var.environment}-${var.s3_event_uploader_lambda_name}"
       ApplicationRole = "AwsLambdaFunction"
     }
   )
@@ -35,7 +35,7 @@ resource "aws_cloudwatch_log_group" "s3_event_uploader_lambda" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-${var.s3_event_uploader_lambda_name}"
+      Name            = "${var.environment}-${var.s3_event_uploader_lambda_name}"
       ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )

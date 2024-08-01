@@ -20,7 +20,7 @@ resource "aws_dynamodb_table" "mi_api_gp_ods" {
     input_compression_type = "NONE"
     s3_bucket_source {
       bucket     = aws_s3_bucket.ods_csv_files.id
-      key_prefix = aws_s3_object.initial_gp_ods.key
+      key_prefix = aws_s3_object.initial_gp_ods_csv.key
     }
     input_format_options {
       csv {

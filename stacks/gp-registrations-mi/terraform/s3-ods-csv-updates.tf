@@ -71,13 +71,18 @@ resource "aws_iam_policy" "ods_csv_files_data_policy" {
 resource "aws_s3_object" "initial_gp_ods_csv" {
   bucket = aws_s3_bucket.ods_csv_files.id
   key    = "init/initial-gps-ods-csv"
-  source = "../scripts/full_modify_gps_ods.csv"
-  etag   = filemd5("")
+  source = "../scripts/initial_full_gps_ods.csv"
+  lifecycle {
+    ignore_changes = all
+  }
 }
+
 
 resource "aws_s3_object" "initial_icb_ods_csv" {
   bucket = aws_s3_bucket.ods_csv_files.id
   key    = "init/initial-icb-ods-csv"
-  source = "../scripts/full_icb_Release 2.0.0.csv"
-  etag   = filemd5("")
+  source = "../scripts/initial_full_icb_ods.csv"
+  lifecycle {
+    ignore_changes = all
+  }
 }

@@ -3,17 +3,17 @@ variable "splunk_cloud_event_uploader_lambda_name" {
 }
 
 resource "aws_lambda_function" "splunk_cloud_event_uploader_lambda" {
-  filename      = "${path.cwd}/${var.splunk_cloud_event_uploader_lambda_zip}"
-  function_name = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
-  role          = aws_iam_role.splunk_cloud_event_uploader_lambda_role.arn
-  handler       = "splunk_cloud_event_uploader_main.lambda_handler"
-  source_code_hash = filebase64sha256("${path.cwd}/${var.splunk_cloud_event_uploader_lambda_zip}")
-  runtime = "python3.9"
-  timeout = 15
+  filename         = "${path.cwd}/${var.splunk_cloud_event_uploader_lambda_zip}"
+  function_name    = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
+  role             = aws_iam_role.splunk_cloud_event_uploader_lambda_role.arn
+  handler          = "splunk_cloud_event_uploader_main.lambda_handler"
+  source_code_hash = filebase64sha256(var.splunk_cloud_event_uploader_lambda_zip)
+  runtime          = "python3.9"
+  timeout          = 15
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
+      Name            = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
       ApplicationRole = "AwsLambdaFunction"
     }
   )
@@ -21,7 +21,7 @@ resource "aws_lambda_function" "splunk_cloud_event_uploader_lambda" {
   environment {
     variables = {
       SPLUNK_CLOUD_API_TOKEN = var.splunk_cloud_api_token_param_name,
-      SPLUNK_CLOUD_URL = var.splunk_cloud_url_param_name
+      SPLUNK_CLOUD_URL       = var.splunk_cloud_url_param_name
     }
   }
 }
@@ -36,7 +36,7 @@ resource "aws_cloudwatch_log_group" "splunk_cloud_event_uploader_lambda" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
+      Name            = "${var.environment}-${var.splunk_cloud_event_uploader_lambda_name}"
       ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )

@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         environment: [ dev ]
-    uses: ./.github/workflows/base-gp-registrations-mi-plan.yml
+    uses: ./.github/workflows/base-gp-registrations-mi.yml
     with:
       environment: ${{ matrix.environment }}
     secrets: inherit

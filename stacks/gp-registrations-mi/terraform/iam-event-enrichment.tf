@@ -1,5 +1,5 @@
 #Lambda
-resource "aws_iam_role" "event_enrichment_lambda" {
+resource "aws_iam_role" "event_enrichment_lambda_role" {
   name               = "${var.environment}-event-enrichment-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   managed_policy_arns = [
@@ -20,7 +20,7 @@ resource "aws_iam_role" "bulk_ods_lambda" {
     aws_iam_policy.dynamodb_policy_bulk_icb_ods_data_lambda.arn,
     aws_iam_policy.dynamodb_policy_bulk_ods_data_lambda.arn,
     aws_iam_policy.bulk_ods_update_lambda_cloudwatch_log_access.arn,
-    aws_iam_policy.s3_ods_csv_document_data_policy.arn
+    aws_iam_policy.ods_csv_files_data_policy.arn
   ]
 }
 

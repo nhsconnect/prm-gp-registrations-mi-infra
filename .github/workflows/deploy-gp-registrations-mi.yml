@@ -15,11 +15,7 @@ permissions:
 
 jobs:
   terraform_plan:
-    strategy:
-      fail-fast: false
-      matrix:
-        environment: [ dev ]
     uses: ./.github/workflows/base-gp-registrations-mi.yml
     with:
-      environment: ${{ matrix.environment }}
+      environment: ${{ inputs.environment }}
     secrets: inherit

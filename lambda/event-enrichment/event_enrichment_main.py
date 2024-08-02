@@ -1,9 +1,13 @@
 import json
 import os
+from datetime import date, timedelta
+from time import strptime
 from typing import Optional
 
 import boto3
 import urllib3
+
+from services.ods_models import PracticeOds, IcbOds
 
 ODS_PORTAL_URL = "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations/"
 ICB_ROLE_ID = "RO98"
@@ -65,38 +69,12 @@ def _enrich_events(sqs_messages: dict) -> list:
                 f"Skipping enrichment for degrades event with eventId: {event['eventId']}."
             )
             continue
-        
         # set requesting practice info
-        requesting_practice_organisation = _fetch_organisation(
-            event["requestingPracticeOdsCode"]
-        )
-        event["requestingPracticeName"] = requesting_practice_organisation["Name"]
-        event["requestingPracticeIcbOdsCode"] = _find_icb_ods_code(
-            requesting_practice_organisation
-        )
-        event["requestingPracticeIcbName"] = _fetch_organisation(
-            event["requestingPracticeIcbOdsCode"]
-        )["Name"]
-
+        event.update(**_requesting_practice_info(ods_code=event["requestingPracticeOdsCode"], practice_name_key="requestingPracticeName", icb_name_key="requestingPracticeIcbName", icb_ods_code_key="requestingPracticeIcbOdsCode", supplier_key="requestingSupplierName" ))
         # set sending practice info
-        sending_practice_organisation = _fetch_organisation(
-            event["sendingPracticeOdsCode"]
-        )
-        event["sendingPracticeName"] = sending_practice_organisation["Name"]
-        event["sendingPracticeIcbOdsCode"] = _find_icb_ods_code(
-            sending_practice_organisation
-        )
-        event["sendingPracticeIcbName"] = _fetch_organisation(
-            event["sendingPracticeIcbOdsCode"]
-        )["Name"]
-
+        event.update(**_requesting_practice_info(ods_code=event["sendingPracticeOdsCode"], practice_name_key="sendingPracticeName", icb_name_key="sendingPracticeIcbName", icb_ods_code_key="sendingPracticeIcbOdsCode", supplier_key="sendingSupplierName" ))
         # set requesting supplier info
-        requesting_supplier_name = get_supplier_name(event["requestingPracticeOdsCode"])
-        event["requestingSupplierName"] = (
-            requesting_supplier_name
-            if requesting_supplier_name is not None
-            else "UNKNOWN"
-        )
+
 
         # set sending supplier info
         sending_supplier_name = get_supplier_name(event["sendingPracticeOdsCode"])
@@ -114,6 +92,44 @@ def _enrich_events(sqs_messages: dict) -> list:
 
 
     return events
+
+def _requesting_practice_info(ods_code: str, practice_name_key,  icb_name_key, icb_ods_code_key, supplier_key) -> dict:
+    enrichment_info ={}
+    new_gp_info_from_api = False
+    try:
+        gp_dynamo_item = get_gp_data_from_dynamo_request(ods_code)
+        enrichment_info.update({practice_name_key: gp_dynamo_item.practice_name, icb_ods_code_key: gp_dynamo_item.icb_ods_code})
+        requesting_supplier_name = gp_dynamo_item.supplier_name
+        date_one_month_ago = date.today() - timedelta(days=30)
+        if requesting_supplier_name is None or strptime(gp_dynamo_item.supplier_last_updated, '%d/%m/%Y') > date_one_month_ago:
+            requesting_supplier_name = get_supplier_name(ods_code)
+            new_gp_info_from_api = True
+        enrichment_info[supplier_key] = requesting_supplier_name if requesting_supplier_name is not None else "UNKNOWN"
+    except PracticeOds.DoesNotExist:
+
+        requesting_practice_organisation = _fetch_organisation(
+            ods_code
+        )
+        enrichment_info[practice_name_key] = requesting_practice_organisation["Name"]
+
+        enrichment_info[icb_ods_code_key] = _find_icb_ods_code(
+            requesting_practice_organisation
+        )
+        new_gp_info_from_api = True
+
+    if new_gp_info_from_api:
+        pass
+    if enrichment_info[icb_ods_code_key] is None:
+        enrichment_info.update({icb_name_key: None})
+    try:
+        icb_dynamo_item = IcbOds.get(enrichment_info.get(icb_name_key))
+        enrichment_info.update({icb_ods_code_key: icb_dynamo_item.icb_name})
+    except IcbOds.DoesNotExist:
+        enrichment_info[icb_name_key] = _fetch_organisation(
+            enrichment_info[icb_ods_code_key]
+        )["Name"]
+        new_values_from_api = True
+    return enrichment_info
 
 
 def _find_icb_ods_code(practice_organisation: dict) -> Optional[str]:
@@ -295,4 +311,21 @@ def get_supplier_name(practice_ods_code: str) -> Optional[str]:
 
     return supplier_name
     
-    
+def get_gp_data_from_dynamo_request(ods_code: str):
+    return PracticeOds.get(ods_code)
+
+def get_icb_data_from_dynamo_request(ods_code: str):
+    return IcbOds.get(ods_code)
+
+def update_dynamo_request(table_name: str, ods_code: str):
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(table_name)
+    table.update_item(
+        Key={
+            'OdsCode': ods_code,
+        },
+        UpdateExpression='SET age = :val1',
+        ExpressionAttributeValues={
+            ':val1': 26
+        }
+    )

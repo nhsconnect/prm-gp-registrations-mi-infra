@@ -2,6 +2,8 @@
 
 set -Eeo pipefail
 
+task="$1"
+
 function build_lambda {
     lambda_name=$1
     lambda_services=$2

@@ -2,7 +2,6 @@
 
 set -Eeo pipefail
 
-
 function build_lambda {
     lambda_name=$1
     lambda_services=$2
@@ -26,7 +25,8 @@ function build_lambda {
     popd
 }
 
-
+echo "--- ${task} ---"
+case "${task}" in
 build-lambdas)
   build_lambda error-alarm-alert
   build_lambda splunk-cloud-event-uploader

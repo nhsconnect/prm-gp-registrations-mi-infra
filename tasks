@@ -2,10 +2,10 @@
 
 set -Eeo pipefail
 
-if [ "$#" -ne 3 ]; then
-  echo "Usage: $0 TASK STACK STACK-ENVIRONMENT"
-  exit 1
-fi
+#if [ "$#" -ne 3 ]; then
+#  echo "Usage: $0 TASK STACK STACK-ENVIRONMENT"
+#  exit 1
+#fi
 
 task="$1"
 stack_name="$2"

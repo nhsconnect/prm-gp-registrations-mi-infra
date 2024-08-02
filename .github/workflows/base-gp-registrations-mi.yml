@@ -48,7 +48,6 @@ jobs:
 
       - name: Build Lambdas
         run: | 
-           sudo apt-get install jq
             ./tasks build-lambda
 
       - name: Set up Python

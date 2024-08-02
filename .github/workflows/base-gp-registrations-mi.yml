@@ -48,7 +48,7 @@ jobs:
 
       - name: Build Lambdas
         run: | 
-            ./tasks build-lambda
+            ./tasks_github_actions.sh build-lambdas
 
       - name: Set up Python
         if: github.ref == 'refs/heads/master'

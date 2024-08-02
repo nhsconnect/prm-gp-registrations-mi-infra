@@ -2,21 +2,20 @@
 
 set -Eeo pipefail
 
-#if [ "$#" -ne 3 ]; then
-#  echo "Usage: $0 TASK STACK STACK-ENVIRONMENT"
-#  exit 1
-#fi
+if [ "$#" -ne 3 ]; then
+  echo "Usage: $0 TASK STACK STACK-ENVIRONMENT"
+  exit 1
+fi
 
 task="$1"
 stack_name="$2"
 stack_env="$3"
 state_region="eu-west-2"
 tf_dir=stacks/${stack_name}/terraform
-# Temporarily disabled until removing environment.json
-#env_name=$(jq -r .${stack_env}.name environment.json)
-#state_lock_table=$(jq -r .${stack_env}.dynamo_table environment.json)
-#state_bucket=$(jq -r .${stack_env}.bucket_name environment.json)
-#s3_state_key=$(jq -r .${stack_env}.state_key_prefix environment.json)${stack_name}/terraform.tfstate
+env_name=$(jq -r .${stack_env}.name environment.json)
+state_lock_table=$(jq -r .${stack_env}.dynamo_table environment.json)
+state_bucket=$(jq -r .${stack_env}.bucket_name environment.json)
+s3_state_key=$(jq -r .${stack_env}.state_key_prefix environment.json)${stack_name}/terraform.tfstate
 
 function assume_role() {
   role_arn_param=$(jq -r .${stack_env}.role_arn_param environment.json)

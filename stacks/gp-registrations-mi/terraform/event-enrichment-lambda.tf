@@ -24,6 +24,8 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
       ENRICHED_EVENTS_SNS_TOPIC_ARN             = aws_sns_topic.enriched_events_topic.arn,
       SDS_FHIR_API_KEY_PARAM_NAME               = var.sds_fhir_api_key_param_name,
       SDS_FHIR_API_URL_PARAM_NAME               = var.sds_fhir_api_url_param_name,
+      GP_ODS_DYNAMO_TABLE_NAME                  = aws_dynamodb_table.mi_api_gp_ods.name,
+      ICB_ODS_DYNAMO_TABLE_NAME                 = aws_dynamodb_table.mi_api_icb_ods.name,
     }
   }
 }

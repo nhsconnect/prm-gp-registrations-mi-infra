@@ -20,8 +20,7 @@ resource "aws_dynamodb_table" "mi_api_icb_ods" {
 
     input_format_options {
       csv {
-        delimiter   = ","
-        header_list = ["IcbOdsCode", "IcbName"]
+        delimiter = ","
       }
     }
   }
@@ -33,7 +32,7 @@ resource "aws_dynamodb_table" "mi_api_icb_ods" {
 }
 
 resource "aws_iam_policy" "dynamodb_policy_icb_ods_enrichment_lambda" {
-  name = "${var.environment}_${aws_dynamodb_table.mi_api_icb_ods.name}_policy"
+  name = "dynamodb_${aws_dynamodb_table.mi_api_icb_ods.name}_enrichment_lambda_policy"
   path = "/"
 
   policy = jsonencode({
@@ -55,7 +54,7 @@ resource "aws_iam_policy" "dynamodb_policy_icb_ods_enrichment_lambda" {
 }
 
 resource "aws_iam_policy" "dynamodb_policy_bulk_icb_ods_data_lambda" {
-  name = "${var.environment}_mi_bulk_${aws_dynamodb_table.mi_api_icb_ods.name}_policy"
+  name = "dynamodb_${aws_dynamodb_table.mi_api_icb_ods.name}_bulk_update_lambda_policy"
   path = "/"
 
   policy = jsonencode({

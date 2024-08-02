@@ -24,15 +24,14 @@ resource "aws_dynamodb_table" "mi_api_gp_ods" {
     }
     input_format_options {
       csv {
-        delimiter   = ","
-        header_list = ["PracticeOdsCode", "PracticeName", "IcbOdsCode"]
+        delimiter = ","
       }
     }
   }
 }
 
 resource "aws_iam_policy" "dynamodb_policy_ods_enrichment_lambda" {
-  name = "${var.environment}_${aws_dynamodb_table.mi_api_gp_ods.name}_policy"
+  name = "dynamodb_${aws_dynamodb_table.mi_api_gp_ods.name}_enrichment_lambda_policy"
   path = "/"
 
   policy = jsonencode({
@@ -54,7 +53,7 @@ resource "aws_iam_policy" "dynamodb_policy_ods_enrichment_lambda" {
 }
 
 resource "aws_iam_policy" "dynamodb_policy_bulk_ods_data_lambda" {
-  name = "${var.environment}_mi_bulk_ods_policy"
+  name = "dynamodb_${aws_dynamodb_table.mi_api_gp_ods.name}_bulk_update_lambda_policy"
   path = "/"
 
   policy = jsonencode({

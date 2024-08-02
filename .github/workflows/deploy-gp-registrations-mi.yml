@@ -1,4 +1,4 @@
-name: deploy-gp-registrations-mi.yml
+name: deploy-gp-registrations-mi
 on:
   workflow_dispatch:
       inputs:
@@ -6,7 +6,10 @@ on:
           default: "dev"
           description: "Which environment should this run against"
           required: true
-          type: "string"
+          type: choice
+          options:
+            - dev
+            - prod
 
 permissions:
   pull-requests: write

@@ -135,5 +135,7 @@ variable "sds_fhir_api_url_param_name" {
 }
 
 variable "ods_bulk_update_lambda_name" {
-  default = "ods_bulk_update_lambda"
+  default     = "ods_bulk_update_lambda"
+  type        = string
+  description = "Name of the ODS bulk upload lambda"
 }

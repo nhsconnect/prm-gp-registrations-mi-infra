@@ -1,5 +1,5 @@
 resource "aws_lambda_function" "ods_bulk_update" {
-  filename         = "${path.cwd}/${var.ods_bulk_update_lambda_name}"
+  filename         = var.ods_bulk_update_lambda_name
   function_name    = "${var.environment}-${var.ods_bulk_update_lambda_name}"
   role             = aws_iam_role.bulk_ods_lambda.arn
   handler          = "ods_bulk_update.lambda_handler"
@@ -10,12 +10,15 @@ resource "aws_lambda_function" "ods_bulk_update" {
     variables = {
       TRUD_API_KEY_PARAM_NAME      = data.aws_ssm_parameter.trud_api_key.value,
       TRUD_FHIR_API_URL_PARAM_NAME = data.aws_ssm_parameter.trud_api_endpoint.value,
+      GP_ODS_DYNAMO_TABLE_NAME     = aws_dynamodb_table.mi_api_gp_ods.name,
+      ICB_ODS_DYNAMO_TABLE_NAME    = aws_dynamodb_table.mi_api_icb_ods.name,
+      ODS_S3_BUCKET_NAME           = aws_s3_bucket.ods_csv_files.bucket
     }
   }
   tags = merge(
     local.common_tags,
     {
-      Name            = "${var.environment}-gp-mi-ods_bulk"
+      Name            = "${var.environment}-gp-mi-ods-bulk"
       ApplicationRole = "AwsLambdaFunction"
     }
   )
@@ -34,11 +37,11 @@ resource "aws_cloudwatch_log_group" "bulk_ods_update_lambda" {
 }
 
 data "aws_ssm_parameter" "trud_api_key" {
-  name = "/registrations/dev/user-input/trud-api-key"
+  name = "/registrations/${var.environment}/user-input/trud-api-key"
 }
 
 data "aws_ssm_parameter" "trud_api_endpoint" {
-  name = "/registrations/dev/user-input/trud-api-url"
+  name = "/registrations/${var.environment}/user-input/trud-api-url"
 }
 
 resource "aws_cloudwatch_event_rule" "ods_bulk_update_schedule" {
@@ -49,7 +52,7 @@ resource "aws_cloudwatch_event_rule" "ods_bulk_update_schedule" {
 
 resource "aws_cloudwatch_event_target" "ods_bulk_update_schedule_event" {
   rule      = aws_cloudwatch_event_rule.ods_bulk_update_schedule.name
-  target_id = "ods_bulk_update_schedule_chedule"
+  target_id = "ods_bulk_update_schedule"
 
   arn = aws_lambda_function.ods_bulk_update.arn
   depends_on = [

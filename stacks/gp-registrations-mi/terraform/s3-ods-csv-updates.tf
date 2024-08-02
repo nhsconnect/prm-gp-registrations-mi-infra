@@ -1,14 +1,14 @@
 resource "aws_s3_bucket" "ods_csv_files" {
-  bucket        = "${terraform.workspace}-ods-csv-files"
+  bucket        = "${var.environment}-ods-csv-files"
   force_destroy = true
 
   tags = {
-    Name        = "${terraform.workspace}-ods-csv-files"
+    Name        = "${var.environment}-ods-csv-files"
     Environment = var.environment
   }
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "csv_ods" {
+resource "aws_s3_bucket_lifecycle_configuration" "ods_csv_files" {
   bucket = aws_s3_bucket.ods_csv_files.id
 
   rule {
@@ -51,7 +51,7 @@ resource "aws_s3_bucket_acl" "ods_csv_files" {
 }
 
 resource "aws_iam_policy" "ods_csv_files_data_policy" {
-  name = "${terraform.workspace}_${aws_s3_bucket.ods_csv_files.bucket}_get_document_data_policy"
+  name = "${aws_s3_bucket.ods_csv_files.bucket}_get_document_data_policy"
 
   policy = jsonencode({
     "Version" : "2012-10-17",

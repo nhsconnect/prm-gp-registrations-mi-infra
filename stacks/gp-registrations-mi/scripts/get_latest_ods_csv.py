@@ -4,8 +4,8 @@ import sys
 from services.trud_api_service import TrudApiService, TrudItem
 
 GP_FILE_HEADERS = [
-    "OdsCode",
-    "GpName",
+    "PracticeOdsCode",
+    "PracticeName",
     "NG",
     "HLHG",
     "AD1",
@@ -34,7 +34,7 @@ GP_FILE_HEADERS = [
 ]
 
 ICB_FILE_HEADERS = [
-    "OdsCode",
+    "IcbOdsCode",
     "IcbName",
     "NG",
     "HLHG",
@@ -112,7 +112,7 @@ def get_gp_latest_ods_csv(service):
         epraccur_csv_file,
         "initial_full_gps_ods.csv",
         GP_FILE_HEADERS,
-        ["OdsCode", "GpName", "IcbOdsCode"],
+        ["PracticeOdsCode", "PracticeName", "IcbOdsCode"],
         True,
     )
 
@@ -153,7 +153,7 @@ def get_icb_latest_ods_csv(service):
                     epraccur_csv_file,
                     output_name,
                     ICB_FILE_HEADERS,
-                    ["OdsCode", "IcbName"],
+                    ["IcbOdsCode", "IcbName"],
                     is_quarterly_release,
                     icb_update_changes,
                 )

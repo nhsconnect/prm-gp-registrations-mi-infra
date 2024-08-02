@@ -1,11 +1,11 @@
-name: 'gp-registrations-mi-task'
+name: base-gp-registrations-mi
 on:
   workflow_call:
     inputs:
       environment:
         description: "Which Environment settings to use."
         required: true
-        type: "string"
+        type: string
         default: "dev"
 
 jobs:
@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -24,9 +22,6 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}
           role-skip-session-tagging: true
-
-      - name: View AWS Role
-        run: aws sts get-caller-identity
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -53,6 +48,7 @@ jobs:
 
       - name: Build Lambdas
         run: | 
+           sudo apt-get install jq
             ./tasks build-lambda
 
       - name: Set up Python
@@ -91,3 +87,76 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: terraform apply -auto-approve -input=false tf.plan
         working-directory: ./stacks/gp-registrations-mi/terraform
+
+      - name: Add PR comment
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // 1. Retrieve existing bot comments for the PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('Report for environment: ${{ inputs.environment }}')
+            })
+
+            // 2. Prepare format of the comment
+            const output = `### Report for environment: ${{ matrix.environment }}
+
+            #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            <details><summary>Format Output</summary>
+
+            \`\`\`\n
+            ${{ steps.fmt.outputs.stdout }}
+            \`\`\`
+
+            </details>
+
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            <details><summary>Initialization Output</summary>
+
+            \`\`\`\n
+            ${{ steps.init.outputs.stdout }}
+            \`\`\`
+
+            </details>
+
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            <details><summary>Validation Output</summary>
+
+            \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
+
+            </details>
+
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan (${{ steps.plan.outputs.summary }})</summary>
+
+            \`\`\`\n
+            ${{ steps.plan.outputs.stdout }}
+            \`\`\`
+
+            </details>`;
+
+            // 3. If we have a comment, update it, otherwise create a new one
+            if (botComment) {
+              github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output
+              })
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })

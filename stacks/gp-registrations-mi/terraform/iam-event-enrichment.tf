@@ -105,7 +105,7 @@ data "aws_iam_policy_document" "event_enrichment_lambda_cloudwatch_log_access" {
 
 
 resource "aws_iam_policy" "bulk_ods_update_lambda_cloudwatch_log_access" {
-  name   = "${var.environment}-bulk_ods_update-lambda-log-access"
+  name   = "${var.environment}-bulk-ods-update-lambda-log-access"
   policy = data.aws_iam_policy_document.bulk_ods_update_lambda_cloudwatch_log_access.json
 }
 

@@ -70,9 +70,9 @@ def _enrich_events(sqs_messages: dict) -> list:
             )
             continue
         # set requesting practice info
-        event.update(**_requesting_practice_info(ods_code=event["requestingPracticeOdsCode"], practice_name_key="requestingPracticeName", icb_name_key="requestingPracticeIcbName", icb_ods_code_key="requestingPracticeIcbOdsCode", supplier_key="requestingSupplierName" ))
+        event.update(_requesting_practice_info(ods_code=event["requestingPracticeOdsCode"], practice_name_key="requestingPracticeName", icb_name_key="requestingPracticeIcbName", icb_ods_code_key="requestingPracticeIcbOdsCode", supplier_key="requestingSupplierName" ))
         # set sending practice info
-        event.update(**_requesting_practice_info(ods_code=event["sendingPracticeOdsCode"], practice_name_key="sendingPracticeName", icb_name_key="sendingPracticeIcbName", icb_ods_code_key="sendingPracticeIcbOdsCode", supplier_key="sendingSupplierName"))
+        event.update(_requesting_practice_info(ods_code=event["sendingPracticeOdsCode"], practice_name_key="sendingPracticeName", icb_name_key="sendingPracticeIcbName", icb_ods_code_key="sendingPracticeIcbOdsCode", supplier_key="sendingSupplierName"))
 
         # temporary fix for EMIS wrong reportingSystemSupplier data        
         reporting_system_supplier = event["reportingSystemSupplier"]
@@ -85,6 +85,7 @@ def _enrich_events(sqs_messages: dict) -> list:
 
 def _requesting_practice_info(ods_code: str, practice_name_key, icb_name_key, icb_ods_code_key, supplier_key) -> dict:
     enrichment_info ={}
+    print("requesting data for" + ods_code)
     gp_dynamo_item = get_gp_data_from_dynamo_request(ods_code) or get_gp_data_from_api(ods_code)
     enrichment_info.update({practice_name_key: gp_dynamo_item.practice_name, icb_ods_code_key: gp_dynamo_item.icb_ods_code})
     enrichment_info[supplier_key] = get_supplier_data(ods_code, gp_dynamo_item) or "UNKNOWN"

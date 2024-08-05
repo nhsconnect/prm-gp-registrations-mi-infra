@@ -18,7 +18,7 @@ from event_enrichment_main import (
     _find_supplier_ods_codes_from_supplier_details,
     _has_supplier_ods_code,
     UnableToFetchSupplierDetailsFromSDSFHIRException,
-    get_supplier_name,
+    get_supplier_name_from_sds_api,
     UnableToMapSupplierOdsCodeToSupplierNameException,
 )
 
@@ -626,7 +626,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
             {"Parameter": {"Value": "some_url.net?"}},
         ]
 
-        supplier_name = get_supplier_name("test_supplier_ods_code")
+        supplier_name = get_supplier_name_from_sds_api("test_supplier_ods_code")
 
         expected_supplier_name = "EMIS"
         assert supplier_name == expected_supplier_name
@@ -646,7 +646,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
             {"Parameter": {"Value": "some_url.net?"}},
         ]
 
-        supplier_name = get_supplier_name("PRACTICE_ODS_123")
+        supplier_name = get_supplier_name_from_sds_api("PRACTICE_ODS_123")
 
         assert supplier_name is None
 
@@ -665,6 +665,6 @@ class TestEventEnrichmentMain(unittest.TestCase):
             {"Parameter": {"Value": "some_url.net?"}},
         ]
 
-        supplier_name = get_supplier_name(None)
+        supplier_name = get_supplier_name_from_sds_api(None)
 
         assert supplier_name is None

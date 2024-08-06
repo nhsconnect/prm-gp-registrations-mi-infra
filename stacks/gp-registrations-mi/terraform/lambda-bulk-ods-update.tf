@@ -70,7 +70,6 @@ resource "aws_lambda_permission" "bulk_upload_metadata_schedule_permission" {
   source_arn    = aws_cloudwatch_event_rule.ods_bulk_update_schedule.arn
   depends_on = [
     aws_lambda_function.ods_bulk_update,
-    aws_cloudwatch_event_rule.ods_bulk_update_schedule
   ]
 }
 

@@ -1,7 +1,6 @@
 import json
 import os
-from datetime import date, timedelta
-from time import strptime
+from datetime import date, timedelta, datetime
 from typing import Optional
 
 import boto3
@@ -70,27 +69,60 @@ def _enrich_events(sqs_messages: dict) -> list:
             )
             continue
         # set requesting practice info
-        event.update(_requesting_practice_info(ods_code=event["requestingPracticeOdsCode"], practice_name_key="requestingPracticeName", icb_name_key="requestingPracticeIcbName", icb_ods_code_key="requestingPracticeIcbOdsCode", supplier_key="requestingSupplierName" ))
+        event.update(
+            _requesting_practice_info(
+                ods_code=event["requestingPracticeOdsCode"],
+                practice_name_key="requestingPracticeName",
+                icb_name_key="requestingPracticeIcbName",
+                icb_ods_code_key="requestingPracticeIcbOdsCode",
+                supplier_key="requestingSupplierName",
+            )
+        )
         # set sending practice info
-        event.update(_requesting_practice_info(ods_code=event["sendingPracticeOdsCode"], practice_name_key="sendingPracticeName", icb_name_key="sendingPracticeIcbName", icb_ods_code_key="sendingPracticeIcbOdsCode", supplier_key="sendingSupplierName"))
+        event.update(
+            _requesting_practice_info(
+                ods_code=event["sendingPracticeOdsCode"],
+                practice_name_key="sendingPracticeName",
+                icb_name_key="sendingPracticeIcbName",
+                icb_ods_code_key="sendingPracticeIcbOdsCode",
+                supplier_key="sendingSupplierName",
+            )
+        )
 
-        # temporary fix for EMIS wrong reportingSystemSupplier data        
+        # temporary fix for EMIS wrong reportingSystemSupplier data
         reporting_system_supplier = event["reportingSystemSupplier"]
         if reporting_system_supplier.isnumeric():
-            print(f"TEMP FIX. Reporting system supplier received: {reporting_system_supplier}. Changed to 'EMIS'.")
-            event["reportingSystemSupplier"] = "EMIS"            
-
+            print(
+                f"TEMP FIX. Reporting system supplier received: {reporting_system_supplier}. Changed to 'EMIS'."
+            )
+            event["reportingSystemSupplier"] = "EMIS"
 
     return events
 
-def _requesting_practice_info(ods_code: str, practice_name_key, icb_name_key, icb_ods_code_key, supplier_key) -> dict:
-    enrichment_info ={}
-    print("requesting data for" + ods_code)
-    gp_dynamo_item = get_gp_data_from_dynamo_request(ods_code) or get_gp_data_from_api(ods_code)
-    enrichment_info.update({practice_name_key: gp_dynamo_item.practice_name, icb_ods_code_key: gp_dynamo_item.icb_ods_code})
-    enrichment_info[supplier_key] = get_supplier_data(ods_code, gp_dynamo_item) or "UNKNOWN"
-    enrichment_info[icb_name_key] = get_icb_name(gp_dynamo_item.icb_ods_code)
+
+def _requesting_practice_info(
+    ods_code: str, practice_name_key, icb_name_key, icb_ods_code_key, supplier_key
+) -> dict:
+    enrichment_info = {}
+    print("requesting data for: " + ods_code)
+    gp_dynamo_item = arrange_gp_data_from_dynamo(ods_code) or get_gp_data_from_api(
+        ods_code
+    )
+    if gp_dynamo_item:
+        enrichment_info.update(
+            {
+                practice_name_key: gp_dynamo_item.practice_name,
+                icb_ods_code_key: gp_dynamo_item.icb_ods_code,
+            }
+        )
+        enrichment_info[supplier_key] = (
+            get_supplier_data(ods_code, gp_dynamo_item) or "UNKNOWN"
+        )
+        enrichment_info[icb_name_key] = (
+            get_icb_name(gp_dynamo_item.icb_ods_code) or "UNKNOWN"
+        )
     return enrichment_info
+
 
 def arrange_gp_data_from_dynamo(ods_code: str):
     try:
@@ -101,11 +133,13 @@ def arrange_gp_data_from_dynamo(ods_code: str):
         print("Failed to find GP data in dynamo table")
         return None
 
+
 def get_icb_name(ods_code: str):
     if ods_code is None:
         return None
     else:
         return get_icb_name_from_dynamo(ods_code) or get_icb_name_from_api(ods_code)
+
 
 def get_icb_name_from_dynamo(ods_code: str):
     try:
@@ -116,33 +150,50 @@ def get_icb_name_from_dynamo(ods_code: str):
         print("Failed to find ICB data in dynamo table")
         return None
 
-def get_gp_data_from_api(ods_code: str):
-    requesting_practice_organisation = _fetch_organisation(
-        ods_code
-    )
-    practice_name = requesting_practice_organisation["Name"]
 
-    icb_ods_code = _find_icb_ods_code(
-        requesting_practice_organisation
-    )
+def get_gp_data_from_api(ods_code: str):
+    requesting_practice_organisation = _fetch_organisation(ods_code)
+
+    practice_name = requesting_practice_organisation["Name"]
+    if practice_name is None:
+        return None
+    icb_ods_code = _find_icb_ods_code(requesting_practice_organisation)
     gp_api_item = PracticeOds(ods_code, practice_name, icb_ods_code=icb_ods_code)
     gp_api_item.save()
     return gp_api_item
+
 
 def get_icb_name_from_api(ods_code: str):
     icb_name = _fetch_organisation(ods_code)["Name"]
     icb_api_item = IcbOds(ods_code, icb_name)
     icb_api_item.save()
     return icb_name
-def get_supplier_data(ods_code: str, gp_dynamo_item: PracticeOds ):
+
+
+def get_supplier_data(ods_code: str, gp_dynamo_item: PracticeOds):
     date_today = date.today()
     date_one_month_ago = date_today - timedelta(days=30)
-    if not gp_dynamo_item.supplier_name and strptime(gp_dynamo_item.supplier_last_updated, '%d/%m/%Y') > date_one_month_ago:
+    supplier_last_update_date = (
+        gp_dynamo_item.supplier_last_updated.date()
+        if gp_dynamo_item.supplier_last_updated
+        else None
+    )
+    is_out_of_date = (
+        supplier_last_update_date < date_one_month_ago
+        if supplier_last_update_date
+        else True
+    )
+    if not gp_dynamo_item.supplier_name and is_out_of_date:
         requesting_supplier_name = get_supplier_name_from_sds_api(ods_code)
         gp_dynamo_item.supplier_name = requesting_supplier_name
-        gp_dynamo_item.supplier_last_updated = date_today
-        gp_dynamo_item.update(actions=[PracticeOds.supplier_name.set(requesting_supplier_name), PracticeOds.supplier_last_updated.set(date_today)])
+        gp_dynamo_item.update(
+            actions=[
+                PracticeOds.supplier_name.set(requesting_supplier_name),
+                PracticeOds.supplier_last_updated.set(datetime.now()),
+            ]
+        )
     return gp_dynamo_item.supplier_name
+
 
 def _find_icb_ods_code(practice_organisation: dict) -> Optional[str]:
     print("Finding ICB ODS code for practice organisation", practice_organisation)
@@ -290,7 +341,7 @@ def _find_supplier_ods_codes_from_supplier_details(supplier_details: dict) -> li
 
 def get_supplier_name_from_sds_api(practice_ods_code: str) -> Optional[str]:
     """uses the SDS FHIR API to get the system supplier from an ODS code"""
-
+    print("Requesting supplier info from SDS")
     if not practice_ods_code or practice_ods_code.isspace():
         return None
 
@@ -306,7 +357,7 @@ def get_supplier_name_from_sds_api(practice_ods_code: str) -> Optional[str]:
     }
 
     supplier_name = None
-    
+
     for supplier_ods_code in supplier_ods_codes:
         try:
             supplier_name = supplier_name_mapping[supplier_ods_code]
@@ -314,17 +365,19 @@ def get_supplier_name_from_sds_api(practice_ods_code: str) -> Optional[str]:
                 break
         except KeyError:
             continue
-    
-    if supplier_name is None:        
+
+    if supplier_name is None:
         print(
             f"Unable to map supplier ODS code(s) found from SDS FHI API: {str(supplier_ods_codes)}"
             + " to a known supplier name. Practice ODS code from event: {practice_ods_code}."
-        )    
+        )
 
     return supplier_name
-    
+
+
 def get_gp_data_from_dynamo_request(ods_code: str):
     return PracticeOds.get(ods_code)
+
 
 def get_icb_data_from_dynamo_request(ods_code: str):
     return IcbOds.get(ods_code)

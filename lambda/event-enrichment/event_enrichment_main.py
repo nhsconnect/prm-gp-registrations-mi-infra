@@ -6,7 +6,7 @@ from typing import Optional
 import boto3
 import urllib3
 
-from services.ods_models import PracticeOds, IcbOds
+from services.models.ods_models import PracticeOds, IcbOds
 
 ODS_PORTAL_URL = "https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations/"
 ICB_ROLE_ID = "RO98"

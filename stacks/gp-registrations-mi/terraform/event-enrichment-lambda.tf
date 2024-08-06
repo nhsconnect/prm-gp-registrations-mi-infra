@@ -3,7 +3,7 @@ variable "event_enrichment_lambda_name" {
 }
 
 resource "aws_lambda_function" "event_enrichment_lambda" {
-  filename         = "${path.cwd}/${var.event_enrichment_lambda_zip}"
+  filename         = var.event_enrichment_lambda_zip
   function_name    = "${var.environment}-${var.event_enrichment_lambda_name}"
   role             = aws_iam_role.event_enrichment_lambda_role.arn
   handler          = "event_enrichment_main.lambda_handler"

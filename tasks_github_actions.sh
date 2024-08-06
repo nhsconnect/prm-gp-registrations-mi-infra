@@ -14,7 +14,7 @@ function build_lambda {
 
     requirements_file=lambda/$lambda_name/requirements.txt
     if test -f "$requirements_file"; then
-        pip install -r $requirements_file -t $build_dir
+        build_lambda_layer $lambda_name
     fi
 
     if test "$lambda_services"; then
@@ -22,6 +22,26 @@ function build_lambda {
     fi
     cp lambda/$lambda_name/*.py $build_dir
 
+    pushd $build_dir
+    zip -r -X ../$lambda_name.zip .
+    popd
+}
+
+function build_lambda_layer {
+    lambda_name=$1
+    build_dir=lambda/build/layer/$lambda_name
+
+    rm -rf $build_dir/python
+    mkdir -p $build_dir/python
+
+    requirements_file=lambda/$lambda_name/requirements.txt
+    if test -f "$requirements_file"; then
+        python3 -m venv create_layer
+        source create_layer/bin/activate
+        pip install -r $requirements_file
+    fi
+
+    cp -r create_layer/lib $build_dir/python
     pushd $build_dir
     zip -r -X ../$lambda_name.zip .
     popd

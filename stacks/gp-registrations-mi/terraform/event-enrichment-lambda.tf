@@ -17,7 +17,7 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
       ApplicationRole = "AwsLambdaFunction"
     }
   )
-
+  layers = [aws_lambda_layer_version.event_enrichment_lambda.arn]
   environment {
     variables = {
       SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.url,
@@ -54,4 +54,11 @@ resource "aws_cloudwatch_log_group" "event_enrichment_lambda" {
     }
   )
   retention_in_days = 60
+}
+
+resource "aws_lambda_layer_version" "event_enrichment_lambda" {
+  filename                 = var.event_enrichment_lambda_layer_zip
+  layer_name               = "${var.environment}-${var.event_enrichment_lambda_name}_layer"
+  compatible_runtimes      = ["python3.12"]
+  compatible_architectures = ["x86_64"]
 }

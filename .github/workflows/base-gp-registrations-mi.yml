@@ -54,11 +54,11 @@ jobs:
       - name: Set up Python
         if: github.ref == 'refs/heads/master'
         uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       - name: Make virtual environment
         if: github.ref == 'refs/heads/master'
-        with:
-          python-version: '3.12'
         run: |
             python3 -m venv ./venv
             ./venv/bin/pip3 install --upgrade pip requests

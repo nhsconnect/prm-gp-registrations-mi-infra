@@ -96,9 +96,21 @@ variable "event_enrichment_lambda_zip" {
   default     = "../../../lambda/build/event-enrichment.zip"
 }
 
+variable "event_enrichment_lambda_layer_zip" {
+  type        = string
+  description = "Path to zipfile containing lambda layer code for enriching MI events"
+  default     = "../../../lambda/build/layer/event-enrichment.zip"
+}
+
 variable "bulk_ods_update_lambda_zip" {
   type        = string
   description = "Path to zipfile containing lambda code for ODS update"
+  default     = "placeholder_lambda_payload.zip"
+}
+
+variable "bulk_ods_update_lambda_layer_zip" {
+  type        = string
+  description = "Path to zipfile containing lambda layer code for ODS update"
   default     = "placeholder_lambda_payload.zip"
 }
 

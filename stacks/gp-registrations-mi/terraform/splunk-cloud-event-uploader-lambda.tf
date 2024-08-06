@@ -8,7 +8,7 @@ resource "aws_lambda_function" "splunk_cloud_event_uploader_lambda" {
   role             = aws_iam_role.splunk_cloud_event_uploader_lambda_role.arn
   handler          = "splunk_cloud_event_uploader_main.lambda_handler"
   source_code_hash = filebase64sha256(var.splunk_cloud_event_uploader_lambda_zip)
-  runtime          = "python3.9"
+  runtime          = "python3.12"
   timeout          = 15
   tags = merge(
     local.common_tags,

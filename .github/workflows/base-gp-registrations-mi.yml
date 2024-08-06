@@ -36,7 +36,7 @@ jobs:
       - name: Terraform Init
         id: init
         run: | 
-          terraform init -backend-config="key=${{ secrets.AWS_STATE_S3_KEY }}" \
+          terraform init -no-color -backend-config="key=${{ secrets.AWS_STATE_S3_KEY }}" \
           -backend-config="bucket=${{ secrets.AWS_STATE_BUCKET }}" \
           -backend-config="dynamodb_table=${{ secrets.AWS_STATE_LOCK_TABLE }}"
         working-directory: ./stacks/gp-registrations-mi/terraform
@@ -57,6 +57,8 @@ jobs:
 
       - name: Make virtual environment
         if: github.ref == 'refs/heads/master'
+        with:
+          python-version: '3.12'
         run: |
             python3 -m venv ./venv
             ./venv/bin/pip3 install --upgrade pip requests

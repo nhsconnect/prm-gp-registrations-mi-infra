@@ -8,7 +8,7 @@ resource "aws_lambda_function" "s3_event_uploader_lambda" {
   role             = aws_iam_role.s3_event_uploader_role.arn
   handler          = "s3_event_uploader_main.lambda_handler"
   source_code_hash = filebase64sha256(var.s3_event_uploader_lambda_zip)
-  runtime          = "python3.9"
+  runtime          = "python3.12"
   timeout          = 15
   tags = merge(
     local.common_tags,

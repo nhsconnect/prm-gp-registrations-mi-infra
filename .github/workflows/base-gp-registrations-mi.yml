@@ -7,6 +7,10 @@ on:
         required: true
         type: string
         default: "dev"
+      is_deployment:
+        description: "Is workflow run on deployment"
+        type: boolean
+        default: false
 
 jobs:
   terraform_process:
@@ -20,7 +24,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}
+          role-to-assume:  ${{inputs.is_deployment && secrets.AWS_ASSUME_ROLE || secrets.AWS_ASSUME_ROLE_READ_ONLY}}
           role-skip-session-tagging: true
 
       - name: Setup Terraform
@@ -52,19 +56,19 @@ jobs:
             ./tasks_github_actions.sh build-lambdas
 
       - name: Set up Python
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' && inputs.is_deployment
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Make virtual environment
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' && inputs.is_deployment
         run: |
             python3 -m venv ./venv
             ./venv/bin/pip3 install --upgrade pip requests
 
       - name: Get ODS CSV Files
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' && inputs.is_deployment
         run: |
           PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 stacks/gp-registrations-mi/scripts/get_latest_ods_csv.py ${{ secrets.TRUD_API_KEY }} ${{ vars.TRUD_API_URL }}
 
@@ -87,14 +91,9 @@ jobs:
         working-directory: ./stacks/gp-registrations-mi/terraform
         shell: bash
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/master'
-        run: terraform apply -auto-approve -input=false tf.plan
-        working-directory: ./stacks/gp-registrations-mi/terraform
-
       - name: Add PR comment
         uses: actions/github-script@v7
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && (success() || failure())
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -103,50 +102,26 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-            })
+            });
             const botComment = comments.find(comment => {
               return comment.user.type === 'Bot' && comment.body.includes('Report for environment: ${{ inputs.environment }}')
-            })
+            });
 
             // 2. Prepare format of the comment
-            const output = `### Report for environment: ${{ matrix.environment }}
+            const output = `### Report for environment: ${{ inputs.environment }}
 
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            <details><summary>Format Output</summary>
 
-            \`\`\`\n
-            ${{ steps.fmt.outputs.stdout }}
-            \`\`\`
-
-            </details>
 
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            <details><summary>Initialization Output</summary>
 
-            \`\`\`\n
-            ${{ steps.init.outputs.stdout }}
-            \`\`\`
-
-            </details>
 
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            <details><summary>Validation Output</summary>
 
-            \`\`\`\n
-            ${{ steps.validate.outputs.stdout }}
-            \`\`\`
-
-            </details>
 
             #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
-            <details><summary>Show Plan (${{ steps.plan.outputs.summary }})</summary>
-
-            \`\`\`\n
-            ${{ steps.plan.outputs.stdout }}
-            \`\`\`
-
-            </details>`;
+            Plan results: ${{ steps.plan.outputs.summary }}`;
 
             // 3. If we have a comment, update it, otherwise create a new one
             if (botComment) {
@@ -154,13 +129,16 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: botComment.id,
-                body: output
               })
             }
-
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output
-            })
+            });
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/master' && inputs.is_deployment
+        run: terraform apply -auto-approve -input=false tf.plan
+        working-directory: ./stacks/gp-registrations-mi/terraform

@@ -21,4 +21,5 @@ jobs:
     uses: ./.github/workflows/base-gp-registrations-mi.yml
     with:
       environment: ${{ inputs.environment }}
+      is_deployment: true
     secrets: inherit

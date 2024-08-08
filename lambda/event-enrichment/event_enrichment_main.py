@@ -101,7 +101,7 @@ def _enrich_events(sqs_messages: dict) -> list:
 
 
 def _requesting_practice_info(
-    ods_code: str, practice_name_key, icb_name_key, icb_ods_code_key, supplier_key
+    ods_code: str, practice_name_key: str, icb_name_key: str, icb_ods_code_key: str, supplier_key: str
 ) -> dict:
     enrichment_info = {}
     print("requesting data for: " + ods_code)
@@ -121,6 +121,8 @@ def _requesting_practice_info(
         enrichment_info[icb_name_key] = (
             get_icb_name(gp_dynamo_item.icb_ods_code) or "UNKNOWN"
         )
+    else:
+        enrichment_info[supplier_key] = "UNKNOWN"
     return enrichment_info
 
 

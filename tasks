@@ -114,7 +114,7 @@ destroy)
 build-lambda)
   build_lambda error-alarm-alert
   build_lambda splunk-cloud-event-uploader
-  build_lambda event-enrichment services
+  build_lambda event-enrichment
   build_lambda s3-event-uploader
 ;;
 *)

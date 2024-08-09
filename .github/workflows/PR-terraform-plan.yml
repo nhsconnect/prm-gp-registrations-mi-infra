@@ -18,7 +18,7 @@ jobs:
       matrix:
         environment: [ dev, prod ]
         terraform_stack: [container-repositories , base-networking, ecs-cluster]
-    uses: ./.github/workflows/base-gp-registrations-mi.yml
+    uses: ./.github/workflows/base-terraform-plan-and-apply.yml
     with:
       environment: ${{ matrix.environment }}
       working-directory: "stacks/${{ matrix.terraform_stack }}/terraform"

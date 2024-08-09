@@ -1,4 +1,4 @@
-name: base-gp-registrations-mi
+name: base-terraform-plan-and-apply
 on:
   workflow_call:
     inputs:

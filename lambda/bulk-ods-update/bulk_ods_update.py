@@ -1,0 +1,175 @@
+import os
+from datetime import date, timedelta
+import calendar
+import csv
+
+from pynamodb.exceptions import DoesNotExist
+
+from utils.enums.trud import OdsDownloadType, TrudItem
+from utils.models.ods_models import PracticeOds, IcbOds
+from utils.services.trud_api_service import TrudApiService
+
+import logging
+
+from utils.trud_files import (
+    GP_FILE_HEADERS,
+    ICB_FILE_HEADERS,
+    ICB_MONTHLY_FILE_PATH,
+    ICB_QUARTERLY_FILE_PATH,
+    ICB_MONTHLY_FILE_NAME,
+    ICB_QUARTERLY_FILE_NAME,
+)
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+
+def lambda_handler(event, context):
+    download_type = determine_ods_manifest_download_type()
+
+    trud_service = TrudApiService(
+        api_key=os.environ.get("TRUD_API_KEY_PARAM_NAME"),
+        api_url=os.environ.get("TRUD_FHIR_API_URL_PARAM_NAME"),
+    )
+
+    extract_and_process_ods_gp_data(trud_service)
+
+    if download_type == OdsDownloadType.BOTH:
+        extract_and_process_ods_icb_data(trud_service)
+
+    return {"statusCode": 200}
+
+
+def determine_ods_manifest_download_type() -> OdsDownloadType:
+    logger.info("Determining download type")
+    today = date.today()
+
+    last_day_of_month = calendar.monthrange(today.year, today.month)[1]
+    last_date_of_month = date(today.year, today.month, last_day_of_month)
+
+    last_sunday_of_month = last_date_of_month
+
+    while last_sunday_of_month.weekday() != 6:
+        last_sunday_of_month -= timedelta(days=1)
+
+    is_icb_download_date = today == last_sunday_of_month
+
+    if is_icb_download_date:
+        logger.info("Download type set to: GP and ICB")
+        return OdsDownloadType.BOTH
+
+    logger.info("Download type set to: GP")
+    return OdsDownloadType.GP
+
+
+def extract_and_process_ods_gp_data(trud_service: TrudApiService):
+    logger.info("Extracting and processing ODS GP data")
+
+    gp_ods_releases = trud_service.get_release_list(
+        TrudItem.NHS_ODS_WEEKLY, is_latest=True
+    )
+    download_file = trud_service.get_download_file(
+        gp_ods_releases[0].get("archiveFileUrl")
+    )
+    epraccur_zip_file = trud_service.unzipping_files(
+        download_file, "Data/epraccur.zip", True
+    )
+    epraccur_csv_file = trud_service.unzipping_files(
+        epraccur_zip_file, "epraccur.csv", True
+    )
+
+    gp_ods_data = trud_csv_to_dict(epraccur_csv_file, GP_FILE_HEADERS)
+    gp_ods_data_amended_data = get_amended_records(gp_ods_data)
+
+    if gp_ods_data_amended_data:
+        compare_and_overwrite(OdsDownloadType.GP, gp_ods_data_amended_data)
+        return
+
+    logger.info("No amended GP data found")
+
+
+def extract_and_process_ods_icb_data(trud_service: TrudApiService):
+    logger.info("Extracting and processing ODS ICB data")
+
+    icb_ods_releases = trud_service.get_release_list(TrudItem.ORG_REF_DATA_MONTHLY)
+    is_quarterly_release = icb_ods_releases[0].get("name").endswith(".0.0")
+    download_file = trud_service.get_download_file(
+        icb_ods_releases[0].get("archiveFileUrl")
+    )
+
+    icb_zip_file_path = (
+        ICB_MONTHLY_FILE_PATH if not is_quarterly_release else ICB_QUARTERLY_FILE_PATH
+    )
+    icb_csv_file_name = (
+        ICB_MONTHLY_FILE_NAME if not is_quarterly_release else ICB_QUARTERLY_FILE_NAME
+    )
+
+    icb_ods_data_amended_data = []
+    if icb_zip_file := trud_service.unzipping_files(
+        download_file, icb_zip_file_path, True
+    ):
+        if icb_csv_file := trud_service.unzipping_files(
+            icb_zip_file, icb_csv_file_name
+        ):
+            icb_ods_data = trud_csv_to_dict(icb_csv_file, ICB_FILE_HEADERS)
+            icb_ods_data_amended_data = get_amended_records(icb_ods_data)
+
+    if icb_ods_data_amended_data:
+        compare_and_overwrite(OdsDownloadType.ICB, icb_ods_data_amended_data)
+        return
+
+    logger.info("No amended ICB data found")
+
+
+def get_amended_records(data: list[dict]) -> list[dict]:
+    return [
+        amended_data
+        for amended_data in data
+        if amended_data.get("AmendedRecordIndicator") == "1"
+    ]
+
+
+def trud_csv_to_dict(file_path: str, headers: list[str]) -> list[dict]:
+    with open(file_path, mode="r") as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        csv_reader.fieldnames = headers
+        data_list = []
+        for row in csv_reader:
+            data_list.append(dict(row))
+        return data_list
+
+
+def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
+    if download_type == OdsDownloadType.GP:
+        logger.info("Comparing GP Practice data")
+        for amended_record in data:
+            try:
+                practice = PracticeOds.get(amended_record.get("PracticeOdsCode"))
+                practice.practice_name = amended_record.get("PracticeName")
+                practice.icb_ods_code = amended_record.get("IcbOdsCode")
+
+                practice.save()
+            except DoesNotExist as e:
+                logger.info(f"Failed to retrieve record by Practice ODS code: {str(e)}")
+
+    if download_type == OdsDownloadType.ICB:
+        for amended_record in data:
+            try:
+                icb = IcbOds.get(amended_record.get("IcbOdsCode"))
+                icb.icb_name = amended_record.get("IcbName")
+
+                icb.save()
+            except DoesNotExist as e:
+                logger.info(f"Failed to retrieve record by ICB ODS code: {str(e)}")
+
+
+if __name__ == "__main__":
+    try:
+        # lambda_handler({}, {})
+        trud_service = TrudApiService(
+            api_key=os.environ.get("TRUD_API_KEY_PARAM_NAME"),
+            api_url=os.environ.get("TRUD_FHIR_API_URL_PARAM_NAME"),
+        )
+        extract_and_process_ods_icb_data(trud_service)
+    except Exception as e:
+        print(f"\nExiting Process! {e}")

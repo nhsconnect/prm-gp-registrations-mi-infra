@@ -18,11 +18,11 @@ jobs:
       max-parallel: 1
       matrix:
         environment: [ dev, prod ]
-        terraform_stack: [container-repositories , base-networking, ecs-cluster]
+        terraform_stack: [container-repositories, base-networking, ecs-cluster]
     uses: ./.github/workflows/base-terraform-plan-and-apply.yml
     with:
       environment: ${{ matrix.environment }}
-      working-directory: "./stacks/${{ matrix.terraform_stack }}/terraform"
+      working-directory: ./stacks/${{ matrix.terraform_stack }}/terraform
     secrets: inherit
 
 

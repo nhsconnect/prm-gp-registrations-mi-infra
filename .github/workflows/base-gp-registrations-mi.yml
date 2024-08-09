@@ -122,7 +122,7 @@ jobs:
             });
 
             // 2. Prepare format of the comment
-            const output = `### Report for environment: ${{ inputs.environment }}
+            const output = `### Report for gp-registrations-mi environment: ${{ inputs.environment }}
 
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
 

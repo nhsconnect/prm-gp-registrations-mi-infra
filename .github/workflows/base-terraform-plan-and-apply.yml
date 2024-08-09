@@ -3,7 +3,7 @@ on:
   workflow_call:
     inputs:
       environment:
-        description: "Which Environment settings to use."
+        description: "Which Environment settings to use"
         required: true
         type: string
         default: "dev"
@@ -11,11 +11,20 @@ on:
         description: "Is workflow run on deployment"
         type: boolean
         default: false
+      working-directory:
+        description: "Which working directory to use"
+        type: string
+        required: true
+    paths:
+        - '${{inputs.working-directory}}/**'
 
 jobs:
   terraform_process:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: ${{inputs.working-directory}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,19 +37,6 @@ jobs:
           role-to-assume:  ${{inputs.is_deployment && secrets.AWS_ASSUME_ROLE || secrets.AWS_ASSUME_ROLE_READ_ONLY}}
           role-skip-session-tagging: true
 
-      - name: Publish Docker Image to Prod
-        if: inputs.environment == 'prod' && inputs.is_deployment
-        run: |
-          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_DEV_REPOSITORY }}
-          IMAGE_TAG=$(aws ecr describe-images --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
-          source_repo=${{ secrets.AWS_ECR_DEV_REPOSITORY }}/${{ secrets.ECR_REPOSITORY_DEV_NAME }}:$IMAGE_TAG
-          destination_repo=${{ secrets.AWS_ECR_PROD_REPOSITORY}}/${{ secrets.ECR_REPOSITORY_NAME }}:$IMAGE_TAG
-          docker pull $source_repo
-          docker tag $source_repo $destination_repo
-          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_PROD_REPOSITORY }}
-          docker push $destination_repo
-
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -49,7 +45,6 @@ jobs:
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
-        working-directory: ./stacks/gp-registrations-mi/terraform
 
       - name: Terraform Init
         id: init
@@ -57,44 +52,18 @@ jobs:
           terraform init -no-color -backend-config="key=${{ secrets.AWS_STATE_S3_KEY }}" \
           -backend-config="bucket=${{ secrets.AWS_STATE_BUCKET }}" \
           -backend-config="dynamodb_table=${{ secrets.AWS_STATE_LOCK_TABLE }}"
-        working-directory: ./stacks/gp-registrations-mi/terraform
         shell: bash
 
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-        working-directory: ./stacks/gp-registrations-mi/terraform
-
-      - name: Build Lambdas
-        run: | 
-            ./tasks_github_actions.sh build-lambdas
-
-      - name: Set up Python
-        if: github.ref == 'refs/heads/master' && inputs.is_deployment
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Make virtual environment
-        if: github.ref == 'refs/heads/master' && inputs.is_deployment
-        run: |
-            python3 -m venv ./venv
-            ./venv/bin/pip3 install --upgrade pip requests
-
-      - name: Get ODS CSV Files
-        if: github.ref == 'refs/heads/master' && inputs.is_deployment
-        run: |
-          PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 stacks/gp-registrations-mi/scripts/get_latest_ods_csv.py ${{ secrets.TRUD_API_KEY }} ${{ vars.TRUD_API_URL }}
 
       - name: Setup Terraform variables
         id: vars
         run: |-
-          IMAGE_TAG=$(aws ecr describe-images --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
           cat > pipeline.auto.tfvars <<EOF
-          gp_registrations_mi_image_tag = $IMAGE_TAG
           environment = "${{ inputs.environment }}"
           EOF
-        working-directory: ./stacks/gp-registrations-mi/terraform
 
       - name: Terraform Plan
         id: plan
@@ -102,7 +71,6 @@ jobs:
           terraform plan -no-color -input=false -var-file="../vars/${{ inputs.environment }}.tfvars" -out "${{ inputs.environment }}.tfplan"
           terraform show -no-color ${{ inputs.environment }}.tfplan > ${{ inputs.environment }}.tfplan.txt
           echo "summary=$(grep -E 'Plan: [0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy\.|No changes\. Your infrastructure matches the configuration\.' ${{ inputs.environment }}.tfplan.txt | sed 's/.*No changes\. Your infrastructure matches the configuration/Plan: no changes/g' | sed 's/.*Plan: //g' | sed 's/\..*//g')" >> $GITHUB_OUTPUT
-        working-directory: ./stacks/gp-registrations-mi/terraform
         shell: bash
 
       - name: Add PR comment
@@ -154,5 +122,4 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && inputs.is_deployment
-        run: terraform apply -auto-approve -input=false tf.plan
-        working-directory: ./stacks/gp-registrations-mi/terraform
+        run: terraform apply -auto-approve -input=false ${{ inputs.environment }}.tfplan

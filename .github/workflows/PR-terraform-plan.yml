@@ -1,4 +1,4 @@
-name: 'pr-gp-registrations-mi'
+name: "PR-terraform-plan"
 on:
   pull_request:
     branches:
@@ -17,9 +17,11 @@ jobs:
       fail-fast: false
       matrix:
         environment: [ dev, prod ]
+        terraform_stack: [container-repositories , base-networking, ecs-cluster]
     uses: ./.github/workflows/base-gp-registrations-mi.yml
     with:
       environment: ${{ matrix.environment }}
+      working-directory: "stacks/${{ matrix.terraform_stack }}/terraform"
     secrets: inherit
 
 

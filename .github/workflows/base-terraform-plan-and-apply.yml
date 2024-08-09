@@ -11,8 +11,8 @@ on:
         description: "Is workflow run on deployment"
         type: boolean
         default: false
-      working-directory:
-        description: "Which working directory to use"
+      terraform_stack:
+        description: "Which terraform stack directory to run"
         type: string
         required: true
 
@@ -22,7 +22,7 @@ jobs:
     environment: ${{ inputs.environment }}
     defaults:
       run:
-        working-directory: ${{inputs.working-directory}}
+        working-directory: ./stacks/${{ inputs.terraform_stack }}/terraform
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,7 +46,7 @@ jobs:
       - name: Terraform Init
         id: init
         run: | 
-          terraform init -no-color -backend-config="key=${{ secrets.AWS_STATE_S3_KEY }}" \
+          terraform init -no-color -backend-config="key=gp-registrations-mi/${{ input.terraform_stack }}/terraform.tfstate" \
           -backend-config="bucket=${{ secrets.AWS_STATE_BUCKET }}" \
           -backend-config="dynamodb_table=${{ secrets.AWS_STATE_LOCK_TABLE }}"
         shell: bash
@@ -83,11 +83,11 @@ jobs:
               issue_number: context.issue.number,
             });
             const botComment = comments.find(comment => {
-              return comment.user.type === 'Bot' && comment.body.includes('Report for ${{inputs.working-directory}} environment: ${{ inputs.environment }} ')
+              return comment.user.type === 'Bot' && comment.body.includes('Report for ${{inputs.terraform_stack}} environment: ${{ inputs.environment }} ')
             });
 
             // 2. Prepare format of the comment
-            const output = `### Report for ${{inputs.working-directory}} environment: ${{ inputs.environment }}
+            const output = `### Report for ${{inputs.terraform_stack}} environment: ${{ inputs.environment }}
 
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
 

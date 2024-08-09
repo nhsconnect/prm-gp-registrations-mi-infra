@@ -61,14 +61,6 @@ jobs:
           cat > pipeline.auto.tfvars <<EOF
           environment = "${{ inputs.environment }}"
           EOF
-      - name: Setup Terraform variables (for container-repositories)
-        id: container-repositories-vars
-        if: inputs.environment == 'dev' && inputs.terraform_stack == 'container-repositories'
-        run: |-
-          cat > pipeline.auto.tfvars <<EOF
-          environment = "${{ inputs.environment }}"
-          prod_account_id = "${{ secrets.AWS_PROD_ACCOUNT_ID }}"
-          EOF
 
       - name: Terraform Plan
         id: plan

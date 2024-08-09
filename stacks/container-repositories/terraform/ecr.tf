@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "ecr_gp_registrations_mi" {
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",
       "ecr:BatchCheckLayerAvailability",
-      "ecr:DescribeRepositories",
+      "ecr:DescribeImages",
       "ecr:ListImages",
     ]
   }

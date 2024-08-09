@@ -5,7 +5,7 @@ resource "aws_ssm_parameter" "cloudwatch_log_group_name" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi"
+      Name            = "${var.environment}-gp-registrations-mi"
       ApplicationRole = "AwsSsmParameter"
     }
   )
@@ -18,7 +18,7 @@ resource "aws_ssm_parameter" "execution_role_arn" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi"
+      Name            = "${var.environment}-gp-registrations-mi"
       ApplicationRole = "AwsSsmParameter"
     }
   )
@@ -31,7 +31,7 @@ resource "aws_ssm_parameter" "ecs_cluster_arn" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi"
+      Name            = "${var.environment}-gp-registrations-mi"
       ApplicationRole = "AwsSsmParameter"
     }
   )

@@ -4,7 +4,7 @@ resource "aws_security_group" "gp_registrations_mi_container" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-container"
+      Name            = "${var.environment}-gp-registrations-mi-container"
       ApplicationRole = "AwsSecurityGroup"
     }
   )

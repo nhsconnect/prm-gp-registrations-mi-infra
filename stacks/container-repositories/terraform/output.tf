@@ -5,7 +5,7 @@ resource "aws_ssm_parameter" "gp_registrations_mi" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi"
+      Name            = "${var.environment}-gp-registrations-mi"
       ApplicationRole = "AwsSsmParameter"
     }
   )

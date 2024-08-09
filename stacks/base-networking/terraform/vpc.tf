@@ -4,7 +4,7 @@ resource "aws_vpc" "vpc" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-vpc"
+      Name            = "${var.environment}-gp-registrations-mi-vpc"
       ApplicationRole = "AwsVpc"
     }
   )
@@ -16,7 +16,7 @@ resource "aws_internet_gateway" "internet_gateway" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi"
+      Name            = "${var.environment}-gp-registrations-mi"
       ApplicationRole = "AwsInternetGateway"
     }
   )

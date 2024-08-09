@@ -3,7 +3,7 @@ resource "aws_ecs_cluster" "gp_registrations_mi_cluster" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-cluster"
+      Name            = "${var.environment}-gp-registrations-mi-cluster"
       ApplicationRole = "AwsEcsCluster"
     }
   )
@@ -19,7 +19,7 @@ resource "aws_cloudwatch_log_group" "gp_registrations_mi" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi"
+      Name            = "${var.environment}-gp-registrations-mi"
       ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )

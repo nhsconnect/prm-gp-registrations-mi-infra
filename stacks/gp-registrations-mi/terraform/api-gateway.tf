@@ -5,7 +5,7 @@ resource "aws_api_gateway_vpc_link" "vpc_link" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-api-gateway-vpc-link"
+      Name            = "${var.environment}-gp-registrations-mi-api-gateway-vpc-link"
       ApplicationRole = "AwsApiGatewayVpcLink"
     }
   )
@@ -17,9 +17,9 @@ resource "aws_api_gateway_rest_api" "rest_api" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-api-gateway-rest-api"
+      Name            = "${var.environment}-gp-registrations-mi-api-gateway-rest-api"
       ApplicationRole = "AwsApiGatewayRestApi"
-      PublicFacing = "Y"
+      PublicFacing    = "Y"
     }
   )
 }
@@ -108,7 +108,7 @@ resource "aws_api_gateway_stage" "api_gateway_stage" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-api-gateway-stage"
+      Name            = "${var.environment}-gp-registrations-mi-api-gateway-stage"
       ApplicationRole = "AwsApiGatewayStage"
     }
   )
@@ -132,7 +132,7 @@ resource "aws_cloudwatch_log_group" "access_logs" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi"
+      Name            = "${var.environment}-gp-registrations-mi"
       ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )
@@ -145,15 +145,15 @@ resource "aws_cloudwatch_log_group" "execution_logs" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi"
+      Name            = "${var.environment}-gp-registrations-mi"
       ApplicationRole = "AwsCloudwatchLogGroup"
     }
   )
 }
 
 resource "aws_api_gateway_usage_plan" "api_gateway_usage_plan" {
-  name         = "${var.environment}-gp-registrations-mi-api-gateway-usage-plan-api-key"
-  description  = "Usage plan to configure api key to connect to the apigee proxy"
+  name        = "${var.environment}-gp-registrations-mi-api-gateway-usage-plan-api-key"
+  description = "Usage plan to configure api key to connect to the apigee proxy"
 
   api_stages {
     api_id = aws_api_gateway_rest_api.rest_api.id

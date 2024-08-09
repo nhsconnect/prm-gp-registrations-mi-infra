@@ -5,7 +5,7 @@ resource "aws_ssm_parameter" "private_subnet_ids" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-private-subnet-ids"
+      Name            = "${var.environment}-gp-registrations-mi-private-subnet-ids"
       ApplicationRole = "AwsSsmParameter"
     }
   )
@@ -18,7 +18,7 @@ resource "aws_ssm_parameter" "vpc_id" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-vpc-id"
+      Name            = "${var.environment}-gp-registrations-mi-vpc-id"
       ApplicationRole = "AwsSsmParameter"
     }
   )
@@ -31,7 +31,7 @@ resource "aws_ssm_parameter" "vpc_cidr_block" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-vpc-cidr-block"
+      Name            = "${var.environment}-gp-registrations-mi-vpc-cidr-block"
       ApplicationRole = "AwsSsmParameter"
     }
   )

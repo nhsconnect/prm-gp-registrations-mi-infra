@@ -6,7 +6,7 @@ resource "aws_subnet" "public_a" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-public-a"
+      Name            = "${var.environment}-gp-registrations-mi-public-a"
       ApplicationRole = "AwsSubnet"
     }
   )
@@ -20,7 +20,7 @@ resource "aws_subnet" "public_b" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-public-b"
+      Name            = "${var.environment}-gp-registrations-mi-public-b"
       ApplicationRole = "AwsSubnet"
     }
   )
@@ -31,7 +31,7 @@ resource "aws_route_table" "public" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-public"
+      Name            = "${var.environment}-gp-registrations-mi-public"
       ApplicationRole = "AwsRouteTable"
     }
   )
@@ -59,7 +59,7 @@ resource "aws_eip" "nat" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-nat"
+      Name            = "${var.environment}-gp-registrations-mi-nat"
       ApplicationRole = "AwsEip"
     }
   )
@@ -72,7 +72,7 @@ resource "aws_nat_gateway" "nat_gateway" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-nat-gateway"
+      Name            = "${var.environment}-gp-registrations-mi-nat-gateway"
       ApplicationRole = "AwsNatGateway"
     }
   )

@@ -62,7 +62,7 @@ jobs:
           environment = "${{ inputs.environment }}"
           EOF
       - name: Setup Terraform variables (for container-repositories)
-        id: container-repositories vars
+        id: container-repositories-vars
         if: inputs.environment == 'dev' && inputs.terraform_stack == 'container-repositories'
         run: |-
           cat > pipeline.auto.tfvars <<EOF

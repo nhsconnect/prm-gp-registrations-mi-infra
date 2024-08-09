@@ -27,7 +27,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -84,7 +83,7 @@ jobs:
               issue_number: context.issue.number,
             });
             const botComment = comments.find(comment => {
-              return comment.user.type === 'Bot' && comment.body.includes('Report for environment: ${{ inputs.environment }}')
+              return comment.user.type === 'Bot' && comment.body.includes('Report for ${{inputs.working-directory}} environment: ${{ inputs.environment }} ')
             });
 
             // 2. Prepare format of the comment

@@ -15,8 +15,6 @@ on:
         description: "Which working directory to use"
         type: string
         required: true
-    paths:
-        - '${{inputs.working-directory}}/**'
 
 jobs:
   terraform_process:

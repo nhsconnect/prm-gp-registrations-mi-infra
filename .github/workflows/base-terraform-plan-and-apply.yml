@@ -67,7 +67,7 @@ jobs:
         run: |-
           cat > pipeline.auto.tfvars <<EOF
           environment = "${{ inputs.environment }}"
-          prod_account_id = "${{ secrets.AWS_PROD_ACCOUNT_ID }}
+          prod_account_id = "${{ secrets.AWS_PROD_ACCOUNT_ID }}"
           EOF
 
       - name: Terraform Plan

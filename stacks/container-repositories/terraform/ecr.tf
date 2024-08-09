@@ -3,7 +3,7 @@ resource "aws_ecr_repository" "gp_registrations_mi" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi"
+      Name            = "${var.environment}-gp-registrations-mi"
       ApplicationRole = "AwsEcrRepository"
     }
   )

@@ -16,7 +16,7 @@ variable "repo_name" {
 }
 
 variable "prod_account_id" {
-  default = ""
-  type = string
+  default     = ""
+  type        = string
   description = "Account id for prod environment"
 }

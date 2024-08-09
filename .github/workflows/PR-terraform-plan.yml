@@ -22,7 +22,7 @@ jobs:
     uses: ./.github/workflows/base-terraform-plan-and-apply.yml
     with:
       environment: ${{ matrix.environment }}
-      terraform_stack: ./stacks/${{ matrix.terraform_stack }}/terraform
+      terraform_stack: ${{ matrix.terraform_stack }}
     secrets: inherit
 
 

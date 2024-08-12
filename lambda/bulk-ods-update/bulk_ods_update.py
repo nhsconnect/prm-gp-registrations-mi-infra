@@ -161,15 +161,3 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                 icb.save()
             except DoesNotExist as e:
                 logger.info(f"Failed to retrieve record by ICB ODS code: {str(e)}")
-
-
-if __name__ == "__main__":
-    try:
-        # lambda_handler({}, {})
-        trud_service = TrudApiService(
-            api_key=os.environ.get("TRUD_API_KEY_PARAM_NAME"),
-            api_url=os.environ.get("TRUD_FHIR_API_URL_PARAM_NAME"),
-        )
-        extract_and_process_ods_icb_data(trud_service)
-    except Exception as e:
-        print(f"\nExiting Process! {e}")

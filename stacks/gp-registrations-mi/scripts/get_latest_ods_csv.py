@@ -1,73 +1,16 @@
 import csv
 import sys
 
-from services.trud_api_service import TrudApiService, TrudItem
-
-GP_FILE_HEADERS = [
-    "PracticeOdsCode",
-    "PracticeName",
-    "NG",
-    "HLHG",
-    "AD1",
-    "AD2",
-    "AD3",
-    "AD4",
-    "AD5",
-    "PostCode",
-    "OD",
-    "CD",
-    "Null1",
-    "Null2",
-    "IcbOdsCode",
-    "JPD",
-    "LPD",
-    "CTN",
-    "Null3",
-    "Null4",
-    "Null5",
-    "AM",
-    "Null6",
-    "GOR",
-    "Null7",
-    "Null8",
-    "Null9",
-]
-
-ICB_FILE_HEADERS = [
-    "IcbOdsCode",
-    "IcbName",
-    "NG",
-    "HLHG",
-    "AD1",
-    "AD2",
-    "AD3",
-    "AD4",
-    "AD5",
-    "PostCode",
-    "OD",
-    "CD",
-    "Null1",
-    "OSTC",
-    "Null2",
-    "Null3",
-    "Null4",
-    "Null5",
-    "Null6",
-    "Null7",
-    "Null8",
-    "AM",
-    "Null9",
-    "Null10",
-    "Null11",
-    "Null12",
-    "Null13",
-]
-
-ICB_MONTHLY_FILE_PATH = "eamendam.zip"
-ICB_QUARTERLY_FILE_PATH = "ocsissue/data/eccg.zip"
-
-ICB_MONTHLY_FILE_NAME = "eccgam.csv"
-ICB_QUARTERLY_FILE_NAME = "eccg.csv"
+from utils.enums.trud import TrudItem
+from utils.services.trud_api_service import TrudApiService
+from utils.trud_files import (
+    ICB_MONTHLY_FILE_PATH,
+    ICB_QUARTERLY_FILE_PATH,
+    ICB_MONTHLY_FILE_NAME,
+    ICB_QUARTERLY_FILE_NAME,
+    ICB_FILE_HEADERS,
+    GP_FILE_HEADERS,
+)
 
 
 def create_modify_csv(

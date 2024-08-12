@@ -2,6 +2,7 @@
 *.tfplan
 .idea
 
+__pycache__/
 */*/__pycache__
 */*/_trial_temp
 

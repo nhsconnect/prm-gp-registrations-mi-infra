@@ -50,9 +50,10 @@ function build_lambda_layer {
 echo "--- ${task} ---"
 case "${task}" in
 build-lambdas)
+  build_lambda bulk-ods-update utils
   build_lambda error-alarm-alert
   build_lambda splunk-cloud-event-uploader
-  build_lambda event-enrichment services
+  build_lambda event-enrichment utils
   build_lambda s3-event-uploader
 ;;
 *)

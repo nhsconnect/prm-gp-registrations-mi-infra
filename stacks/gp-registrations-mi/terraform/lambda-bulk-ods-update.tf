@@ -9,7 +9,7 @@ resource "aws_lambda_function" "ods_bulk_update" {
   layers           = [aws_lambda_layer_version.ods_bulk_update_lambda.arn]
   environment {
     variables = {
-      TRUD_API_KEY_PARAM_NAME      = data.aws_ssm_parameter.trud_api_key.value,
+      TRUD_API_KEY_PARAM_NAME      = data.aws_ssm_parameter.trud_api_key.name,
       TRUD_FHIR_API_URL_PARAM_NAME = data.aws_ssm_parameter.trud_api_endpoint.value,
       GP_ODS_DYNAMO_TABLE_NAME     = aws_dynamodb_table.mi_api_gp_ods.name,
       ICB_ODS_DYNAMO_TABLE_NAME    = aws_dynamodb_table.mi_api_icb_ods.name,

@@ -14,9 +14,3 @@ variable "repo_name" {
   default     = "prm-gp-registrations-mi-infra"
   description = "Name of this repository"
 }
-
-variable "prod_account_id" {
-  default     = ""
-  type        = string
-  description = "Account id for prod environment"
-}

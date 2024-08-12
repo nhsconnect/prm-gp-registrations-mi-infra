@@ -10,12 +10,13 @@ resource "aws_ecr_repository" "gp_registrations_mi" {
 }
 
 data "aws_iam_policy_document" "ecr_gp_registrations_mi" {
+  count      = var.environment == "dev" ? 1 : 0
   statement {
     effect = "Allow"
 
     principals {
       type        = "AWS"
-      identifiers = [var.prod_account_id]
+      identifiers = [data.aws_ssm_parameter.prod-aws-account-id.value]
     }
 
     actions = [
@@ -32,4 +33,9 @@ resource "aws_ecr_repository_policy" "ecr_gp_registrations_mi" {
   count      = var.environment == "dev" ? 1 : 0
   repository = aws_ecr_repository.gp_registrations_mi.name
   policy     = data.aws_iam_policy_document.ecr_gp_registrations_mi.json
+}
+
+data "aws_ssm_parameter" "prod-aws-account-id" {
+  count      = var.environment == "dev" ? 1 : 0
+  name = "/registrations/dev/user-input/prod-aws-account-id"
 }

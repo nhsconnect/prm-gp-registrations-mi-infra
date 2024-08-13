@@ -29,7 +29,9 @@ jobs:
           role-skip-session-tagging: true
 
       - name: Publish Docker Image to Prod
+        id: push-image-to-prod
         if: inputs.environment == 'prod' && inputs.is_deployment
+
         run: |
           aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_DEV_REPOSITORY }}
           IMAGE_TAG=$(aws ecr describe-images --registy-id ${{ secrets.AWS_DEV_ACCOUNT_ID }} --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
@@ -39,6 +41,7 @@ jobs:
           docker tag $source_repo $destination_repo
           aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_PROD_REPOSITORY }}
           docker push $destination_repo
+          echo "image-tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -86,7 +89,18 @@ jobs:
           PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 stacks/gp-registrations-mi/scripts/get_latest_ods_csv.py ${{ secrets.TRUD_API_KEY }} ${{ vars.TRUD_API_URL }}
 
       - name: Setup Terraform variables
-        id: vars
+        id: vars-prod
+        if: inputs.environment == 'prod' && inputs.is_deployment
+        run: |-
+          cat > pipeline.auto.tfvars <<EOF
+          gp_registrations_mi_image_tag = ${{ steps.push-image-to-prod.outputs.image-tag }}
+          environment = "${{ inputs.environment }}"
+          EOF
+        working-directory: ./stacks/gp-registrations-mi/terraform
+
+      - name: Setup Terraform variables
+        id: vars-dev
+        if: inputs.environment != 'prod' || !inputs.is_deployment
         run: |-
           IMAGE_TAG=$(aws ecr describe-images --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
           cat > pipeline.auto.tfvars <<EOF

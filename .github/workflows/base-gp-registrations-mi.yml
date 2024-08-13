@@ -25,7 +25,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume:  ${{inputs.is_deployment && secrets.AWS_ASSUME_ROLE || secrets.AWS_ASSUME_ROLE_READ_ONLY}}
+          role-to-assume:  ${{(inputs.is_deployment && secrets.AWS_ASSUME_ROLE) || secrets.AWS_ASSUME_ROLE_READ_ONLY}}
           role-skip-session-tagging: true
 
       - name: Publish Docker Image to Prod
@@ -100,7 +100,7 @@ jobs:
 
       - name: Setup Terraform variables
         id: vars-dev
-        if: inputs.environment != 'prod' || !inputs.is_deployment
+        if: inputs.environment != 'prod'
         run: |-
           IMAGE_TAG=$(aws ecr describe-images --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
           cat > pipeline.auto.tfvars <<EOF

@@ -10,7 +10,7 @@ resource "aws_ecr_repository" "gp_registrations_mi" {
 }
 
 data "aws_iam_policy_document" "ecr_gp_registrations_mi" {
-  count      = var.environment == "dev" ? 1 : 0
+  count = var.environment == "dev" ? 1 : 0
   statement {
     effect = "Allow"
 
@@ -36,6 +36,6 @@ resource "aws_ecr_repository_policy" "ecr_gp_registrations_mi" {
 }
 
 data "aws_ssm_parameter" "prod-aws-account-id" {
-  count      = var.environment == "dev" ? 1 : 0
-  name = "/registrations/dev/user-input/prod-aws-account-id"
+  count = var.environment == "dev" ? 1 : 0
+  name  = "/registrations/dev/user-input/prod-aws-account-id"
 }

@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: [ dev, prod ]
+        environment: [ dev, prod-plan ]
     uses: ./.github/workflows/base-gp-registrations-mi.yml
     with:
       environment: ${{ matrix.environment }}

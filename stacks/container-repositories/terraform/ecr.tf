@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "ecr_gp_registrations_mi" {
 
     principals {
       type        = "AWS"
-      identifiers = [data.aws_ssm_parameter.prod-aws-account-id.value]
+      identifiers = [data.aws_ssm_parameter.prod-aws-account-id[0].value]
     }
 
     actions = [
@@ -32,7 +32,7 @@ data "aws_iam_policy_document" "ecr_gp_registrations_mi" {
 resource "aws_ecr_repository_policy" "ecr_gp_registrations_mi" {
   count      = var.environment == "dev" ? 1 : 0
   repository = aws_ecr_repository.gp_registrations_mi.name
-  policy     = data.aws_iam_policy_document.ecr_gp_registrations_mi.json
+  policy     = data.aws_iam_policy_document.ecr_gp_registrations_mi[0].json
 }
 
 data "aws_ssm_parameter" "prod-aws-account-id" {

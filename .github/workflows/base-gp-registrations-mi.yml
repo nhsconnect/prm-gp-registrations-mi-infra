@@ -94,7 +94,7 @@ jobs:
         run: |-
           cat > pipeline.auto.tfvars <<EOF
           gp_registrations_mi_image_tag = ${{ steps.push-image-to-prod.outputs.image-tag }}
-          environment = "${{ inputs.environment }}"
+          environment = "${{ vars.AWS_ENVIRONMENT }}"
           EOF
         working-directory: ./stacks/gp-registrations-mi/terraform
 
@@ -105,16 +105,16 @@ jobs:
           IMAGE_TAG=$(aws ecr describe-images --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
           cat > pipeline.auto.tfvars <<EOF
           gp_registrations_mi_image_tag = $IMAGE_TAG
-          environment = "${{ inputs.environment }}"
+          environment = "${{ vars.AWS_ENVIRONMENT }}"
           EOF
         working-directory: ./stacks/gp-registrations-mi/terraform
 
       - name: Terraform Plan
         id: plan
         run: |
-          terraform plan -no-color -input=false -var-file="../vars/${{ inputs.environment }}.tfvars" -out "${{ inputs.environment }}.tfplan"
-          terraform show -no-color ${{ inputs.environment }}.tfplan > ${{ inputs.environment }}.tfplan.txt
-          echo "summary=$(grep -E 'Plan: [0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy\.|No changes\. Your infrastructure matches the configuration\.' ${{ inputs.environment }}.tfplan.txt | sed 's/.*No changes\. Your infrastructure matches the configuration/Plan: no changes/g' | sed 's/.*Plan: //g' | sed 's/\..*//g')" >> $GITHUB_OUTPUT
+          terraform plan -no-color -input=false -var-file="../vars/${{ vars.AWS_ENVIRONMENT }}.tfvars" -out "${{ vars.AWS_ENVIRONMENT }}.tfplan"
+          terraform show -no-color ${{ vars.AWS_ENVIRONMENT }}.tfplan > ${{ vars.AWS_ENVIRONMENT }}.tfplan.txt
+          echo "summary=$(grep -E 'Plan: [0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy\.|No changes\. Your infrastructure matches the configuration\.' ${{ vars.AWS_ENVIRONMENT }}.tfplan.txt | sed 's/.*No changes\. Your infrastructure matches the configuration/Plan: no changes/g' | sed 's/.*Plan: //g' | sed 's/\..*//g')" >> $GITHUB_OUTPUT
         working-directory: ./stacks/gp-registrations-mi/terraform
         shell: bash
 
@@ -167,5 +167,5 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && inputs.is_deployment
-        run: terraform apply -auto-approve -input=false tf.plan
+        run: terraform apply -auto-approve -input=false ${{ vars.AWS_ENVIRONMENT }}.tfplan
         working-directory: ./stacks/gp-registrations-mi/terraform

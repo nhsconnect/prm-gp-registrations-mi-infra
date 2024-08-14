@@ -1,4 +1,6 @@
 import os
+import tempfile
+import zipfile
 from datetime import date, timedelta
 import calendar
 import csv
@@ -23,10 +25,13 @@ from utils.trud_files import (
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
+
 
 def lambda_handler(event, context):
     download_type = determine_ods_manifest_download_type()
 
+    # TODO: Update to pull API keys from SSM
     trud_service = TrudApiService(
         api_key=os.environ.get("TRUD_API_KEY_PARAM_NAME"),
         api_url=os.environ.get("TRUD_FHIR_API_URL_PARAM_NAME"),
@@ -68,17 +73,29 @@ def extract_and_process_ods_gp_data(trud_service: TrudApiService):
     gp_ods_releases = trud_service.get_release_list(
         TrudItem.NHS_ODS_WEEKLY, is_latest=True
     )
-    download_file = trud_service.get_download_file(
+
+    logger.info(gp_ods_releases)
+
+    download_file_bytes = trud_service.get_download_file(
         gp_ods_releases[0].get("archiveFileUrl")
     )
-    epraccur_zip_file = trud_service.unzipping_files(
-        download_file, "Data/epraccur.zip", True
-    )
-    epraccur_csv_file = trud_service.unzipping_files(
-        epraccur_zip_file, "epraccur.csv", True
-    )
 
-    gp_ods_data = trud_csv_to_dict(epraccur_csv_file, GP_FILE_HEADERS)
+    download_zip_path = os.path.join(TEMP_DIR, 'download.zip')
+    eppracur_zip_path = os.path.join(TEMP_DIR, 'Data/epraccur.zip')
+    eppracur_csv_path = os.path.join(TEMP_DIR, "epraccur.csv")
+
+    with open(download_zip_path, 'wb') as f:
+        f.write(download_file_bytes)
+
+    with zipfile.ZipFile(download_zip_path, 'r') as zip_ref:
+        zip_ref.extractall(TEMP_DIR)
+
+    with zipfile.ZipFile(eppracur_zip_path, 'r') as zip_ref:
+        zip_ref.extractall(TEMP_DIR)
+
+    logger.info(os.listdir(TEMP_DIR))
+
+    gp_ods_data = trud_csv_to_dict(eppracur_csv_path, GP_FILE_HEADERS)
     gp_ods_data_amended_data = get_amended_records(gp_ods_data)
 
     if gp_ods_data_amended_data:
@@ -86,7 +103,6 @@ def extract_and_process_ods_gp_data(trud_service: TrudApiService):
         return
 
     logger.info("No amended GP data found")
-
 
 def extract_and_process_ods_icb_data(trud_service: TrudApiService):
     logger.info("Extracting and processing ODS ICB data")
@@ -140,24 +156,29 @@ def trud_csv_to_dict(file_path: str, headers: list[str]) -> list[dict]:
 
 
 def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
+    logger.info(data)
     if download_type == OdsDownloadType.GP:
         logger.info("Comparing GP Practice data")
         for amended_record in data:
             try:
-                practice = PracticeOds.get(amended_record.get("PracticeOdsCode"))
-                practice.practice_name = amended_record.get("PracticeName")
-                practice.icb_ods_code = amended_record.get("IcbOdsCode")
-
-                practice.save()
+                practice = PracticeOds(amended_record.get("PracticeOdsCode"))
+                practice.update(
+                    actions=[
+                        PracticeOds.practice_name.set(amended_record.get("PracticeName")),
+                        PracticeOds.icb_ods_code.set(amended_record.get("IcbOdsCode"))
+                    ]
+                )
             except DoesNotExist as e:
                 logger.info(f"Failed to retrieve record by Practice ODS code: {str(e)}")
 
     if download_type == OdsDownloadType.ICB:
         for amended_record in data:
             try:
-                icb = IcbOds.get(amended_record.get("IcbOdsCode"))
-                icb.icb_name = amended_record.get("IcbName")
-
-                icb.save()
+                icb = IcbOds(amended_record.get("IcbOdsCode"))
+                icb.update(
+                    actions=[
+                        IcbOds.icb_name.set(amended_record.get("IcbName"))
+                    ]
+                )
             except DoesNotExist as e:
                 logger.info(f"Failed to retrieve record by ICB ODS code: {str(e)}")

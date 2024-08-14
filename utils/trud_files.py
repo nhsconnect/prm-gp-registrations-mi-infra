@@ -19,7 +19,7 @@ GP_FILE_HEADERS = [
     "CloseDate",
     "StatusCode",
     "OrganisationSubTypeCode",
-    "IcbOdsCode ",
+    "IcbOdsCode",
     "JoinParentDate",
     "LeftParentDate",
     "ContactTelephoneNumber",

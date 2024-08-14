@@ -1,3 +1,4 @@
+import os
 from io import BytesIO
 from zipfile import ZipFile
 import urllib3
@@ -57,8 +58,10 @@ class TrudApiService:
             logger.info(f"An unexpected error occurred: {e}")
             raise e
 
-    def unzipping_files(self, zip_file, path=None, byte: bool = False):
+    def unzipping_files(self, zip_file, path=None, path_to_extract=None, byte: bool = False):
         myzip = ZipFile(BytesIO(zip_file) if byte else zip_file)
+        if path_to_extract is None:
+            path_to_extract = os.getcwd()
         if path in myzip.namelist():
-            return myzip.extract(path)
+            return myzip.extract(path, path_to_extract)
         return None

@@ -48,7 +48,7 @@ def get_gp_latest_ods_csv(service):
         release_list_response[0].get("archiveFileUrl")
     )
     epraccur_zip_file = service.unzipping_files(
-        download_file, "Data/epraccur.zip", True
+        download_file, "Data/epraccur.zip", byte=True
     )
     epraccur_csv_file = service.unzipping_files(epraccur_zip_file, "epraccur.csv")
     create_modify_csv(
@@ -87,7 +87,7 @@ def get_icb_latest_ods_csv(service):
         )
 
         if epraccur_zip_file := service.unzipping_files(
-            download_file, zip_file_path, True
+            download_file, zip_file_path, byte=True
         ):
             if epraccur_csv_file := service.unzipping_files(
                 epraccur_zip_file, csv_file_name

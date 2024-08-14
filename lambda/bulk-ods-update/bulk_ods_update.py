@@ -1,10 +1,10 @@
 import os
 import tempfile
-import zipfile
 from datetime import date, timedelta
 import calendar
 import csv
 
+import boto3
 from pynamodb.exceptions import DoesNotExist
 
 from utils.enums.trud import OdsDownloadType, TrudItem
@@ -30,10 +30,11 @@ TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
 
 def lambda_handler(event, context):
     download_type = determine_ods_manifest_download_type()
-
-    # TODO: Update to pull API keys from SSM
+    ssm = boto3.client("ssm")
+    trud_api_key_param = os.environ.get("TRUD_API_KEY_PARAM_NAME")
+    trud_api_key = ssm.get_parameter(trud_api_key_param) if trud_api_key_param else ""
     trud_service = TrudApiService(
-        api_key=os.environ.get("TRUD_API_KEY_PARAM_NAME"),
+        api_key=trud_api_key,
         api_url=os.environ.get("TRUD_FHIR_API_URL_PARAM_NAME"),
     )
 
@@ -80,18 +81,12 @@ def extract_and_process_ods_gp_data(trud_service: TrudApiService):
         gp_ods_releases[0].get("archiveFileUrl")
     )
 
-    download_zip_path = os.path.join(TEMP_DIR, 'download.zip')
-    eppracur_zip_path = os.path.join(TEMP_DIR, 'Data/epraccur.zip')
     eppracur_csv_path = os.path.join(TEMP_DIR, "epraccur.csv")
 
-    with open(download_zip_path, 'wb') as f:
-        f.write(download_file_bytes)
-
-    with zipfile.ZipFile(download_zip_path, 'r') as zip_ref:
-        zip_ref.extractall(TEMP_DIR)
-
-    with zipfile.ZipFile(eppracur_zip_path, 'r') as zip_ref:
-        zip_ref.extractall(TEMP_DIR)
+    epraccur_zip_file = trud_service.unzipping_files(
+        download_file_bytes, "Data/epraccur.zip", TEMP_DIR, True
+    )
+    trud_service.unzipping_files(epraccur_zip_file,"epraccur.csv", TEMP_DIR)
 
     logger.info(os.listdir(TEMP_DIR))
 
@@ -107,7 +102,8 @@ def extract_and_process_ods_gp_data(trud_service: TrudApiService):
 def extract_and_process_ods_icb_data(trud_service: TrudApiService):
     logger.info("Extracting and processing ODS ICB data")
 
-    icb_ods_releases = trud_service.get_release_list(TrudItem.ORG_REF_DATA_MONTHLY)
+    icb_ods_releases = trud_service.get_release_list(TrudItem.ORG_REF_DATA_MONTHLY, True)
+
     is_quarterly_release = icb_ods_releases[0].get("name").endswith(".0.0")
     download_file = trud_service.get_download_file(
         icb_ods_releases[0].get("archiveFileUrl")
@@ -122,10 +118,10 @@ def extract_and_process_ods_icb_data(trud_service: TrudApiService):
 
     icb_ods_data_amended_data = []
     if icb_zip_file := trud_service.unzipping_files(
-        download_file, icb_zip_file_path, True
+        download_file, icb_zip_file_path, TEMP_DIR, True
     ):
         if icb_csv_file := trud_service.unzipping_files(
-            icb_zip_file, icb_csv_file_name
+            icb_zip_file, icb_csv_file_name, TEMP_DIR
         ):
             icb_ods_data = trud_csv_to_dict(icb_csv_file, ICB_FILE_HEADERS)
             icb_ods_data_amended_data = get_amended_records(icb_ods_data)

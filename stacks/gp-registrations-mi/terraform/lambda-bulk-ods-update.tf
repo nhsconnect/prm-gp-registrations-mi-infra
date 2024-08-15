@@ -6,7 +6,7 @@ resource "aws_lambda_function" "ods_bulk_update" {
   source_code_hash = filebase64sha256(var.bulk_ods_update_lambda_zip)
   runtime          = "python3.12"
   timeout          = 300
-  layers           = [aws_lambda_layer_version.ods_bulk_update_lambda.arn]
+  layers           = [aws_lambda_layer_version.mi_lambda_layer.arn]
   environment {
     variables = {
       TRUD_API_KEY_PARAM_NAME      = data.aws_ssm_parameter.trud_api_key.name,
@@ -73,9 +73,3 @@ resource "aws_lambda_permission" "bulk_upload_metadata_schedule_permission" {
   ]
 }
 
-resource "aws_lambda_layer_version" "ods_bulk_update_lambda" {
-  filename                 = var.event_enrichment_lambda_layer_zip
-  layer_name               = "${var.environment}-${var.ods_bulk_update_lambda_name}_layer"
-  compatible_runtimes      = ["python3.12"]
-  compatible_architectures = ["x86_64"]
-}

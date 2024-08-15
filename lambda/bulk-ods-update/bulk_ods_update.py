@@ -5,7 +5,6 @@ import calendar
 import csv
 
 import boto3
-from pynamodb.exceptions import DoesNotExist
 
 from utils.enums.trud import OdsDownloadType, TrudItem
 from utils.models.ods_models import PracticeOds, IcbOds
@@ -19,7 +18,7 @@ from utils.trud_files import (
     ICB_MONTHLY_FILE_PATH,
     ICB_QUARTERLY_FILE_PATH,
     ICB_MONTHLY_FILE_NAME,
-    ICB_QUARTERLY_FILE_NAME,
+    ICB_QUARTERLY_FILE_NAME, GP_WEEKLY_FILE_NAME,
 )
 
 logger = logging.getLogger()
@@ -50,8 +49,8 @@ def determine_ods_manifest_download_type() -> OdsDownloadType:
     logger.info("Determining download type")
     today = date.today()
 
-    last_day_of_month = calendar.monthrange(today.year, today.month)[1]
-    last_date_of_month = date(today.year, today.month, last_day_of_month)
+    total_days_in_month = calendar.monthrange(today.year, today.month)[1]
+    last_date_of_month = date(today.year, today.month, total_days_in_month)
 
     last_sunday_of_month = last_date_of_month
 
@@ -81,23 +80,23 @@ def extract_and_process_ods_gp_data(trud_service: TrudApiService):
         gp_ods_releases[0].get("archiveFileUrl")
     )
 
-    eppracur_csv_path = os.path.join(TEMP_DIR, "epraccur.csv")
+    eppracur_csv_path = os.path.join(TEMP_DIR, GP_WEEKLY_FILE_NAME)
 
     epraccur_zip_file = trud_service.unzipping_files(
         download_file_bytes, "Data/epraccur.zip", TEMP_DIR, True
     )
-    trud_service.unzipping_files(epraccur_zip_file,"epraccur.csv", TEMP_DIR)
-
-    logger.info(os.listdir(TEMP_DIR))
+    trud_service.unzipping_files(epraccur_zip_file, GP_WEEKLY_FILE_NAME, TEMP_DIR)
 
     gp_ods_data = trud_csv_to_dict(eppracur_csv_path, GP_FILE_HEADERS)
     gp_ods_data_amended_data = get_amended_records(gp_ods_data)
 
     if gp_ods_data_amended_data:
+        logger.info(f"Found {len(gp_ods_data_amended_data)} amended GP data records to update")
         compare_and_overwrite(OdsDownloadType.GP, gp_ods_data_amended_data)
         return
 
     logger.info("No amended GP data found")
+
 
 def extract_and_process_ods_icb_data(trud_service: TrudApiService):
     logger.info("Extracting and processing ODS ICB data")
@@ -127,6 +126,7 @@ def extract_and_process_ods_icb_data(trud_service: TrudApiService):
             icb_ods_data_amended_data = get_amended_records(icb_ods_data)
 
     if icb_ods_data_amended_data:
+        logger.info(f"Found {len(icb_ods_data_amended_data)} amended ICB data records to update")
         compare_and_overwrite(OdsDownloadType.ICB, icb_ods_data_amended_data)
         return
 
@@ -152,7 +152,6 @@ def trud_csv_to_dict(file_path: str, headers: list[str]) -> list[dict]:
 
 
 def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
-    logger.info(data)
     if download_type == OdsDownloadType.GP:
         logger.info("Comparing GP Practice data")
         for amended_record in data:
@@ -164,10 +163,11 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                         PracticeOds.icb_ods_code.set(amended_record.get("IcbOdsCode"))
                     ]
                 )
-            except DoesNotExist as e:
-                logger.info(f"Failed to retrieve record by Practice ODS code: {str(e)}")
+            except Exception as e:
+                logger.info(f"Failed to create/update record by Practice ODS code: {str(e)}")
 
     if download_type == OdsDownloadType.ICB:
+        logger.info("Comparing ICB data")
         for amended_record in data:
             try:
                 icb = IcbOds(amended_record.get("IcbOdsCode"))
@@ -176,5 +176,5 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                         IcbOds.icb_name.set(amended_record.get("IcbName"))
                     ]
                 )
-            except DoesNotExist as e:
-                logger.info(f"Failed to retrieve record by ICB ODS code: {str(e)}")
+            except Exception as e:
+                logger.info(f"Failed to create/update record by ICB ODS code: {str(e)}")

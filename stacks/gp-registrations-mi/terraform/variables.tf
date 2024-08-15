@@ -84,6 +84,12 @@ variable "splunk_cloud_api_token_param_name" {
   description = "SSM param containing splunk cloud api token to send MI events to"
 }
 
+variable "mi_enrichment_lambda_layer_zip" {
+  type        = string
+  description = "Path to zipfile containing relevant packages for MI lambdas"
+  default     = "../../../lambda/build/layers/mi-enrichment.zip"
+}
+
 variable "splunk_cloud_event_uploader_lambda_zip" {
   type        = string
   description = "Path to zipfile containing lambda code for uploading events to splunk cloud"
@@ -96,22 +102,10 @@ variable "event_enrichment_lambda_zip" {
   default     = "../../../lambda/build/event-enrichment.zip"
 }
 
-variable "event_enrichment_lambda_layer_zip" {
-  type        = string
-  description = "Path to zipfile containing lambda layer code for enriching MI events"
-  default     = "../../../lambda/build/layer/event-enrichment.zip"
-}
-
 variable "bulk_ods_update_lambda_zip" {
   type        = string
   description = "Path to zipfile containing lambda code for ODS update"
-  default     = "placeholder_lambda_payload.zip"
-}
-
-variable "bulk_ods_update_lambda_layer_zip" {
-  type        = string
-  description = "Path to zipfile containing lambda layer code for ODS update"
-  default     = "placeholder_lambda_payload.zip"
+  default     = "../../../lambda/build/bulk-ods-update.zip"
 }
 
 variable "s3_event_uploader_lambda_zip" {

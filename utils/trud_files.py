@@ -1,3 +1,5 @@
+GP_WEEKLY_FILE_NAME = "epraccur.csv"
+
 ICB_MONTHLY_FILE_PATH = "eamendam.zip"
 ICB_MONTHLY_FILE_NAME = "eccgam.csv"
 

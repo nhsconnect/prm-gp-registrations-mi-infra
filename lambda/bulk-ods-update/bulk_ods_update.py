@@ -18,7 +18,7 @@ from utils.trud_files import (
     ICB_MONTHLY_FILE_PATH,
     ICB_QUARTERLY_FILE_PATH,
     ICB_MONTHLY_FILE_NAME,
-    ICB_QUARTERLY_FILE_NAME, GP_WEEKLY_FILE_NAME,
+    ICB_QUARTERLY_FILE_NAME, GP_WEEKLY_FILE_NAME, GP_WEEKLY_ZIP_FILE_PATH,
 )
 
 logger = logging.getLogger()
@@ -83,7 +83,7 @@ def extract_and_process_ods_gp_data(trud_service: TrudApiService):
     eppracur_csv_path = os.path.join(TEMP_DIR, GP_WEEKLY_FILE_NAME)
 
     epraccur_zip_file = trud_service.unzipping_files(
-        download_file_bytes, "Data/epraccur.zip", TEMP_DIR, True
+        download_file_bytes, GP_WEEKLY_ZIP_FILE_PATH, TEMP_DIR, True
     )
     trud_service.unzipping_files(epraccur_zip_file, GP_WEEKLY_FILE_NAME, TEMP_DIR)
 

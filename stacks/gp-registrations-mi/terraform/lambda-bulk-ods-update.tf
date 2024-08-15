@@ -6,7 +6,7 @@ resource "aws_lambda_function" "ods_bulk_update" {
   source_code_hash = filebase64sha256(var.bulk_ods_update_lambda_zip)
   runtime          = "python3.12"
   timeout          = 300
-  layers           = [aws_lambda_layer_version.mi_lambda_layer.arn]
+  layers           = [aws_lambda_layer_version.mi_enrichment_lambda_layer.arn]
   environment {
     variables = {
       TRUD_API_KEY_PARAM_NAME      = data.aws_ssm_parameter.trud_api_key.name,

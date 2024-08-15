@@ -9,7 +9,7 @@ from utils.trud_files import (
     ICB_MONTHLY_FILE_NAME,
     ICB_QUARTERLY_FILE_NAME,
     ICB_FILE_HEADERS,
-    GP_FILE_HEADERS,
+    GP_FILE_HEADERS, GP_WEEKLY_FILE_NAME, GP_WEEKLY_ZIP_FILE_PATH,
 )
 
 
@@ -48,9 +48,9 @@ def get_gp_latest_ods_csv(service):
         release_list_response[0].get("archiveFileUrl")
     )
     epraccur_zip_file = service.unzipping_files(
-        download_file, "Data/epraccur.zip", byte=True
+        download_file, GP_WEEKLY_ZIP_FILE_PATH, byte=True
     )
-    epraccur_csv_file = service.unzipping_files(epraccur_zip_file, "epraccur.csv")
+    epraccur_csv_file = service.unzipping_files(epraccur_zip_file, GP_WEEKLY_FILE_NAME)
     create_modify_csv(
         epraccur_csv_file,
         "initial_full_gps_ods.csv",

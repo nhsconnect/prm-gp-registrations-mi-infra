@@ -18,7 +18,9 @@ from utils.trud_files import (
     ICB_MONTHLY_FILE_PATH,
     ICB_QUARTERLY_FILE_PATH,
     ICB_MONTHLY_FILE_NAME,
-    ICB_QUARTERLY_FILE_NAME, GP_WEEKLY_FILE_NAME, GP_WEEKLY_ZIP_FILE_PATH,
+    ICB_QUARTERLY_FILE_NAME,
+    GP_WEEKLY_FILE_NAME,
+    GP_WEEKLY_ZIP_FILE_PATH,
 )
 
 logger = logging.getLogger()
@@ -91,7 +93,9 @@ def extract_and_process_ods_gp_data(trud_service: TrudApiService):
     gp_ods_data_amended_data = get_amended_records(gp_ods_data)
 
     if gp_ods_data_amended_data:
-        logger.info(f"Found {len(gp_ods_data_amended_data)} amended GP data records to update")
+        logger.info(
+            f"Found {len(gp_ods_data_amended_data)} amended GP data records to update"
+        )
         compare_and_overwrite(OdsDownloadType.GP, gp_ods_data_amended_data)
         return
 
@@ -101,7 +105,9 @@ def extract_and_process_ods_gp_data(trud_service: TrudApiService):
 def extract_and_process_ods_icb_data(trud_service: TrudApiService):
     logger.info("Extracting and processing ODS ICB data")
 
-    icb_ods_releases = trud_service.get_release_list(TrudItem.ORG_REF_DATA_MONTHLY, True)
+    icb_ods_releases = trud_service.get_release_list(
+        TrudItem.ORG_REF_DATA_MONTHLY, True
+    )
 
     is_quarterly_release = icb_ods_releases[0].get("name").endswith(".0.0")
     download_file = trud_service.get_download_file(
@@ -126,7 +132,9 @@ def extract_and_process_ods_icb_data(trud_service: TrudApiService):
             icb_ods_data_amended_data = get_amended_records(icb_ods_data)
 
     if icb_ods_data_amended_data:
-        logger.info(f"Found {len(icb_ods_data_amended_data)} amended ICB data records to update")
+        logger.info(
+            f"Found {len(icb_ods_data_amended_data)} amended ICB data records to update"
+        )
         compare_and_overwrite(OdsDownloadType.ICB, icb_ods_data_amended_data)
         return
 
@@ -159,22 +167,22 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                 practice = PracticeOds(amended_record.get("PracticeOdsCode"))
                 practice.update(
                     actions=[
-                        PracticeOds.practice_name.set(amended_record.get("PracticeName")),
-                        PracticeOds.icb_ods_code.set(amended_record.get("IcbOdsCode"))
+                        PracticeOds.practice_name.set(
+                            amended_record.get("PracticeName")
+                        ),
+                        PracticeOds.icb_ods_code.set(amended_record.get("IcbOdsCode")),
                     ]
                 )
             except Exception as e:
-                logger.info(f"Failed to create/update record by Practice ODS code: {str(e)}")
+                logger.info(
+                    f"Failed to create/update record by Practice ODS code: {str(e)}"
+                )
 
     if download_type == OdsDownloadType.ICB:
         logger.info("Comparing ICB data")
         for amended_record in data:
             try:
                 icb = IcbOds(amended_record.get("IcbOdsCode"))
-                icb.update(
-                    actions=[
-                        IcbOds.icb_name.set(amended_record.get("IcbName"))
-                    ]
-                )
+                icb.update(actions=[IcbOds.icb_name.set(amended_record.get("IcbName"))])
             except Exception as e:
                 logger.info(f"Failed to create/update record by ICB ODS code: {str(e)}")

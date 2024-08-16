@@ -48,6 +48,7 @@ resource "aws_s3_bucket_ownership_controls" "ods_csv_files" {
 resource "aws_s3_bucket_acl" "ods_csv_files" {
   bucket = aws_s3_bucket.ods_csv_files.id
   acl    = "private"
+  depends_on = [aws_s3_bucket_ownership_controls.ods_csv_files]
 }
 
 resource "aws_iam_policy" "ods_csv_files_data_policy" {

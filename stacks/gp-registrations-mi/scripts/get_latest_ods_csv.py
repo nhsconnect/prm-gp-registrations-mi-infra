@@ -1,73 +1,18 @@
 import csv
 import sys
 
-from services.trud_api_service import TrudApiService, TrudItem
-
-GP_FILE_HEADERS = [
-    "PracticeOdsCode",
-    "PracticeName",
-    "NG",
-    "HLHG",
-    "AD1",
-    "AD2",
-    "AD3",
-    "AD4",
-    "AD5",
-    "PostCode",
-    "OD",
-    "CD",
-    "Null1",
-    "Null2",
-    "IcbOdsCode",
-    "JPD",
-    "LPD",
-    "CTN",
-    "Null3",
-    "Null4",
-    "Null5",
-    "AM",
-    "Null6",
-    "GOR",
-    "Null7",
-    "Null8",
-    "Null9",
-]
-
-ICB_FILE_HEADERS = [
-    "IcbOdsCode",
-    "IcbName",
-    "NG",
-    "HLHG",
-    "AD1",
-    "AD2",
-    "AD3",
-    "AD4",
-    "AD5",
-    "PostCode",
-    "OD",
-    "CD",
-    "Null1",
-    "OSTC",
-    "Null2",
-    "Null3",
-    "Null4",
-    "Null5",
-    "Null6",
-    "Null7",
-    "Null8",
-    "AM",
-    "Null9",
-    "Null10",
-    "Null11",
-    "Null12",
-    "Null13",
-]
-
-ICB_MONTHLY_FILE_PATH = "eamendam.zip"
-ICB_QUARTERLY_FILE_PATH = "ocsissue/data/eccg.zip"
-
-ICB_MONTHLY_FILE_NAME = "eccgam.csv"
-ICB_QUARTERLY_FILE_NAME = "eccg.csv"
+from utils.enums.trud import TrudItem
+from utils.services.trud_api_service import TrudApiService
+from utils.trud_files import (
+    ICB_MONTHLY_FILE_PATH,
+    ICB_QUARTERLY_FILE_PATH,
+    ICB_MONTHLY_FILE_NAME,
+    ICB_QUARTERLY_FILE_NAME,
+    ICB_FILE_HEADERS,
+    GP_FILE_HEADERS,
+    GP_WEEKLY_FILE_NAME,
+    GP_WEEKLY_ZIP_FILE_PATH,
+)
 
 
 def create_modify_csv(
@@ -105,9 +50,9 @@ def get_gp_latest_ods_csv(service):
         release_list_response[0].get("archiveFileUrl")
     )
     epraccur_zip_file = service.unzipping_files(
-        download_file, "Data/epraccur.zip", True
+        download_file, GP_WEEKLY_ZIP_FILE_PATH, byte=True
     )
-    epraccur_csv_file = service.unzipping_files(epraccur_zip_file, "epraccur.csv")
+    epraccur_csv_file = service.unzipping_files(epraccur_zip_file, GP_WEEKLY_FILE_NAME)
     create_modify_csv(
         epraccur_csv_file,
         "initial_full_gps_ods.csv",
@@ -144,7 +89,7 @@ def get_icb_latest_ods_csv(service):
         )
 
         if epraccur_zip_file := service.unzipping_files(
-            download_file, zip_file_path, True
+            download_file, zip_file_path, byte=True
         ):
             if epraccur_csv_file := service.unzipping_files(
                 epraccur_zip_file, csv_file_name

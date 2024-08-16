@@ -17,7 +17,7 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
       ApplicationRole = "AwsLambdaFunction"
     }
   )
-  layers = [aws_lambda_layer_version.mi_enrichment_lambda_layer.arn]
+  layers = [aws_lambda_layer_version.mi_enrichment.arn]
   environment {
     variables = {
       SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL = aws_sqs_queue.incoming_mi_events_for_splunk_cloud_event_uploader.url,

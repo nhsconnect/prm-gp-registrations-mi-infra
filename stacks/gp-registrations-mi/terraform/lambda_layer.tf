@@ -1,4 +1,4 @@
-resource "aws_lambda_layer_version" "mi_enrichment_lambda_layer" {
+resource "aws_lambda_layer_version" "mi_enrichment" {
   filename                 = var.mi_enrichment_lambda_layer_zip
   layer_name               = "${var.environment}_mi_enrichment_layer"
   compatible_runtimes      = ["python3.12"]

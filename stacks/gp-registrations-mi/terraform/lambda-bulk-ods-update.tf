@@ -72,4 +72,3 @@ resource "aws_lambda_permission" "bulk_upload_metadata_schedule_permission" {
     aws_lambda_function.ods_bulk_update,
   ]
 }
-

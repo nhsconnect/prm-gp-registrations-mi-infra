@@ -1,0 +1,122 @@
+name: base-terraform-plan-and-apply
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Which Environment settings to use"
+        required: true
+        type: string
+        default: "dev"
+      is_deployment:
+        description: "Is workflow run on deployment"
+        type: boolean
+        default: false
+      terraform_stack:
+        description: "Which terraform stack directory to run"
+        type: string
+        required: true
+
+jobs:
+  terraform_process:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: ./stacks/${{ inputs.terraform_stack }}/terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume:  ${{inputs.is_deployment && secrets.AWS_ASSUME_ROLE || secrets.AWS_ASSUME_ROLE_READ_ONLY}}
+          role-skip-session-tagging: true
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        id: init
+        run: | 
+          terraform init -no-color -backend-config="key=gp-registrations-mi/${{ inputs.terraform_stack }}/terraform.tfstate" \
+          -backend-config="bucket=${{ secrets.AWS_STATE_BUCKET }}" \
+          -backend-config="dynamodb_table=${{ secrets.AWS_STATE_LOCK_TABLE }}"
+        shell: bash
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Setup Terraform variables
+        id: vars
+        run: |-
+          cat > pipeline.auto.tfvars <<EOF
+          environment = "${{ vars.AWS_ENVIRONMENT }}"
+          EOF
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan -no-color -input=false -var-file="../vars/${{ vars.AWS_ENVIRONMENT }}.tfvars" -out "${{ vars.AWS_ENVIRONMENT }}.tfplan"
+          terraform show -no-color ${{ vars.AWS_ENVIRONMENT }}.tfplan > ${{ vars.AWS_ENVIRONMENT }}.tfplan.txt
+          echo "summary=$(grep -E 'Plan: [0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy\.|No changes\. Your infrastructure matches the configuration\.' ${{ vars.AWS_ENVIRONMENT }}.tfplan.txt | sed 's/.*No changes\. Your infrastructure matches the configuration/Plan: no changes/g' | sed 's/.*Plan: //g' | sed 's/\..*//g')" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Add PR comment
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && (success() || failure())
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // 1. Retrieve existing bot comments for the PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('Report for ${{inputs.terraform_stack}} environment: ${{ inputs.environment }}')
+            });
+
+            // 2. Prepare format of the comment
+            const output = `### Report for ${{inputs.terraform_stack}} environment: ${{ inputs.environment }}
+
+            #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+
+
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+
+
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+
+
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            Plan results: ${{ steps.plan.outputs.summary }}`;
+
+            // 3. If we have a comment, update it, otherwise create a new one
+            if (botComment) {
+              github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+              })
+            }
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/master' && inputs.is_deployment
+        run: terraform apply -auto-approve -input=false ${{ vars.AWS_ENVIRONMENT }}.tfplan

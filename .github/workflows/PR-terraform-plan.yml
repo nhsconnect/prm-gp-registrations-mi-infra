@@ -1,0 +1,28 @@
+name: "PR-terraform-plan"
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'stacks/**'
+
+permissions:
+  pull-requests: write
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
+jobs:
+  terraform_plan:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        environment: [ dev, prod-plan ]
+        terraform_stack: [container-repositories, base-networking, ecs-cluster]
+    uses: ./.github/workflows/base-terraform-plan-and-apply.yml
+    with:
+      environment: ${{ matrix.environment }}
+      terraform_stack: ${{ matrix.terraform_stack }}
+    secrets: inherit
+
+

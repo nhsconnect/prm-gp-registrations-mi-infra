@@ -84,28 +84,40 @@ variable "splunk_cloud_api_token_param_name" {
   description = "SSM param containing splunk cloud api token to send MI events to"
 }
 
+variable "mi_enrichment_lambda_layer_zip" {
+  type        = string
+  description = "Path to zipfile containing relevant packages for MI lambdas"
+  default     = "../../../lambda/build/layers/mi-enrichment.zip"
+}
+
 variable "splunk_cloud_event_uploader_lambda_zip" {
   type        = string
   description = "Path to zipfile containing lambda code for uploading events to splunk cloud"
-  default     = "lambda/build/splunk-cloud-event-uploader.zip"
+  default     = "../../../lambda/build/splunk-cloud-event-uploader.zip"
 }
 
 variable "event_enrichment_lambda_zip" {
   type        = string
   description = "Path to zipfile containing lambda code for enriching MI events"
-  default     = "lambda/build/event-enrichment.zip"
+  default     = "../../../lambda/build/event-enrichment.zip"
+}
+
+variable "bulk_ods_update_lambda_zip" {
+  type        = string
+  description = "Path to zipfile containing lambda code for ODS update"
+  default     = "../../../lambda/build/bulk-ods-update.zip"
 }
 
 variable "s3_event_uploader_lambda_zip" {
   type        = string
   description = "Path to zipfile containing lambda code for uploading to s3 bucket"
-  default     = "lambda/build/s3-event-uploader.zip"
+  default     = "../../../lambda/build/s3-event-uploader.zip"
 }
 
 variable "error_alarm_alert_lambda_zip" {
   type        = string
   description = "Path to zipfile containing lambda code for sending alerts to"
-  default     = "lambda/build/error-alarm-alert.zip"
+  default     = "../../../lambda/build/error-alarm-alert.zip"
 }
 
 variable "log_alerts_general_webhook_url_param_name" {
@@ -126,4 +138,10 @@ variable "sds_fhir_api_key_param_name" {
 variable "sds_fhir_api_url_param_name" {
   type        = string
   description = "SSM param containing SDS FHIR API url to retrieve supplier details"
+}
+
+variable "ods_bulk_update_lambda_name" {
+  default     = "ods_bulk_update_lambda"
+  type        = string
+  description = "Name of the ODS bulk upload lambda"
 }

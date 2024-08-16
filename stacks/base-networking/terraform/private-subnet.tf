@@ -6,7 +6,7 @@ resource "aws_subnet" "private_a" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-private-a"
+      Name            = "${var.environment}-gp-registrations-mi-private-a"
       ApplicationRole = "AwsSubnet"
     }
   )
@@ -20,7 +20,7 @@ resource "aws_subnet" "private_b" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-private-b"
+      Name            = "${var.environment}-gp-registrations-mi-private-b"
       ApplicationRole = "AwsSubnet"
     }
   )
@@ -34,9 +34,9 @@ resource "aws_route" "private" {
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.vpc.id
-  tags  = merge(
+  tags = merge(
     local.common_tags, {
-      Name = "${var.environment}-gp-registrations-mi-private"
+      Name            = "${var.environment}-gp-registrations-mi-private"
       ApplicationRole = "AwsRouteTable"
     }
   )

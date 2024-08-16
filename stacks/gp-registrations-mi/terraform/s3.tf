@@ -5,22 +5,26 @@ resource "aws_s3_bucket" "mi_events_output" {
     prevent_destroy = true
   }
 
-  lifecycle_rule {
-    enabled = true
-    id      = "expire-mi-objects-after-2-years"
+  tags = merge(
+    local.common_tags,
+    {
+      Name            = "${var.environment}-prm-gp-registrations-mi-s3-mi-events"
+      ApplicationRole = "AwsS3Bucket"
+    }
+  )
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "mi_events_output" {
+  bucket = aws_s3_bucket.mi_events_output.id
+
+  rule {
+    id     = "expire-mi-objects-after-2-years"
+    status = "Enabled"
 
     expiration {
       days = 730
     }
   }
-
-  tags = merge(
-    local.common_tags,
-    {
-      Name = "${var.environment}-prm-gp-registrations-mi-s3-mi-events"
-      ApplicationRole = "AwsS3Bucket"
-    }
-  )
 }
 
 resource "aws_s3_bucket_acl" "mi_events_output" {

@@ -18,7 +18,7 @@ resource "aws_lb" "nlb" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-nlb"
+      Name            = "${var.environment}-gp-registrations-mi-nlb"
       ApplicationRole = "AwsLb"
     }
   )
@@ -40,7 +40,7 @@ resource "aws_lb_target_group" "nlb" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-nlb-tg"
+      Name            = "${var.environment}-gp-registrations-mi-nlb-tg"
       ApplicationRole = "AwsLbTargetGroup"
     }
   )
@@ -57,7 +57,7 @@ resource "aws_lb_listener" "nlb_listener" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.environment}-gp-registrations-mi-nlb-listener"
+      Name            = "${var.environment}-gp-registrations-mi-nlb-listener"
       ApplicationRole = "AwsLbListener"
     }
   )

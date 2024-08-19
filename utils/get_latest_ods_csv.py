@@ -1,9 +1,9 @@
 import csv
 import sys
 
-from utils.enums.trud import TrudItem
-from utils.services.trud_api_service import TrudApiService
-from utils.trud_files import (
+from .enums.trud import TrudItem
+from .services.trud_api_service import TrudApiService
+from .trud_files import (
     ICB_MONTHLY_FILE_PATH,
     ICB_QUARTERLY_FILE_PATH,
     ICB_MONTHLY_FILE_NAME,
@@ -24,7 +24,7 @@ def create_modify_csv(
     additional_rows=None,
 ):
     with open(file_path, newline="") as original, open(
-        modify_file_path, "w", newline=""
+        f"stacks/gp-registrations-mi/terraform/{modify_file_path}", "w", newline=""
     ) as output:
         reader = csv.DictReader(original, delimiter=",", fieldnames=headers_list)
         csv_modified_rows = [

@@ -81,6 +81,7 @@ jobs:
         if: github.ref == 'refs/heads/master' && inputs.is_deployment
         run: |
             python3 -m venv ./venv
+          ./venv/bin/pip3 install --upgrade pip urllib3
 
       - name: Get ODS CSV Files
         if: github.ref == 'refs/heads/master' && inputs.is_deployment

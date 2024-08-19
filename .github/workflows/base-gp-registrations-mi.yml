@@ -81,14 +81,11 @@ jobs:
         if: github.ref == 'refs/heads/master' && inputs.is_deployment
         run: |
             python3 -m venv ./venv
-            ./venv/bin/pip3 install --upgrade pip requests
-        working-directory: ./stacks/gp-registrations-mi/scripts
 
       - name: Get ODS CSV Files
         if: github.ref == 'refs/heads/master' && inputs.is_deployment
         run: |
-          PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 get_latest_ods_csv.py ${{ secrets.TRUD_API_KEY }} ${{ vars.TRUD_API_URL }}
-        working-directory: ./stacks/gp-registrations-mi/scripts
+          PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 -m utils.get_latest_ods_csv ${{ secrets.TRUD_API_KEY }} ${{ vars.TRUD_API_URL }}
 
       - name: Setup Terraform variables
         id: vars-prod

@@ -1,3 +1,4 @@
+import json
 import os
 from io import BytesIO
 from zipfile import ZipFile
@@ -31,7 +32,8 @@ class TrudApiService:
 
         try:
             trud_response = self.http.request("GET", url_endpoint)
-            response = trud_response.json().get("releases", [])
+            trud_data = json.loads(trud_response.data.decode())
+            response = trud_data.get("releases", [])
             trud_response.release_conn()
 
             return response

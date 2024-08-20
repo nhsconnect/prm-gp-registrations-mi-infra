@@ -1,5 +1,5 @@
 resource "aws_lambda_function" "ods_bulk_update" {
-  filename         = var.ods_bulk_update_lambda_name
+  filename         = var.bulk_ods_update_lambda_zip
   function_name    = "${var.environment}-${var.ods_bulk_update_lambda_name}"
   role             = aws_iam_role.bulk_ods_lambda.arn
   handler          = "ods_bulk_update.lambda_handler"

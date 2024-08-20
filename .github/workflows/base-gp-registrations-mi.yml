@@ -167,5 +167,7 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && inputs.is_deployment
+        env:
+          TF_LOG_PROVIDER: TRACE
         run: terraform apply -auto-approve -input=false ${{ vars.AWS_ENVIRONMENT }}.tfplan
         working-directory: ./stacks/gp-registrations-mi/terraform

@@ -67,15 +67,14 @@ jobs:
         run: terraform validate -no-color
         working-directory: ./stacks/gp-registrations-mi/terraform
 
-      - name: Build Lambdas
-        run: | 
-            ./tasks_github_actions.sh build-lambdas
-
       - name: Set up Python
-        if: github.ref == 'refs/heads/master' && inputs.is_deployment
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Build Lambdas
+        run: | 
+            ./tasks_github_actions.sh build-lambdas
 
       - name: Make virtual environment
         if: github.ref == 'refs/heads/master' && inputs.is_deployment

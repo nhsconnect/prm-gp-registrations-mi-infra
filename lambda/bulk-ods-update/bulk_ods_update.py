@@ -8,6 +8,7 @@ import boto3
 
 from utils.enums.trud import OdsDownloadType, TrudItem
 from utils.models.ods_models import PracticeOds, IcbOds
+from utils.services.ssm_service import SsmSecretManager
 from utils.services.trud_api_service import TrudApiService
 
 import logging
@@ -33,7 +34,8 @@ def lambda_handler(event, context):
     download_type = determine_ods_manifest_download_type()
     ssm = boto3.client("ssm")
     trud_api_key_param = os.environ.get("TRUD_API_KEY_PARAM_NAME")
-    trud_api_key = ssm.get_parameter(trud_api_key_param) if trud_api_key_param else ""
+    ssm_service = SsmSecretManager(ssm)
+    trud_api_key = ssm_service.get_secret(trud_api_key_param) if trud_api_key_param else ""
     trud_service = TrudApiService(
         api_key=trud_api_key,
         api_url=os.environ.get("TRUD_FHIR_API_URL_PARAM_NAME"),

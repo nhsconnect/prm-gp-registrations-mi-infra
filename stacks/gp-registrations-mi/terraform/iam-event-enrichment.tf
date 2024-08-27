@@ -20,7 +20,8 @@ resource "aws_iam_role" "bulk_ods_lambda" {
     aws_iam_policy.dynamodb_policy_bulk_icb_ods_data_lambda.arn,
     aws_iam_policy.dynamodb_policy_bulk_ods_data_lambda.arn,
     aws_iam_policy.bulk_ods_update_lambda_cloudwatch_log_access.arn,
-    aws_iam_policy.ods_csv_files_data_policy.arn
+    aws_iam_policy.ods_csv_files_data_policy.arn,
+    aws_iam_policy.bulk_ods_lambda_ssm_access.arn
   ]
 }
 
@@ -40,6 +41,24 @@ data "aws_iam_policy_document" "event_enrichment_lambda_ssm_access" {
     resources = [
       "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.sds_fhir_api_key_param_name}",
       "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.sds_fhir_api_url_param_name}",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "bulk_ods_lambda_ssm_access" {
+  name   = "${var.environment}-bulk-ods-lambda-ssm-access"
+  policy = data.aws_iam_policy_document.bulk_ods_lambda_ssm_access.json
+}
+
+data "aws_iam_policy_document" "bulk_ods_lambda_ssm_access" {
+  statement {
+    sid = "GetSSMParameter"
+
+    actions = [
+      "ssm:GetParameter"
+    ]
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${data.aws_ssm_parameter.trud_api_key.name}",
     ]
   }
 }

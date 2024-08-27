@@ -175,6 +175,7 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                         PracticeOds.icb_ods_code.set(amended_record.get("IcbOdsCode")),
                     ]
                 )
+                logger.info(f'Overwriting for ODS: {amended_record.get("PracticeOdsCode")} - Name: {amended_record.get("PracticeName")} | ICB: {amended_record.get("IcbOdsCode")}')
             except Exception as e:
                 logger.info(
                     f"Failed to create/update record by Practice ODS code: {str(e)}"
@@ -186,5 +187,6 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
             try:
                 icb = IcbOds(amended_record.get("IcbOdsCode"))
                 icb.update(actions=[IcbOds.icb_name.set(amended_record.get("IcbName"))])
+                logger.info(f'Overwriting for ODS: {amended_record.get("IcbOdsCode")} - Name: {amended_record.get("IcbName")}')
             except Exception as e:
                 logger.info(f"Failed to create/update record by ICB ODS code: {str(e)}")

@@ -185,7 +185,7 @@ def get_supplier_data(ods_code: str, gp_dynamo_item: PracticeOds):
         if supplier_last_update_date
         else True
     )
-    if not gp_dynamo_item.supplier_name and is_out_of_date:
+    if not gp_dynamo_item.supplier_name or is_out_of_date:
         requesting_supplier_name = get_supplier_name_from_sds_api(ods_code)
         gp_dynamo_item.supplier_name = requesting_supplier_name
         gp_dynamo_item.update(
@@ -245,6 +245,7 @@ def _fetch_organisation(ods_code: Optional[str]) -> dict:
         return EMPTY_ORGANISATION
 
     print("Attempting to retrieve organisation with ODS code: " + ods_code)
+    print("Requesting info from ODS API")
     http = urllib3.PoolManager()
     response = http.request("GET", ODS_PORTAL_URL + ods_code)
 

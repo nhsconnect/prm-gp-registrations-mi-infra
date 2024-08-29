@@ -22,11 +22,12 @@ jobs:
 
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume:  ${{ (inputs.is_deployment && secrets.AWS_ASSUME_ROLE) || secrets.AWS_ASSUME_ROLE_READ_ONLY }}
           role-skip-session-tagging: true
           aws-region: ${{ vars.AWS_REGION }}
+          mask-aws-account-id: true
 
       - name: Publish Docker Image to Prod
         id: push-image-to-prod

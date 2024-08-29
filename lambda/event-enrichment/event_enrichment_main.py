@@ -160,14 +160,14 @@ def get_gp_data_from_api(ods_code: str):
     if practice_name is None:
         return None
     icb_ods_code = _find_icb_ods_code(requesting_practice_organisation)
-    gp_api_item = PracticeOds(ods_code, practice_name, icb_ods_code=icb_ods_code)
+    gp_api_item = PracticeOds(ods_code, practice_name=practice_name, icb_ods_code=icb_ods_code)
     gp_api_item.save()
     return gp_api_item
 
 
 def get_icb_name_from_api(ods_code: str):
     icb_name = _fetch_organisation(ods_code)["Name"]
-    icb_api_item = IcbOds(ods_code, icb_name)
+    icb_api_item = IcbOds(ods_code, icb_name=icb_name)
     icb_api_item.save()
     return icb_name
 

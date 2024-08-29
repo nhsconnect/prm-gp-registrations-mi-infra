@@ -8,6 +8,7 @@ import boto3
 
 from utils.enums.trud import OdsDownloadType, TrudItem
 from utils.models.ods_models import PracticeOds, IcbOds
+from utils.services.ssm_service import SsmSecretManager
 from utils.services.trud_api_service import TrudApiService
 
 import logging
@@ -33,7 +34,8 @@ def lambda_handler(event, context):
     download_type = determine_ods_manifest_download_type()
     ssm = boto3.client("ssm")
     trud_api_key_param = os.environ.get("TRUD_API_KEY_PARAM_NAME")
-    trud_api_key = ssm.get_parameter(trud_api_key_param) if trud_api_key_param else ""
+    ssm_service = SsmSecretManager(ssm)
+    trud_api_key = ssm_service.get_secret(trud_api_key_param) if trud_api_key_param else ""
     trud_service = TrudApiService(
         api_key=trud_api_key,
         api_url=os.environ.get("TRUD_FHIR_API_URL_PARAM_NAME"),
@@ -108,6 +110,7 @@ def extract_and_process_ods_icb_data(trud_service: TrudApiService):
     icb_ods_releases = trud_service.get_release_list(
         TrudItem.ORG_REF_DATA_MONTHLY, True
     )
+    logger.info(icb_ods_releases)
 
     is_quarterly_release = icb_ods_releases[0].get("name").endswith(".0.0")
     download_file = trud_service.get_download_file(
@@ -173,6 +176,7 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                         PracticeOds.icb_ods_code.set(amended_record.get("IcbOdsCode")),
                     ]
                 )
+                logger.info(f'Overwriting for ODS: {amended_record.get("PracticeOdsCode")} - Name: {amended_record.get("PracticeName")} | ICB: {amended_record.get("IcbOdsCode")}')
             except Exception as e:
                 logger.info(
                     f"Failed to create/update record by Practice ODS code: {str(e)}"
@@ -184,5 +188,6 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
             try:
                 icb = IcbOds(amended_record.get("IcbOdsCode"))
                 icb.update(actions=[IcbOds.icb_name.set(amended_record.get("IcbName"))])
+                logger.info(f'Overwriting for ODS: {amended_record.get("IcbOdsCode")} - Name: {amended_record.get("IcbName")}')
             except Exception as e:
                 logger.info(f"Failed to create/update record by ICB ODS code: {str(e)}")

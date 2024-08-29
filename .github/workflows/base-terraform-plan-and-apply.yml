@@ -33,6 +33,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume:  ${{inputs.is_deployment && secrets.AWS_ASSUME_ROLE || secrets.AWS_ASSUME_ROLE_READ_ONLY}}
           role-skip-session-tagging: true
+          mask-aws-account-id: true
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

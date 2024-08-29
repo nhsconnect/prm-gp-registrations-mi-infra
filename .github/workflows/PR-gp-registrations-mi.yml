@@ -1,4 +1,4 @@
-name: 'pr-gp-registrations-mi'
+name: 'PR-terraform-gp-registrations-mi'
 on:
   pull_request:
     branches:

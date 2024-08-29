@@ -110,6 +110,7 @@ def extract_and_process_ods_icb_data(trud_service: TrudApiService):
     icb_ods_releases = trud_service.get_release_list(
         TrudItem.ORG_REF_DATA_MONTHLY, True
     )
+    logger.info(icb_ods_releases)
 
     is_quarterly_release = icb_ods_releases[0].get("name").endswith(".0.0")
     download_file = trud_service.get_download_file(

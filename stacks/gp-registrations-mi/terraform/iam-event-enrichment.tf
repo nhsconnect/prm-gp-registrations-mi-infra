@@ -58,7 +58,7 @@ data "aws_iam_policy_document" "bulk_ods_lambda_ssm_access" {
       "ssm:GetParameter"
     ]
     resources = [
-      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${data.aws_ssm_parameter.trud_api_key.name}",
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${data.aws_ssm_parameter.trud_api_key.name}"
     ]
   }
 }

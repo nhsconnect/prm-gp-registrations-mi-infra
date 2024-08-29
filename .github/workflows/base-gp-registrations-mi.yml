@@ -22,11 +22,11 @@ jobs:
 
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume:  ${{(inputs.is_deployment && secrets.AWS_ASSUME_ROLE) || secrets.AWS_ASSUME_ROLE_READ_ONLY}}
+          role-to-assume:  ${{ (inputs.is_deployment && secrets.AWS_ASSUME_ROLE) || secrets.AWS_ASSUME_ROLE_READ_ONLY }}
           role-skip-session-tagging: true
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Publish Docker Image to Prod
         id: push-image-to-prod
@@ -47,7 +47,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: latest
-          terraform_wrapper: false
 
       - name: Terraform Format
         id: fmt

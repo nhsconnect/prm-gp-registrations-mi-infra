@@ -6,6 +6,7 @@ resource "aws_lambda_function" "ods_bulk_update" {
   source_code_hash = filebase64sha256(var.bulk_ods_update_lambda_zip)
   runtime          = "python3.12"
   timeout          = 300
+  memory_size      = 512
   layers           = [aws_lambda_layer_version.mi_enrichment.arn]
   environment {
     variables = {

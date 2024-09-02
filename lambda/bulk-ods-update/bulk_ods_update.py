@@ -1,6 +1,6 @@
 import os
 import tempfile
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import calendar
 import csv
 
@@ -31,44 +31,54 @@ TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
 
 
 def lambda_handler(event, context):
-    download_type = determine_ods_manifest_download_type()
-    ssm = boto3.client("ssm")
-    trud_api_key_param = os.environ.get("TRUD_API_KEY_PARAM_NAME")
-    ssm_service = SsmSecretManager(ssm)
-    trud_api_key = ssm_service.get_secret(trud_api_key_param) if trud_api_key_param else ""
-    trud_service = TrudApiService(
-        api_key=trud_api_key,
-        api_url=os.environ.get("TRUD_FHIR_API_URL_PARAM_NAME"),
-    )
+    try:
+        ssm = boto3.client("ssm")
+        trud_api_key_param = os.environ.get("TRUD_API_KEY_PARAM_NAME")
+        ssm_service = SsmSecretManager(ssm)
+        trud_api_key = ssm_service.get_secret(trud_api_key_param) if trud_api_key_param else ""
+        trud_service = TrudApiService(
+            api_key=trud_api_key,
+            api_url=os.environ.get("TRUD_FHIR_API_URL_PARAM_NAME"),
+        )
 
-    extract_and_process_ods_gp_data(trud_service)
-
-    if download_type == OdsDownloadType.BOTH:
+        extract_and_process_ods_gp_data(trud_service)
         extract_and_process_ods_icb_data(trud_service)
 
-    return {"statusCode": 200}
+        return {"statusCode": 200}
+    except Exception as e:
+        logger.info(f"An unexpected error occurred: {e}")
+        return {"statusCode": 400}
 
 
-def determine_ods_manifest_download_type() -> OdsDownloadType:
-    logger.info("Determining download type")
+def find_date_for_friday(start_date):
+    last_friday = start_date
+    while last_friday.weekday() != 4:
+        last_friday -= timedelta(days=1)
+    return last_friday
+
+
+def determine_if_last_friday_was_the_last_friday_of_the_month():
+    logger.info("Determining if last friday date was the last friday of the month")
     today = date.today()
+    last_friday = find_date_for_friday(today)
 
-    total_days_in_month = calendar.monthrange(today.year, today.month)[1]
-    last_date_of_month = date(today.year, today.month, total_days_in_month)
+    total_days_in_month = calendar.monthrange(last_friday.year, last_friday.month)[1]
+    last_date_of_month = date(last_friday.year, last_friday.month, total_days_in_month)
 
-    last_sunday_of_month = last_date_of_month
+    last_friday_of_month = find_date_for_friday(last_date_of_month)
 
-    while last_sunday_of_month.weekday() != 6:
-        last_sunday_of_month -= timedelta(days=1)
+    return last_friday == last_friday_of_month
 
-    is_icb_download_date = today == last_sunday_of_month
 
-    if is_icb_download_date:
-        logger.info("Download type set to: GP and ICB")
-        return OdsDownloadType.BOTH
-
-    logger.info("Download type set to: GP")
-    return OdsDownloadType.GP
+def check_release_date_within_last_7_days(release_date_string: str):
+    try:
+        release_date = datetime.strptime(release_date_string, '%Y-%m-%d').date()
+        today = date.today()
+        days_since_release = today - release_date
+        return days_since_release <= timedelta(days=7)
+    except (TypeError, ValueError):
+        logger.info("failed to check release date")
+        raise UnableToGetReleaseDate()
 
 
 def extract_and_process_ods_gp_data(trud_service: TrudApiService):
@@ -105,13 +115,26 @@ def extract_and_process_ods_gp_data(trud_service: TrudApiService):
 
 
 def extract_and_process_ods_icb_data(trud_service: TrudApiService):
-    logger.info("Extracting and processing ODS ICB data")
+    logger.info("Getting latest ICB release details")
 
     icb_ods_releases = trud_service.get_release_list(
         TrudItem.ORG_REF_DATA_MONTHLY, True
     )
     logger.info(icb_ods_releases)
+    try:
+        release_date_string = icb_ods_releases[0].get("releaseDate")
+        if release_date_string:
+            is_icb_download_date = check_release_date_within_last_7_days(release_date_string)
+        else:
+            raise UnableToGetReleaseDate()
+    except UnableToGetReleaseDate:
+        is_icb_download_date = determine_if_last_friday_was_the_last_friday_of_the_month()
 
+    if not is_icb_download_date:
+        logger.info("No ICB download for this week, skipping download")
+        return None
+
+    logger.info("Proceeding to download ICB data")
     is_quarterly_release = icb_ods_releases[0].get("name").endswith(".0.0")
     download_file = trud_service.get_download_file(
         icb_ods_releases[0].get("archiveFileUrl")
@@ -125,6 +148,8 @@ def extract_and_process_ods_icb_data(trud_service: TrudApiService):
     )
 
     icb_ods_data_amended_data = []
+    logger.info("Extracting and processing ODS ICB data")
+
     if icb_zip_file := trud_service.unzipping_files(
         download_file, icb_zip_file_path, TEMP_DIR, True
     ):
@@ -191,3 +216,7 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                 logger.info(f'Overwriting for ODS: {amended_record.get("IcbOdsCode")} - Name: {amended_record.get("IcbName")}')
             except Exception as e:
                 logger.info(f"Failed to create/update record by ICB ODS code: {str(e)}")
+
+
+class UnableToGetReleaseDate(Exception):
+    pass

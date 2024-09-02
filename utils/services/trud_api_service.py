@@ -3,6 +3,7 @@ import os
 from io import BytesIO
 from zipfile import ZipFile
 import urllib3
+from urllib3.exceptions import HTTPError
 from urllib3.util.retry import Retry
 
 import logging
@@ -37,9 +38,8 @@ class TrudApiService:
             trud_response.release_conn()
 
             return response
-        except Exception as e:
+        except HTTPError as e:
             logger.info(f"An unexpected error occurred: {e}")
-            raise e
 
     def get_download_url_by_release(
         self, releases_list, break_at_quarterly_release=True
@@ -54,11 +54,10 @@ class TrudApiService:
     def get_download_file(self, download_url):
         try:
             download_response = self.http.request("GET", download_url)
-            logger.info(download_response)
+            logger.info(download_response.json())
             return download_response.data
-        except Exception as e:
+        except HTTPError as e:
             logger.info(f"An unexpected error occurred: {e}")
-            raise e
 
     def unzipping_files(self, zip_file, path=None, path_to_extract=None, byte: bool = False):
         myzip = ZipFile(BytesIO(zip_file) if byte else zip_file)

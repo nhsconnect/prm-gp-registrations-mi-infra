@@ -1,8 +1,9 @@
+import calendar
+import csv
+import logging
 import os
 import tempfile
 from datetime import date, timedelta, datetime
-import calendar
-import csv
 
 import boto3
 
@@ -10,9 +11,6 @@ from utils.enums.trud import OdsDownloadType, TrudItem
 from utils.models.ods_models import PracticeOds, IcbOds
 from utils.services.ssm_service import SsmSecretManager
 from utils.services.trud_api_service import TrudApiService
-
-import logging
-
 from utils.trud_files import (
     GP_FILE_HEADERS,
     ICB_FILE_HEADERS,
@@ -151,10 +149,10 @@ def extract_and_process_ods_icb_data(trud_service: TrudApiService):
     logger.info("Extracting and processing ODS ICB data")
 
     if icb_zip_file := trud_service.unzipping_files(
-        download_file, icb_zip_file_path, TEMP_DIR, True
+            download_file, icb_zip_file_path, TEMP_DIR, True
     ):
         if icb_csv_file := trud_service.unzipping_files(
-            icb_zip_file, icb_csv_file_name, TEMP_DIR
+                icb_zip_file, icb_csv_file_name, TEMP_DIR
         ):
             icb_ods_data = trud_csv_to_dict(icb_csv_file, ICB_FILE_HEADERS)
             icb_ods_data_amended_data = get_amended_records(icb_ods_data)
@@ -201,7 +199,8 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                         PracticeOds.icb_ods_code.set(amended_record.get("IcbOdsCode")),
                     ]
                 )
-                logger.info(f'Overwriting for ODS: {amended_record.get("PracticeOdsCode")} - Name: {amended_record.get("PracticeName")} | ICB: {amended_record.get("IcbOdsCode")}')
+                logger.info(
+                    f'Overwriting for ODS: {amended_record.get("PracticeOdsCode")} - Name: {amended_record.get("PracticeName")} | ICB: {amended_record.get("IcbOdsCode")}')
             except Exception as e:
                 logger.info(
                     f"Failed to create/update record by Practice ODS code: {str(e)}"
@@ -213,7 +212,8 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
             try:
                 icb = IcbOds(amended_record.get("IcbOdsCode"))
                 icb.update(actions=[IcbOds.icb_name.set(amended_record.get("IcbName"))])
-                logger.info(f'Overwriting for ODS: {amended_record.get("IcbOdsCode")} - Name: {amended_record.get("IcbName")}')
+                logger.info(
+                    f'Overwriting for ODS: {amended_record.get("IcbOdsCode")} - Name: {amended_record.get("IcbName")}')
             except Exception as e:
                 logger.info(f"Failed to create/update record by ICB ODS code: {str(e)}")
 

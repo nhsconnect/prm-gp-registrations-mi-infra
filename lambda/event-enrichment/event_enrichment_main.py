@@ -281,7 +281,6 @@ def _publish_enriched_events_to_sns_topic(enriched_events: list):
 
 
 def _fetch_supplier_details(practice_ods_code: str) -> dict:
-
     if not practice_ods_code or practice_ods_code.isspace():
         return EMPTY_ORGANISATION
 
@@ -315,9 +314,9 @@ def _fetch_supplier_details(practice_ods_code: str) -> dict:
 
 def _has_supplier_ods_code(extension: dict) -> bool:
     return (
-        "SDS-ManufacturingOrganisation" in extension["url"]
-        and "ods-organization-code"
-        in extension["valueReference"]["identifier"]["system"]
+            "SDS-ManufacturingOrganisation" in extension["url"]
+            and "ods-organization-code"
+            in extension["valueReference"]["identifier"]["system"]
     )
 
 

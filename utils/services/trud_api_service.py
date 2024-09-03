@@ -54,7 +54,6 @@ class TrudApiService:
     def get_download_file(self, download_url):
         try:
             download_response = self.http.request("GET", download_url)
-            logger.info(download_response.json())
             return download_response.data
         except HTTPError as e:
             logger.info(f"An unexpected error occurred: {e}")

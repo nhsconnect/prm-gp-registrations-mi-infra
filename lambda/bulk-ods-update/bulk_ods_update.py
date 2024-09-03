@@ -85,11 +85,11 @@ def extract_and_process_ods_gp_data(trud_service: TrudApiService):
     gp_ods_releases = trud_service.get_release_list(
         TrudItem.NHS_ODS_WEEKLY, is_latest=True
     )
-
+    gp_ods_latest_releases = gp_ods_releases[0]
     logger.info(gp_ods_releases)
 
     download_file_bytes = trud_service.get_download_file(
-        gp_ods_releases[0].get("archiveFileUrl")
+        gp_ods_latest_releases.get("archiveFileUrl")
     )
 
     eppracur_csv_path = os.path.join(TEMP_DIR, GP_WEEKLY_FILE_NAME)
@@ -118,24 +118,22 @@ def extract_and_process_ods_icb_data(trud_service: TrudApiService):
     icb_ods_releases = trud_service.get_release_list(
         TrudItem.ORG_REF_DATA_MONTHLY, True
     )
+    icb_ods_latest_release = icb_ods_releases[0]
     logger.info(icb_ods_releases)
     try:
-        release_date_string = icb_ods_releases[0].get("releaseDate")
-        if release_date_string:
-            is_icb_download_date = check_release_date_within_last_7_days(release_date_string)
-        else:
-            raise UnableToGetReleaseDate()
+        release_date_string = icb_ods_latest_release.get("releaseDate")
+        is_latest_icb_download_recent = check_release_date_within_last_7_days(release_date_string)
     except UnableToGetReleaseDate:
-        is_icb_download_date = determine_if_last_friday_was_the_last_friday_of_the_month()
+        is_latest_icb_download_recent = determine_if_last_friday_was_the_last_friday_of_the_month()
 
-    if not is_icb_download_date:
+    if not is_latest_icb_download_recent:
         logger.info("No ICB download for this week, skipping download")
         return None
 
     logger.info("Proceeding to download ICB data")
-    is_quarterly_release = icb_ods_releases[0].get("name").endswith(".0.0")
+    is_quarterly_release = icb_ods_latest_release.get("name").endswith(".0.0")
     download_file = trud_service.get_download_file(
-        icb_ods_releases[0].get("archiveFileUrl")
+        icb_ods_latest_release.get("archiveFileUrl")
     )
 
     icb_zip_file_path = (

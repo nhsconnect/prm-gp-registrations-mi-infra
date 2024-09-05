@@ -33,15 +33,6 @@ resource "aws_lambda_function" "event_enrichment_lambda" {
 resource "aws_lambda_event_source_mapping" "sqs_queue_event_enrichment_lambda_trigger" {
   event_source_arn = aws_sqs_queue.incoming_mi_events_for_event_enrichment_lambda.arn
   function_name    = aws_lambda_function.event_enrichment_lambda.arn
-  filter_criteria {
-    filter {
-      pattern = jsonencode({
-        body = {
-          eventType : [{ "anything-but" : ["DEGRADES"] }]
-        }
-      })
-    }
-  }
 }
 
 resource "aws_cloudwatch_log_group" "event_enrichment_lambda" {

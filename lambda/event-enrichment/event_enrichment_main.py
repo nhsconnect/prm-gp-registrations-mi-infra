@@ -80,6 +80,8 @@ def _enrich_events(sqs_messages: dict) -> list:
                     supplier_key="requestingSupplierName",
                 )
             )
+        else:
+            print("Missing requestingPracticeOdsCode in event, skipping enrichment for requesting practice.")
         # set sending practice info
         sending_practice_ods = event.get("sendingPracticeOdsCode")
         if sending_practice_ods:
@@ -92,7 +94,8 @@ def _enrich_events(sqs_messages: dict) -> list:
                     supplier_key="sendingSupplierName",
                 )
             )
-
+        else:
+            print("Missing sendingPracticeOdsCode in event, skipping enrichment for sending practice.")
         # temporary fix for EMIS wrong reportingSystemSupplier data
         reporting_system_supplier = event["reportingSystemSupplier"]
         if reporting_system_supplier.isnumeric():

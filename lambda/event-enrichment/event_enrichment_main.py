@@ -69,26 +69,33 @@ def _enrich_events(sqs_messages: dict) -> list:
             )
             continue
         # set requesting practice info
-        event.update(
-            _requesting_practice_info(
-                ods_code=event["requestingPracticeOdsCode"],
-                practice_name_key="requestingPracticeName",
-                icb_name_key="requestingPracticeIcbName",
-                icb_ods_code_key="requestingPracticeIcbOdsCode",
-                supplier_key="requestingSupplierName",
+        requesting_practice_ods = event.get("requestingPracticeOdsCode")
+        if requesting_practice_ods:
+            event.update(
+                _requesting_practice_info(
+                    ods_code=requesting_practice_ods,
+                    practice_name_key="requestingPracticeName",
+                    icb_name_key="requestingPracticeIcbName",
+                    icb_ods_code_key="requestingPracticeIcbOdsCode",
+                    supplier_key="requestingSupplierName",
+                )
             )
-        )
+        else:
+            print("Missing requestingPracticeOdsCode in event, skipping enrichment for requesting practice.")
         # set sending practice info
-        event.update(
-            _requesting_practice_info(
-                ods_code=event["sendingPracticeOdsCode"],
-                practice_name_key="sendingPracticeName",
-                icb_name_key="sendingPracticeIcbName",
-                icb_ods_code_key="sendingPracticeIcbOdsCode",
-                supplier_key="sendingSupplierName",
+        sending_practice_ods = event.get("sendingPracticeOdsCode")
+        if sending_practice_ods:
+            event.update(
+                _requesting_practice_info(
+                    ods_code=sending_practice_ods,
+                    practice_name_key="sendingPracticeName",
+                    icb_name_key="sendingPracticeIcbName",
+                    icb_ods_code_key="sendingPracticeIcbOdsCode",
+                    supplier_key="sendingSupplierName",
+                )
             )
-        )
-
+        else:
+            print("Missing sendingPracticeOdsCode in event, skipping enrichment for sending practice.")
         # temporary fix for EMIS wrong reportingSystemSupplier data
         reporting_system_supplier = event["reportingSystemSupplier"]
         if reporting_system_supplier.isnumeric():

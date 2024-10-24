@@ -363,6 +363,7 @@ def get_supplier_name_from_sds_api(practice_ods_code: str) -> Optional[str]:
         "YGJ": "EMIS",
         "YGA": "SystmOne",
         "YGC": "Vision",
+        "YGMYW": "Medicus"
     }
 
     supplier_name = None

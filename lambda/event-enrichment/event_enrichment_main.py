@@ -64,6 +64,9 @@ def _enrich_events(sqs_messages: dict) -> list:
     events = [json.loads(event["body"]) for event in events_records]
     for event in events:
         if event["eventType"] == "DEGRADES":
+            sqs_client = boto3.client("sqs", region_name=os.getenv("REGION"))
+            degrades_sqs_url = sqs_client.get_queue_url(QueueName=os.getenv("DEGRADES_MESSAGE_QUEUE_NAME"))["QueueUrl"]
+            sqs_client.send_message(QueueUrl=degrades_sqs_url, MessageBody=json.dumps(event))
             print(
                 f"Skipping enrichment for degrades event with eventId: {event['eventId']}."
             )

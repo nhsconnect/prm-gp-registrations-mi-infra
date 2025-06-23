@@ -11,3 +11,5 @@ lambda/build
 **/**/.terraform
 **/**/.terraform.*
 .vscode/settings.json
+
+venv/

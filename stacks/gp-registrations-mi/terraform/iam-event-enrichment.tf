@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "lambda_bulk_ods_assume_role" {
 
 #SSM Event Enrichment
 resource "aws_iam_role_policy_attachment" "ssm_access" {
-  role = aws_iam_role.event_enrichment_lambda_role.name
+  role       = aws_iam_role.event_enrichment_lambda_role.name
   policy_arn = aws_iam_policy.event_enrichment_lambda_ssm_access.arn
 }
 
@@ -66,7 +66,7 @@ data "aws_iam_policy_document" "event_enrichment_lambda_ssm_access" {
 
 # SSM Bulk ODS
 resource "aws_iam_role_policy_attachment" "ssm_access" {
-  role = aws_iam_role.bulk_ods_lambda.name
+  role       = aws_iam_role.bulk_ods_lambda.name
   policy_arn = aws_iam_policy.bulk_ods_lambda_ssm_access.arn
 }
 
@@ -91,7 +91,7 @@ data "aws_iam_policy_document" "bulk_ods_lambda_ssm_access" {
 
 #SQS - inbound
 resource "aws_iam_role_policy_attachment" "incoming_mi_events_for_event_enrichment_lambda_sqs_read_access" {
-  role = aws_iam_role.event_enrichment_lambda_role.name
+  role       = aws_iam_role.event_enrichment_lambda_role.name
   policy_arn = aws_iam_policy.incoming_mi_events_for_event_enrichment_lambda_sqs_read_access.arn
 }
 
@@ -116,7 +116,7 @@ data "aws_iam_policy_document" "incoming_mi_events_for_event_enrichment_lambda_s
 
 #SQS - DLQ
 resource "aws_iam_role_policy_attachment" "incoming_event_enrichment_lambda_to_send_to_dlq_access" {
-  role = aws_iam_role.event_enrichment_lambda_role.name
+  role       = aws_iam_role.event_enrichment_lambda_role.name
   policy_arn = aws_iam_policy.incoming_event_enrichment_lambda_to_send_to_dlq_access.arn
 }
 
@@ -154,7 +154,7 @@ data "aws_iam_policy_document" "outgoing_event_enrichment_lambda_send_to_degrade
     effect = "Allow"
 
     actions = [
-    "sqs:SendMessage"
+      "sqs:SendMessage"
     ]
     resources = [
       "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.degrades_message_queue}_${var.environment}"
@@ -164,7 +164,7 @@ data "aws_iam_policy_document" "outgoing_event_enrichment_lambda_send_to_degrade
 
 #Cloudwatch Enrichment Lambda
 resource "aws_iam_role_policy_attachment" "event_enrichment_lambda_cloudwatch_log_access" {
-  role = aws_iam_role.event_enrichment_lambda_role.name
+  role       = aws_iam_role.event_enrichment_lambda_role.name
   policy_arn = aws_iam_policy.event_enrichment_lambda_cloudwatch_log_access.arn
 }
 
@@ -188,7 +188,7 @@ data "aws_iam_policy_document" "event_enrichment_lambda_cloudwatch_log_access" {
 
 # Cloudwatch Bulk ODS Lambda
 resource "aws_iam_role_policy_attachment" "bulk_ods_update_lambda_cloudwatch_log_access" {
-  role = aws_iam_role.bulk_ods_lambda.name
+  role       = aws_iam_role.bulk_ods_lambda.name
   policy_arn = aws_iam_policy.bulk_ods_update_lambda_cloudwatch_log_access.arn
 }
 

@@ -40,7 +40,7 @@ data "aws_iam_policy_document" "lambda_bulk_ods_assume_role" {
 }
 
 #SSM Event Enrichment
-resource "aws_iam_role_policy_attachment" "ssm_access" {
+resource "aws_iam_role_policy_attachment" "event_enrichment_lambda_ssm_access" {
   role       = aws_iam_role.event_enrichment_lambda_role.name
   policy_arn = aws_iam_policy.event_enrichment_lambda_ssm_access.arn
 }
@@ -65,7 +65,7 @@ data "aws_iam_policy_document" "event_enrichment_lambda_ssm_access" {
 }
 
 # SSM Bulk ODS
-resource "aws_iam_role_policy_attachment" "ssm_access" {
+resource "aws_iam_role_policy_attachment" "bulk_ods_lambda_ssm_access" {
   role       = aws_iam_role.bulk_ods_lambda.name
   policy_arn = aws_iam_policy.bulk_ods_lambda_ssm_access.arn
 }

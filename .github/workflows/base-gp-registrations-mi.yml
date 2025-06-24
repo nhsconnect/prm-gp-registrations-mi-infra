@@ -106,6 +106,7 @@ jobs:
           cat > pipeline.auto.tfvars <<EOF
           gp_registrations_mi_image_tag = $IMAGE_TAG
           environment = "${{ vars.AWS_ENVIRONMENT }}"
+          degrades_message_queue = "${{ secrets.AWS_DEGRADES_MESSAGE_QUEUE }}"
           EOF
         working-directory: ./stacks/gp-registrations-mi/terraform
 

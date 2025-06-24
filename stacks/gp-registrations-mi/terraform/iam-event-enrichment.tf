@@ -146,7 +146,8 @@ resource "aws_iam_role_policy_attachment" "outgoing_event_enrichment_lambda_send
 }
 
 resource "aws_iam_policy" "outgoing_event_enrichment_lambda_send_to_degrades_sqs" {
-  policy = data.aws_iam_policy_document.outgoing_event_enrichment_lambda_send_to_degrades_sqs
+  policy = data.aws_iam_policy_document.outgoing_event_enrichment_lambda_send_to_degrades_sqs.json
+  name = "${var.environment}-send-message-degrades-queue"
 }
 
 data "aws_iam_policy_document" "outgoing_event_enrichment_lambda_send_to_degrades_sqs" {

@@ -60,7 +60,8 @@ jobs:
         id: vars
         run: |-
           cat > pipeline.auto.tfvars <<EOF
-          environment = "${{ vars.AWS_ENVIRONMENT }}"
+            environment = "${{ vars.AWS_ENVIRONMENT }}"
+            degrades_queue = "${{ secrets.AWS_DEGRADES_MESSAGE_QUEUE }}"
           EOF
 
       - name: Terraform Plan

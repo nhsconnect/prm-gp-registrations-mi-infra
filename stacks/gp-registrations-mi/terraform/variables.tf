@@ -145,3 +145,8 @@ variable "ods_bulk_update_lambda_name" {
   type        = string
   description = "Name of the ODS bulk upload lambda"
 }
+
+variable "degrades_message_queue" {
+  type        = string
+  description = "Name of Degrades Message SQS queue"
+}

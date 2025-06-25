@@ -82,8 +82,8 @@ def generate_successful_organisation(practice_ods_code: str):
 
 
 def generate_side_effect(
-    num_successful_organisation_to_generate: int,
-    num_succesful_sds_fhir_api_responses_to_generate: int,
+        num_successful_organisation_to_generate: int,
+        num_succesful_sds_fhir_api_responses_to_generate: int,
 ) -> list:
     side_effect_list = []
 
@@ -122,7 +122,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
     @patch.dict(os.environ, {"SPLUNK_CLOUD_EVENT_UPLOADER_SQS_QUEUE_URL": "test_url"})
     @patch.dict(os.environ, {"ENRICHED_EVENTS_SNS_TOPIC_ARN": "test_arn"})
     def test_should_publish_enriched_event_with_lambda_handler(
-        self, mock_boto, mock_request
+            self, mock_boto, mock_request
     ):
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1", "reportingSystemSupplier": "EMIS"}"""
 
@@ -166,7 +166,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
     def test_should_enrich_events_with_all_fields_from_organisation(
-        self, mock_boto_client, mock_request
+            self, mock_boto_client, mock_request
     ):
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1", "reportingSystemSupplier":"EMIS"}"""
 
@@ -198,10 +198,10 @@ class TestEventEnrichmentMain(unittest.TestCase):
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
     def test_should_correct_for_emis_sending_asid_code(
-        self, mock_boto_client, mock_request
+            self, mock_boto_client, mock_request
     ):
         """A temporary test to test that we can correct"""
-        
+
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ODS_1", "sendingPracticeOdsCode": "ODS_1", "reportingSystemSupplier":"200000000260"}"""
 
         lambda_input = {"Records": [{"body": events}]}
@@ -254,7 +254,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
     @patch.dict(os.environ, {"SDS_FHIR_API_KEY_PARAM_NAME": "test_fhir_api_key"})
     @patch.dict(os.environ, {"SDS_FHIR_API_URL_PARAM_NAME": "test_fhir_url"})
     def test_should_enrich_events_with_empty_fields_if_unable_to_fetch_organisation(
-        self, mock_boto_client, mock_requests
+            self, mock_boto_client, mock_requests
     ):
         events = """{"eventId": "event_id_1", "eventType": "REGISTRATIONS", "requestingPracticeOdsCode": "ods_1", "sendingPracticeOdsCode": "ods_2","reportingSystemSupplier":"EMIS"}"""
 
@@ -303,7 +303,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
         assert result is None
 
     def test_find_icb_ods_code_returns_ods_code_when_active_and_primary_role_id_is_an_icb_role(
-        self,
+            self,
     ):
         an_ods_code = "ODS_1"
         organisation = A_VALID_TEST_ORGANISATION
@@ -378,7 +378,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
         return_value=type("", (object,), {"status": 404, "data": """{}"""})(),
     )
     def test_fetch_organisation_returns_empty_organisation_when_no_matches_found(
-        self, mock_PoolManager
+            self, mock_PoolManager
     ):
         an_ods_code = "ODS_1"
 
@@ -392,7 +392,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
         return_value=type("", (object,), {"status": 500, "data": """{}"""})(),
     )
     def test_fetch_organisation_throws_exception_when_500_status(
-        self, mock_PoolManager
+            self, mock_PoolManager
     ):
         an_ods_code = "ODS_1"
 
@@ -447,7 +447,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
     )
     @patch("boto3.client")
     def test_fetch_supplier_details_throws_exception_when_non_200_status(
-        self, mock_boto3_client, mock_PoolManager
+            self, mock_boto3_client, mock_PoolManager
     ):
         an_ods_code = "ODS_1"
         mock_boto3_client("ssm").get_parameter.side_effect = [
@@ -575,7 +575,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
         assert not result
 
     def test_return_empty_list_when_supplier_details_has_entry_resources_but_no_extension(
-        self,
+            self,
     ):
         sds_fhir_api_ods_response = {"entry": [{"resource": {}}]}
 
@@ -619,7 +619,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
     )
     @patch("boto3.client")
     def test_returns_supplier_name_given_a_practice_ods_code(
-        self, mock_boto3_client, _
+            self, mock_boto3_client, _
     ):
         mock_boto3_client("ssm").get_parameter.side_effect = [
             {"Parameter": {"Value": "test-api-key"}},
@@ -639,7 +639,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
     )
     @patch("boto3.client")
     def test_supplier_name_returns_none_when_supplier_ods_code_is_not_found_from_sds_fhir_api_response(
-        self, mock_boto3_client, _
+            self, mock_boto3_client, _
     ):
         mock_boto3_client("ssm").get_parameter.side_effect = [
             {"Parameter": {"Value": "test-api-key"}},
@@ -658,7 +658,7 @@ class TestEventEnrichmentMain(unittest.TestCase):
     )
     @patch("boto3.client")
     def test_supplier_name_returns_none_when_supplier_ods_code_is_none(
-        self, mock_boto3_client, _
+            self, mock_boto3_client, _
     ):
         mock_boto3_client("ssm").get_parameter.side_effect = [
             {"Parameter": {"Value": "test-api-key"}},
@@ -668,3 +668,41 @@ class TestEventEnrichmentMain(unittest.TestCase):
         supplier_name = get_supplier_name_from_sds_api(None)
 
         assert supplier_name is None
+
+    @patch("boto3.client")
+    @patch.dict(os.environ, {"DEGRADES_MESSAGE_QUEUE_NAME": "degrades_queue", "REGION": "us-east-2"})
+    def test_degrades_message_sent_to_degrades_queue(
+            self, mock_boto
+    ):
+        degrades_event = {"eventId": "01-DEGRADES-01",
+                          "eventGeneratedDateTime": "2024-09-20T00:00:00",
+                          "eventType": "DEGRADES",
+                          "reportingSystemSupplier": "EMIS",
+                          "payload": {"degrades": [{"type": "MEDICATION",
+                                                    "reason": "CODE",
+                                                    "coding": [{"code": "02543001",
+                                                                "system": "UNKNOWN"
+                                                                },
+                                                               {
+                                                                   "code": "02543001",
+                                                                   "system": "UNKNOWN"
+                                                               }]
+                                                    }
+                                                   ]
+                                      }
+                          }
+
+        send_queue_spy = MagicMock()
+        mock_boto("sqs").send_message = send_queue_spy
+
+        get_url = MagicMock()
+        mock_boto("sqs").get_queue_url = get_url
+        get_url.return_value = {"QueueUrl": "queue_url"}
+
+        lambda_input = {"Records": [{"body": json.dumps(degrades_event)}]}
+        _enrich_events(lambda_input)
+
+        send_queue_spy.assert_called_with(
+            QueueUrl="queue_url",
+            MessageBody=json.dumps(degrades_event)
+        )

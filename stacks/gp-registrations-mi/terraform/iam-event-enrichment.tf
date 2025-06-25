@@ -158,7 +158,7 @@ data "aws_iam_policy_document" "outgoing_event_enrichment_lambda_send_to_degrade
       "sqs:SendMessage"
     ]
     resources = [
-      "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.degrades_message_queue}_${var.environment}"
+      "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.environment}_${var.degrades_message_queue}"
     ]
   }
 }

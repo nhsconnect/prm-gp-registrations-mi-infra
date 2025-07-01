@@ -155,7 +155,8 @@ data "aws_iam_policy_document" "outgoing_event_enrichment_lambda_send_to_degrade
     effect = "Allow"
 
     actions = [
-      "sqs:SendMessage"
+      "sqs:SendMessage",
+      "sqs:GetQueueUrl"
     ]
     resources = [
       "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.environment}_${var.degrades_message_queue}"

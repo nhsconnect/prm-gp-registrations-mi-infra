@@ -3,22 +3,28 @@ DEGRADES_LAMBDA_PATH = lambda/degrades-reporting
 
 degrades-env:
 	cd $(DEGRADES_LAMBDA_PATH) && rm -rf lambdas/venv || true
-	cd $(DEGRADES_LAMBDA_PATH) && python3 -m venv ./venv
+	cd $(DEGRADES_LAMBDA_PATH) && python3.12 -m venv ./venv
 	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install --upgrade pip
 	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install -r requirements.txt --no-cache-dir
 	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install -r requirements_local.txt --no-cache-dir
 
-degrades-github-env:
-	cd $(DEGRADES_LAMBDA_PATH) && rm -rf lambdas/venv || true
-	cd $(DEGRADES_LAMBDA_PATH) && python3 -m venv ./venv
-	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install --upgrade pip
-	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install -r requirements.txt --no-cache-dir
+#degrades-github-env:
+#	cd $(DEGRADES_LAMBDA_PATH) && rm -rf lambdas/venv || true
+#	cd $(DEGRADES_LAMBDA_PATH) && python3.12 -m venv ./venv
+#	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install --upgrade pip
+#	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install -r requirements.txt --no-cache-dir
 
 
 test-degrades:
 	cd $(DEGRADES_LAMBDA_PATH) && rm -rf tmp || true
-	cd ${DEGRADES_LAMBDA_PATH} && mkdir -p tmp
+	cd $(DEGRADES_LAMBDA_PATH) && mkdir -p tmp
 	cd $(DEGRADES_LAMBDA_PATH)  && venv/bin/python3 -m pytest tests/
+
+test-degrades-coverage:
+	cd $(DEGRADES_LAMBDA_PATH) && rm -rf tmp || true
+	cd $(DEGRADES_LAMBDA_PATH) && mkdir -p tmp
+	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/coverage run -m pytest tests/
+	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/coverage report -m
 
 
 zip-degrades-local: zip-lambda-layer

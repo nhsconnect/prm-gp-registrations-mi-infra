@@ -62,7 +62,6 @@ jobs:
           environment = "${{ vars.environemnt }}"
           degrades_message_queue = "${{ secrets.AWS_DEGRADES_MESSAGE_QUEUE }}"
           region = "${{ vars.AWS_REGION }}"
-#          need to add all the other variables needed for deployment
           EOF
 
       - name: Terraform Plan

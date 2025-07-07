@@ -53,7 +53,7 @@ jobs:
 
       - name: Build Lambdas
         run: | 
-            make zip-degrades-lambdas
+          make zip-degrades-lambdas
 
       - name: Setup Terraform variables
         id: vars-${{ vars.environment }}

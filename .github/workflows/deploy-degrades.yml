@@ -1,0 +1,54 @@
+name: Deploy Degrades
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches: [ main ]
+    paths:
+      - '../../lambda/degrades-reporting/**'
+      - '../../stacks/degrades-reporting/**'
+      - '.github/workflows/deploy-degrades.yml'
+
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '../../lambda/degrades-reporting/**'
+      - '../../stacks/degrades-reporting/**'
+      - '.github/workflows/deploy-degrades.yml'
+
+
+permissions:
+  pull-requests: write
+  id-token: write
+  contents: read
+
+jobs:
+  test_lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install requirements
+        run: |
+          make degrades-env
+
+      - name: Test Degrades
+        run: |
+          make test-degrades
+
+
+  deploy_degrades_infra:
+    needs: [test_lambda]
+    uses: ./.github/workflows/base-terraform-plan-and-apply.yml
+    with:
+      environment: dev
+      is_deployment: ${{ github.ref == 'refs/heads/main' }}
+      terraform_stack: degrades-reporting
+    secrets: inherit

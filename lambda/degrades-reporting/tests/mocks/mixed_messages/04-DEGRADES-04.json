@@ -1,0 +1,64 @@
+{
+  "eventId": "04-DEGRADES-04",
+  "eventGeneratedDateTime": "2024-09-20T00:00:00",
+  "eventType": "DEGRADES",
+  "reportingSystemSupplier": "EMIS",
+  "payload": {
+    "degrades": [
+      {
+        "type": "MEDICATION",
+        "reason": "CODE",
+        "coding": [
+          {
+            "code": "00902002",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "00902002",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "02305002",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "02305002",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "01978001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "01978001",
+            "system": "UNKNOWN"
+          }
+        ]
+      },
+      {
+        "type": "RECORD_ENTRY",
+        "reason": "CODE",
+        "coding": [
+          {
+            "code": "n47D.",
+            "system": "CLINICAL_TERMS_READV3"
+          },
+          {
+            "code": "n47D.",
+            "system": "CLINICAL_TERMS_READV3"
+          }
+        ]
+      },
+      {
+        "type": "RECORD_ENTRY",
+        "reason": "NUMERIC_VALUE",
+        "coding": [
+          {
+            "code": "XaLGM",
+            "system": "CLINICAL_TERMS_READV3"
+          }
+        ]
+      }
+    ]
+  }
+}

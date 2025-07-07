@@ -1,11 +1,11 @@
-name: base-gp-registrations-mi
+name: base-degrades-reporting.yml
 on:
   workflow_call:
     inputs:
       environment:
-        description: "Which Environment settings to use."
-        required: true
         type: string
+        description: "Which environment to deploy to"
+        required: true
         default: "dev"
       is_deployment:
         description: "Is workflow run on deployment"
@@ -20,39 +20,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume:  ${{ (inputs.is_deployment && secrets.AWS_ASSUME_ROLE) || secrets.AWS_ASSUME_ROLE_READ_ONLY }}
+          role-to-assume: ${{ (inputs.is_deployment && secrets.AWS_ASSUME_ROLE) || secrets.AWS_ASSUME_ROLE_READ_ONLY }}
           role-skip-session-tagging: true
           aws-region: ${{ vars.AWS_REGION }}
           mask-aws-account-id: true
-
-      - name: Publish Docker Image to Prod
-        id: push-image-to-prod
-        if: inputs.environment == 'prod' && inputs.is_deployment
-
-        run: |
-          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_DEV_REPOSITORY }}
-          IMAGE_TAG=$(aws ecr describe-images --registry-id ${{ secrets.AWS_DEV_ACCOUNT_ID }} --repository-name ${{ secrets.ECR_REPOSITORY_DEV_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
-          source_repo=${{ secrets.AWS_ECR_DEV_REPOSITORY }}/${{ secrets.ECR_REPOSITORY_DEV_NAME }}:${IMAGE_TAG//\"}
-          destination_repo=${{ secrets.AWS_ECR_PROD_REPOSITORY}}/${{ secrets.ECR_REPOSITORY_NAME }}:${IMAGE_TAG//\"}
-          docker pull $source_repo
-          docker tag $source_repo $destination_repo
-          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_PROD_REPOSITORY }}
-          docker push $destination_repo
-          echo "image-tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: latest
 
-      - name: Terraform Format
+      - name: Terraform format check
         id: fmt
         run: terraform fmt -check
-        working-directory: ./stacks/gp-registrations-mi/terraform
+        working-directory: ./stacks/degrades-reporting/terraform
 
       - name: Terraform Init
         id: init
@@ -60,56 +44,26 @@ jobs:
           terraform init -no-color -backend-config="key=${{ secrets.AWS_STATE_S3_KEY }}" \
           -backend-config="bucket=${{ secrets.AWS_STATE_BUCKET }}" \
           -backend-config="dynamodb_table=${{ secrets.AWS_STATE_LOCK_TABLE }}"
-        working-directory: ./stacks/gp-registrations-mi/terraform
-        shell: bash
+        working-directory: ./stacks/degrades-reporting/terraform
 
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-        working-directory: ./stacks/gp-registrations-mi/terraform
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+        working-directory: ./stacks/degrades-reporting/terraform
 
       - name: Build Lambdas
         run: | 
-            ./tasks_github_actions.sh build-lambdas
-
-      - name: Make virtual environment
-        if: github.ref == 'refs/heads/master' && inputs.is_deployment
-        run: |
-          python3 -m venv ./venv
-          ./venv/bin/pip3 install --upgrade pip urllib3
-
-      - name: Get ODS CSV Files
-        if: github.ref == 'refs/heads/master' && inputs.is_deployment
-        run: |
-          PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 -m utils.get_latest_ods_csv ${{ secrets.TRUD_API_KEY }} ${{ vars.TRUD_API_URL }}
+            make zip-degrades-lambdas
 
       - name: Setup Terraform variables
-        id: vars-prod
-        if: inputs.environment == 'prod' && inputs.is_deployment
+        id: vars-${{ vars.environment }}
         run: |-
           cat > pipeline.auto.tfvars <<EOF
-          gp_registrations_mi_image_tag = ${{ steps.push-image-to-prod.outputs.image-tag }}
-          environment = "${{ vars.AWS_ENVIRONMENT }}"
+          environment = "${{ vars.environemnt }}"
           degrades_message_queue = "${{ secrets.AWS_DEGRADES_MESSAGE_QUEUE }}"
+          region = "${{ vars.AWS_REGION }}"
+#          need to add all the other variables needed for deployment
           EOF
-        working-directory: ./stacks/gp-registrations-mi/terraform
-
-      - name: Setup Terraform variables
-        id: vars-dev
-        if: inputs.environment != 'prod'
-        run: |-
-          IMAGE_TAG=$(aws ecr describe-images --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
-          cat > pipeline.auto.tfvars <<EOF
-          gp_registrations_mi_image_tag = $IMAGE_TAG
-          environment = "${{ vars.AWS_ENVIRONMENT }}"
-          degrades_message_queue = "${{ secrets.AWS_DEGRADES_MESSAGE_QUEUE }}"
-          EOF
-        working-directory: ./stacks/gp-registrations-mi/terraform
 
       - name: Terraform Plan
         id: plan
@@ -117,7 +71,7 @@ jobs:
           terraform plan -no-color -input=false -var-file="../vars/${{ vars.AWS_ENVIRONMENT }}.tfvars" -out "${{ vars.AWS_ENVIRONMENT }}.tfplan"
           terraform show -no-color ${{ vars.AWS_ENVIRONMENT }}.tfplan > ${{ vars.AWS_ENVIRONMENT }}.tfplan.txt
           echo "summary=$(grep -E 'Plan: [0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy\.|No changes\. Your infrastructure matches the configuration\.' ${{ vars.AWS_ENVIRONMENT }}.tfplan.txt | sed 's/.*No changes\. Your infrastructure matches the configuration/Plan: no changes/g' | sed 's/.*Plan: //g' | sed 's/\..*//g')" >> $GITHUB_OUTPUT
-        working-directory: ./stacks/gp-registrations-mi/terraform
+        working-directory: ./stacks/degrades-reporting/terraform
         shell: bash
 
       - name: Add PR comment
@@ -133,11 +87,11 @@ jobs:
               issue_number: context.issue.number,
             });
             const botComment = comments.find(comment => {
-              return comment.user.type === 'Bot' && comment.body.includes('Report for gp-registrations-mi environment: ${{ inputs.environment }}')
+              return comment.user.type === 'Bot' && comment.body.includes('Report for degrades-reporting environment: ${{ inputs.environment }}')
             });
 
             // 2. Prepare format of the comment
-            const output = `### Report for gp-registrations-mi environment: ${{ inputs.environment }}
+            const output = `### Report for degrades-reporting environment: ${{ inputs.environment }}
 
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
 
@@ -170,4 +124,4 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && inputs.is_deployment
         run: terraform apply -auto-approve -input=false ${{ vars.AWS_ENVIRONMENT }}.tfplan
-        working-directory: ./stacks/gp-registrations-mi/terraform
+        working-directory: ./stacks/degrades-reporting/terraform

@@ -1,0 +1,73 @@
+MOCK_COMPLEX_DEGRADES_MESSAGE = {
+    "eventId": "02-DEGRADES-02",
+    "eventGeneratedDateTime": "2024-09-20T00:00:00",
+    "eventType": "DEGRADES",
+    "reportingSystemSupplier": "EMIS",
+    "payload": {
+        "degrades": [
+            {
+                "type": "MEDICATION",
+                "reason": "CODE",
+                "coding": [
+                    {"code": "01147001", "system": "UNKNOWN"},
+                    {"code": "01147001", "system": "UNKNOWN"},
+                ],
+            },
+            {
+                "type": "RECORD_ENTRY",
+                "reason": "CODE",
+                "coding": [
+                    {"code": "oaz1.", "system": "CLINICAL_TERMS_READV3"},
+                    {"code": "x001v", "system": "CLINICAL_TERMS_READV3"},
+                    {"code": "ga8..", "system": "CLINICAL_TERMS_READV3"},
+                ],
+            },
+            {
+                "type": "NON_DRUG_ALLERGY",
+                "reason": "CODE",
+                "coding": [
+                    {"code": "196471000000108", "system": "SNOMED_CT"},
+                    {"code": "609328004", "system": "SNOMED_CT"},
+                ],
+            },
+        ]
+    },
+}
+
+MOCK_FIRST_DEGRADES_MESSAGE = {
+    "eventId": "01-DEGRADES-01",
+    "eventGeneratedDateTime": "2024-09-20T00:00:00",
+    "eventType": "DEGRADES",
+    "reportingSystemSupplier": "EMIS",
+    "payload": {
+        "degrades": [
+            {
+                "type": "MEDICATION",
+                "reason": "CODE",
+                "coding": [
+                    {"code": "02543001", "system": "UNKNOWN"},
+                    {"code": "02543001", "system": "UNKNOWN"},
+                ],
+            }
+        ]
+    },
+}
+
+MOCK_SIMPLE_DEGRADES_MESSAGE = {
+    "eventId": "05-DEGRADES-05",
+    "eventGeneratedDateTime": "2024-09-20T00:00:00",
+    "eventType": "DEGRADES",
+    "reportingSystemSupplier": "EMIS",
+    "payload": {
+        "degrades": [
+            {
+                "type": "MEDICATION",
+                "reason": "CODE",
+                "coding": [
+                    {"code": "01142001", "system": "UNKNOWN"},
+                    {"code": "01142001", "system": "UNKNOWN"},
+                ],
+            }
+        ]
+    },
+}

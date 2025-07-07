@@ -1,0 +1,24 @@
+{
+  "eventId": "05-DEGRADES-05",
+  "eventGeneratedDateTime": "2024-09-20T00:00:00",
+  "eventType": "DEGRADES",
+  "reportingSystemSupplier": "EMIS",
+  "payload": {
+    "degrades": [
+      {
+        "type": "MEDICATION",
+        "reason": "CODE",
+        "coding": [
+          {
+            "code": "01142001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "01142001",
+            "system": "UNKNOWN"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -2,7 +2,7 @@ import pytest
 from moto import mock_aws
 import os
 from botocore.exceptions import ClientError
-from utils.s3_service import S3Service
+from degrade_utils.s3_service import S3Service
 from tests.conftest import REGION_NAME, MOCK_BUCKET
 
 

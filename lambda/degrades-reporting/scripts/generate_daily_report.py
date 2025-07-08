@@ -2,9 +2,9 @@ import os
 import csv
 from datetime import datetime
 from models.degrade_message import DegradeMessage
-from utils.dynamo_service import DynamoService
-from utils.s3_service import S3Service
-from utils.utils import get_degrade_totals_from_degrades
+from degrade_utils.dynamo_service import DynamoService
+from degrade_utils.s3_service import S3Service
+from degrade_utils.utils import get_degrade_totals_from_degrades
 
 """Adhoc script to generate daily report from DynamoDB
     date to be in format YYYY-MM-DD"""
@@ -30,7 +30,7 @@ def generate_degrades_daily_summary_report_from_date(date: str):
 
     file_path = generate_report_from_dynamo_query(degrades)
 
-    base_file_key = date.replace("-", "/")
+    base_file_key = "/reports/daily"
 
     print(f"Writing summary report to {base_file_key}")
 
@@ -38,7 +38,7 @@ def generate_degrades_daily_summary_report_from_date(date: str):
     s3_service.upload_file(
         file=file_path,
         bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
-        key=f"{base_file_key}/degrades_summary.csv",
+        key=f"{base_file_key}/{date}.csv",
     )
 
 

@@ -8,10 +8,10 @@ from tests.mocks.sqs_messages.degrades import (
     MOCK_FIRST_DEGRADES_MESSAGE,
     MOCK_SIMPLE_DEGRADES_MESSAGE,
 )
-from utils.dynamo_service import DynamoService
-from utils.utils import extract_degrades_payload
+from degrade_utils.dynamo_service import DynamoService
+from degrade_utils.utils import extract_degrades_payload
 from models.degrade_message import DegradeMessage
-from utils.s3_service import S3Service
+from degrade_utils.s3_service import S3Service
 
 import pytest
 

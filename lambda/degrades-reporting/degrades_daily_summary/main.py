@@ -1,11 +1,10 @@
 import csv
-import json
 import os
 import logging
 from models.degrade_message import DegradeMessage
-from utils.dynamo_service import DynamoService
-from utils.s3_service import S3Service
-from utils.utils import (
+from degrade_utils.dynamo_service import DynamoService
+from degrade_utils.s3_service import S3Service
+from degrade_utils.utils import (
     extract_query_timestamp_from_scheduled_event_trigger,
     get_degrade_totals_from_degrades,
 )

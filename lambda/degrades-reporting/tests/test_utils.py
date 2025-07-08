@@ -12,7 +12,7 @@ from tests.mocks.sqs_messages.degrades import (
     MOCK_FIRST_DEGRADES_MESSAGE,
     MOCK_COMPLEX_DEGRADES_MESSAGE,
 )
-from utils.utils import (
+from degrade_utils.utils import (
     get_key_from_date,
     calculate_number_of_degrades,
     is_degrade,

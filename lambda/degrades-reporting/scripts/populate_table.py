@@ -1,7 +1,7 @@
 import json
 import os
 import boto3
-from utils.s3_service import S3Service
+from degrade_utils.s3_service import S3Service
 
 
 def populate_degrades_table(date):

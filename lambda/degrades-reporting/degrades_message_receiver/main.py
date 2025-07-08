@@ -1,12 +1,11 @@
 import json
 import os
-import boto3
 import logging
 from datetime import datetime
 from pydantic import ValidationError
 from models.degrade_message import DegradeMessage
-from utils.dynamo_service import DynamoService
-from utils.utils import extract_degrades_payload
+from degrade_utils.dynamo_service import DynamoService
+from degrade_utils.utils import extract_degrades_payload
 
 logger = logging.getLogger()
 logger.setLevel("INFO")

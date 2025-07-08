@@ -2,7 +2,7 @@ name: 'PR-terraform-gp-registrations-mi'
 on:
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - 'stacks/gp-registrations-mi/**'
 

@@ -30,7 +30,7 @@ class DynamoService:
             return results
         except ClientError as e:
             print("There has been an error: {}".format(e))
-            raise Exception
+            raise e
 
     def put_item(self, table_name, payload):
         try:
@@ -38,4 +38,4 @@ class DynamoService:
             table.put_item(Item=payload)
         except ClientError as e:
             print("There has been an error: {}".format(e))
-            raise Exception
+            raise e

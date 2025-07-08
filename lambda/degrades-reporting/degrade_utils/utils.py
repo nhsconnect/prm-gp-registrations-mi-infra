@@ -60,4 +60,4 @@ def get_degrade_totals_from_degrades(degrades_messages: list[DegradeMessage]) ->
     total = sum(degrade_totals.values())
     degrade_totals["TOTAL"] += total
 
-    return degrade_totals
+    return dict(degrade_totals)

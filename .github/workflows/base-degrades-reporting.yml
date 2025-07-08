@@ -61,6 +61,10 @@ jobs:
           cat > pipeline.auto.tfvars <<EOF
           environment = "${{ vars.environemnt }}"
           degrades_message_queue = "${{ secrets.AWS_DEGRADES_MESSAGE_QUEUE }}"
+          degrades_message_receiver_lambda_zip = "./lambda/build/degrades-message-receiver.zip"
+          degrades_daily_summary_lambda_zip = "./lambda/build/degrades-daily-summary.zip"
+          degrades_message_table = "${{ secrets.AWS_DEGRADES_MESSAGE_TABLE }}"
+          registrations_mi_event_bucket = "${{ secrets.AWS_REGISTRATION_MI_EVENT_BUCKET }}"
           region = "${{ vars.AWS_REGION }}"
           EOF
 

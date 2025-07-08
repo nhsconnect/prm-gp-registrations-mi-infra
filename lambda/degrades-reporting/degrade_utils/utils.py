@@ -1,5 +1,6 @@
 import json
 import os
+from collections import defaultdict
 from datetime import datetime, timedelta
 
 from models.degrade_message import DegradeMessage, Degrade
@@ -48,18 +49,15 @@ def extract_query_timestamp_from_scheduled_event_trigger(
         return int(midnight.timestamp()), query_date.strftime("%Y-%m-%d")
 
 
-def get_degrade_totals_from_degrades(degrades: list[DegradeMessage]) -> dict:
-    degrade_totals = {"TOTAL": 0}
+def get_degrade_totals_from_degrades(degrades_messages: list[DegradeMessage]) -> dict:
+    degrade_totals = defaultdict(int)
 
-    for degrade_message in degrades:
+    for degrade_message in degrades_messages:
         for degrade in degrade_message.degrades:
             degrade_type_reason = f"{degrade.type}: {degrade.reason}"
-            if degrade_totals.get(degrade_type_reason):
-                degrade_totals[degrade_type_reason] += 1
-            else:
-                degrade_totals[degrade_type_reason] = 1
+            degrade_totals[degrade_type_reason] += 1
 
-    for type, count in degrade_totals.items():
-        degrade_totals["TOTAL"] += count
+    total = sum(degrade_totals.values())
+    degrade_totals["TOTAL"] += total
 
     return degrade_totals

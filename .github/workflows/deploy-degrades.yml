@@ -46,9 +46,8 @@ jobs:
 
   deploy_degrades_infra:
     needs: [test_lambda]
-    uses: ./.github/workflows/base-terraform-plan-and-apply.yml
+    uses: ./.github/workflows/base-degrades-reporting.yml
     with:
       environment: dev
       is_deployment: ${{ github.ref == 'refs/heads/main' }}
-      terraform_stack: degrades-reporting
     secrets: inherit

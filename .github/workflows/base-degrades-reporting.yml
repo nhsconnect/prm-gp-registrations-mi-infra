@@ -51,6 +51,16 @@ jobs:
         run: terraform validate -no-color
         working-directory: ./stacks/degrades-reporting/terraform
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Make Virtual Env
+        working-directory: ./lambda/degrades-reporting
+        run: |
+          python3 -m venv venv
+
       - name: Build Lambdas
         run: | 
           make zip-degrades-lambdas

@@ -56,11 +56,10 @@ jobs:
           make zip-degrades-lambdas
 
       - name: Setup Terraform variables
-        id: vars-${{ inputs.environment }}
         working-directory: ./stacks/degrades-reporting/terraform
         run: |-
           cat > pipeline.auto.tfvars <<EOF
-            environment = "${{ inputs.environment }}"
+            environment = "${{ vars.AWS_ENVIRONMENT }}"
             degrades_message_queue = "${{ secrets.AWS_DEGRADES_MESSAGE_QUEUE }}"
             degrades_message_receiver_lambda_zip = "./lambda/build/degrades-message-receiver.zip"
             degrades_daily_summary_lambda_zip = "./lambda/build/degrades-daily-summary.zip"

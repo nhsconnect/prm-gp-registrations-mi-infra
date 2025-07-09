@@ -1,5 +1,6 @@
 BUILD_PATH = stacks/degrades-reporting/terraform/lambda/build
 DEGRADES_LAMBDA_PATH = lambda/degrades-reporting
+UTILS = degrade_utils
 
 degrades-env:
 	cd $(DEGRADES_LAMBDA_PATH) && rm -rf lambdas/venv || true
@@ -46,8 +47,8 @@ zip-degrades-local: zip-lambda-layer
 	cp ./$(DEGRADES_LAMBDA_PATH)/degrades_daily_summary/main.py $(BUILD_PATH)/degrades-daily-summary
 	cp ./$(DEGRADES_LAMBDA_PATH)/degrades_message_receiver/main.py $(BUILD_PATH)/degrades-message-receiver
 
-	cp -r $(DEGRADES_LAMBDA_PATH)/utils $(BUILD_PATH)/degrades-daily-summary/utils
-	cp -r $(DEGRADES_LAMBDA_PATH)/utils $(BUILD_PATH)/degrades-message-receiver/utils
+	cp -r $(DEGRADES_LAMBDA_PATH)/$(UTILS) $(BUILD_PATH)/degrades-daily-summary/$(UTILS)
+	cp -r $(DEGRADES_LAMBDA_PATH)/$(UTILS) $(BUILD_PATH)/degrades-message-receiver/$(UTILS)
 
 	cp -r $(DEGRADES_LAMBDA_PATH)/models $(BUILD_PATH)/degrades-daily-summary/models
 	cp -r $(DEGRADES_LAMBDA_PATH)/models $(BUILD_PATH)/degrades-message-receiver/models
@@ -80,8 +81,8 @@ zip-degrades-lambdas: zip-lambda-layer
 	cp ./$(DEGRADES_LAMBDA_PATH)/degrades_message_receiver/main.py $(BUILD_PATH)/degrades-message-receiver
 	cp ./$(DEGRADES_LAMBDA_PATH)/degrades_daily_summary/main.py $(BUILD_PATH)/degrades-daily-summary
 
-	cp -r $(DEGRADES_LAMBDA_PATH)/utils $(BUILD_PATH)/degrades-message-receiver/utils
-	cp -r $(DEGRADES_LAMBDA_PATH)/utils $(BUILD_PATH)/degrades-daily-summary/utils
+	cp -r $(DEGRADES_LAMBDA_PATH)/$(UTILS) $(BUILD_PATH)/degrades-message-receiver/$(UTILS)
+	cp -r $(DEGRADES_LAMBDA_PATH)/$(UTILS) $(BUILD_PATH)/degrades-daily-summary/$(UTILS)
 
 
 	cp -r $(DEGRADES_LAMBDA_PATH)/models $(BUILD_PATH)/degrades-message-receiver/models

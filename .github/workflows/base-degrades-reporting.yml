@@ -57,6 +57,7 @@ jobs:
 
       - name: Setup Terraform variables
         id: vars-${{ vars.environment }}
+        working-directory: ./stacks/degrades-reporting/terraform
         run: |-
           cat > pipeline.auto.tfvars <<EOF
             environment = "${{ vars.environemnt }}"

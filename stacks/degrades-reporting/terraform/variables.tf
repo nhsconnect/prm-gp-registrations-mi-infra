@@ -1,19 +1,19 @@
 variable "degrades_message_receiver_lambda_zip" {
   type        = string
   description = "File path Degrades Message Receiver Lambda"
-  default     = "./lambda/build/degrades-message-receiver.zip"
+  default     = "lambda/build/degrades-message-receiver.zip"
 }
 
 variable "degrades_daily_summary_lambda_zip" {
   type        = string
   description = "File path to Degrades Daily Summary Lambda"
-  default     = "./lambda/build/degrades-daily-summary.zip"
+  default     = "lambda/build/degrades-daily-summary.zip"
 }
 
 variable "degrades_lambda_layer_zip" {
   type        = string
   description = "File path for Degrades Lambda Layer"
-  default     = "./lambda/build/degrades-lambda-layer.zip"
+  default     = "lambda/build/degrades-lambda-layer.zip"
 }
 
 variable "environment" {

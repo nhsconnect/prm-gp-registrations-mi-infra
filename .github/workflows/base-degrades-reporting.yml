@@ -56,7 +56,7 @@ jobs:
           make zip-degrades-lambdas
 
       - name: Setup Terraform variables
-        id: vars-${{ vars.AWS_ENVIRONMENT }}
+        id: vars-${{ inputs.environment }}
         working-directory: ./stacks/degrades-reporting/terraform
         run: |-
           cat > pipeline.auto.tfvars <<EOF

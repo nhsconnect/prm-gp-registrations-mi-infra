@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  hello_world:
+  create_placeholder:
     runs-on: ubuntu-latest
     steps: 
-      - name: Hello World
-        run: echo hello world
+      - name: Create placeholder
+        run: echo placeholder

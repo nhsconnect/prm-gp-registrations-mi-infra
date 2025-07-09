@@ -41,7 +41,7 @@ jobs:
       - name: Terraform Init
         id: init
         run: | 
-          terraform init -no-color -backend-config="key=${{ secrets.AWS_STATE_S3_KEY }}" \
+          terraform init -no-color -backend-config="key=data-pipeline/degrades-reporting/terraform.tfstate" \
           -backend-config="bucket=${{ secrets.AWS_STATE_BUCKET }}" \
           -backend-config="dynamodb_table=${{ secrets.AWS_STATE_LOCK_TABLE }}"
         working-directory: ./stacks/degrades-reporting/terraform

@@ -1,0 +1,11 @@
+name: base-degrades-reporting.yml
+
+on:
+  workflow_dispatch:
+
+jobs:
+  hello_world:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Hello World
+        run: echo hello world

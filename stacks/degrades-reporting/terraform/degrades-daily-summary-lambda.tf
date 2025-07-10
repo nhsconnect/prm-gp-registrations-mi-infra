@@ -6,6 +6,15 @@ resource "aws_lambda_function" "degrades_daily_summary" {
   handler          = "main.lambda_handler"
   timeout          = 900
   source_code_hash = filebase64sha256("${var.degrades_daily_summary_lambda_zip}")
+  layers           = [aws_lambda_layer_version.degrades.arn]
+
+  environment {
+    variables = {
+      REGISTRATIONS_MI_EVENT_BUCKET = var.registrations_mi_event_bucket
+      DEGRADES_MESSAGE_TABLE        = aws_dynamodb_table.degrades_message_table.name
+      REGION                        = var.region
+    }
+  }
 }
 
 resource "aws_lambda_permission" "degrades_daily_summary_schedule" {

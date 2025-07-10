@@ -30,7 +30,7 @@ def generate_degrades_daily_summary_report_from_date(date: str):
 
     file_path = generate_report_from_dynamo_query(degrades)
 
-    base_file_key = "/reports/daily"
+    base_file_key = "reports/daily"
 
     print(f"Writing summary report to {base_file_key}")
 
@@ -51,14 +51,14 @@ def generate_report_from_dynamo_query(
     degrade_totals = get_degrade_totals_from_degrades(degrades)
 
     print(f"Writing degrades report...")
-    with open(f"{os.getcwd()}/tmp/{date}.csv", "w") as output_file:
+    with open(f"/tmp/{date}.csv", "w") as output_file:
         fieldnames = [key for key in degrade_totals.keys()]
         writer = csv.DictWriter(output_file, fieldnames=fieldnames)
         writer.writeheader()
         for degrade in degrade_totals:
             writer.writerow(degrade)
 
-    return f"{os.getcwd()}/tmp/{date}.csv"
+    return f"/tmp/{date}.csv"
 
 
 if __name__ == "__main__":

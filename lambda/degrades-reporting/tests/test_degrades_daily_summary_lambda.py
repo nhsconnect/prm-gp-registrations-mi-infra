@@ -20,7 +20,7 @@ def test_degrades_daily_summary_lambda_queries_dynamo(
 ):
     lambda_handler(mock_scheduled_event, context)
     mock_dynamo_service.query.assert_called()
-    os.remove(f"{os.getcwd()}/tmp/reports/{TEST_DEGRADES_DATE}.csv")
+    os.remove(f"/tmp/{TEST_DEGRADES_DATE}.csv")
 
 
 @mock_aws
@@ -38,7 +38,7 @@ def test_degrades_daily_summary_uses_trigger_date_to_query_dynamo(
         condition=simple_message_timestamp,
         table_name=mock_table.table_name,
     )
-    os.remove(f"{os.getcwd()}/tmp/reports/{TEST_DEGRADES_DATE}.csv")
+    os.remove(f"/tmp/{TEST_DEGRADES_DATE}.csv")
 
 
 @mock_aws
@@ -50,10 +50,11 @@ def test_generate_report_from_dynamo_query_result(mock_table_with_files):
     generate_report_from_dynamo_query(degrades_from_table, TEST_DEGRADES_DATE)
 
     expected = readfile(f"{os.getcwd()}/tests/reports/{TEST_DEGRADES_DATE}.csv")
-    with open(f"{os.getcwd()}/tmp/reports/{TEST_DEGRADES_DATE}.csv", "r") as file:
+    with open(f"/tmp/{TEST_DEGRADES_DATE}.csv", "r") as file:
         actual = file.read()
         assert actual == expected
-    os.remove(f"{os.getcwd()}/tmp/reports/{TEST_DEGRADES_DATE}.csv")
+    os.remove(f"/tmp/{TEST_DEGRADES_DATE}.csv")
+
 
 
 @mock_aws
@@ -98,5 +99,5 @@ def test_degrades_daily_summary_uploads_to_s3(
     mock_s3_service.upload_file.assert_called_with(
         file="./tests/reports/2024-09-20.csv",
         bucket_name=MOCK_BUCKET,
-        key="/reports/daily/2024-09-20.csv",
+        key="reports/daily/2024-09-20.csv",
     )

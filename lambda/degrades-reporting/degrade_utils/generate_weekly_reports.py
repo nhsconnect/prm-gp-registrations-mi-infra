@@ -41,12 +41,17 @@ def generate_weekly_report(date_beginning: str):
             Body=csv_file.getvalue(),
         )
 
-    logger.info(f"Successfully updated weekly summary report with summary for week beginning: {date_beginning}")
+    logger.info(
+        f"Successfully updated weekly summary report with summary for week beginning: {date_beginning}"
+    )
 
 
 def get_keys_from_date_range(date_beginning: str) -> list[str]:
     start_date = datetime.fromisoformat(date_beginning)
-    week_range = [datetime.strftime(start_date + timedelta(days=i), "%Y-%m-%d") for i in range(0, 7, 1)]
+    week_range = [
+        datetime.strftime(start_date + timedelta(days=i), "%Y-%m-%d")
+        for i in range(0, 7, 1)
+    ]
 
     return week_range
 
@@ -54,7 +59,9 @@ def get_keys_from_date_range(date_beginning: str) -> list[str]:
 def generate_weekly_summary(files: list[str], date_beginning) -> dict:
     s3_service = S3Service()
     dfs = []
-    logger.info(f"Retrieving daily reports for week beginning: {date_beginning} from S3")
+    logger.info(
+        f"Retrieving daily reports for week beginning: {date_beginning} from S3"
+    )
     for file in files:
         try:
             csv_body = s3_service.get_object_from_s3(
@@ -71,5 +78,7 @@ def generate_weekly_summary(files: list[str], date_beginning) -> dict:
     df = pd.concat(dfs, ignore_index=True).sum()
     week_summary = df.to_dict()
     week_summary.update({"WEEK_BEGINNING": date_beginning.replace("-", "/")})
-    logger.info(f"Successfully generated weekly summary for {date_beginning}: {week_summary}")
+    logger.info(
+        f"Successfully generated weekly summary for {date_beginning}: {week_summary}"
+    )
     return week_summary

@@ -24,9 +24,9 @@ def test_populate_table_script_gets_all_files_from_S3(
     set_env, mock_s3_with_files, mock_sqs, mock_s3_service
 ):
     mock_s3_service.list_files_from_S3.return_value = ["2024/01/01/01-DEGRADES-01.json"]
-    mock_s3_service.get_file_from_S3.return_value = '{"eventType": "DEGRADES"}'
+    mock_s3_service.read_file_from_S3.return_value = '{"eventType": "DEGRADES"}'
     populate_degrades_table(test_date)
-    mock_s3_service.get_file_from_S3.assert_called()
+    mock_s3_service.read_file_from_S3.assert_called()
 
 
 @mock_aws

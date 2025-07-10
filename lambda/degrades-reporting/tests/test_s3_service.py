@@ -34,7 +34,7 @@ def test_get_file_from_S3(set_env, mock_s3_with_files):
         bucket_name=MOCK_BUCKET, prefix="2024/01/01/"
     )
 
-    actual = service.get_file_from_S3(bucket_name=MOCK_BUCKET, key=files_names[0])
+    actual = service.read_file_from_S3(bucket_name=MOCK_BUCKET, key=files_names[0])
     with open("./tests/mocks/mixed_messages/01-DEGRADES-01.json", "rb") as expected:
         assert expected.read() == actual
 
@@ -44,7 +44,7 @@ def test_get_file_from_S3_raises_error_client_issue(set_env):
     service = S3Service()
 
     with pytest.raises(ClientError):
-        service.get_file_from_S3("test", "key")
+        service.read_file_from_S3("test", "key")
 
 
 @mock_aws
@@ -57,6 +57,6 @@ def test_s3_service_uploads_files(set_env, mock_s3_with_files):
         key="2024/09/20/summary.csv",
     )
 
-    actual = service.get_file_from_S3(MOCK_BUCKET, "2024/09/20/summary.csv")
+    actual = service.read_file_from_S3(MOCK_BUCKET, "2024/09/20/summary.csv")
     with open("./tests/reports/2024-09-20.csv", "rb") as expected:
         assert expected.read() == actual

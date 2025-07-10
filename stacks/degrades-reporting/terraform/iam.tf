@@ -23,6 +23,7 @@ data "aws_iam_policy_document" "registrations_mi_events_access" {
       "s3:ListBucket",
       "s3:ListBucketMultipartUploads",
       "s3:ListBucketVersions",
+      "s3:PutObject",
       "s3:PutObjectVersionTagging",
       "s3:RestoreObject",
     ]

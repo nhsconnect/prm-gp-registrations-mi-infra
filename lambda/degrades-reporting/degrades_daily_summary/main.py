@@ -1,8 +1,6 @@
 import csv
 import os
 import logging
-import tempfile
-
 from models.degrade_message import DegradeMessage
 from degrade_utils.dynamo_service import DynamoService
 from degrade_utils.s3_service import S3Service
@@ -37,7 +35,7 @@ def lambda_handler(event, context):
 
     file_path = generate_report_from_dynamo_query(degrades, query_day)
 
-    base_file_key = "/reports/daily"
+    base_file_key = "reports/daily/"
 
     logger.info(f"Writing summary report to {base_file_key}")
 
@@ -45,7 +43,7 @@ def lambda_handler(event, context):
     s3_service.upload_file(
         file=file_path,
         bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
-        key=f"{base_file_key}/{query_day}.csv",
+        key=f"{base_file_key}{query_day}.csv",
     )
 
 
@@ -57,13 +55,12 @@ def generate_report_from_dynamo_query(
     logger.info(f"Getting degrades totals from: {degrades}")
     degrade_totals = get_degrade_totals_from_degrades(degrades)
 
-
-
     logger.info(f"Writing degrades report...")
-    with open(f"{os.getcwd()}/tmp/reports/{date}.csv", "w+") as output_file:
+
+    with open(f"/tmp/{date}.csv", "w") as output_file:
         fieldnames = list(degrade_totals.keys())
         writer = csv.DictWriter(output_file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerow(degrade_totals)
 
-    return f"{os.getcwd()}/tmp/reports/{date}.csv"
+    return f"/tmp/{date}.csv"

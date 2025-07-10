@@ -17,13 +17,13 @@ degrades-env:
 
 
 test-degrades:
-	cd $(DEGRADES_LAMBDA_PATH) && rm -rf tmp/reports || true
-	cd $(DEGRADES_LAMBDA_PATH) && mkdir -p tmp/reports
+	rm -rf tmp/reports || true
+	mkdir -p tmp/reports
 	cd $(DEGRADES_LAMBDA_PATH)  && venv/bin/python3 -m pytest tests/
 
 test-degrades-coverage:
-	cd $(DEGRADES_LAMBDA_PATH) && rm -rf tmp || true
-	cd $(DEGRADES_LAMBDA_PATH) && mkdir -p tmp
+	rm -rf tmp/reports || true
+	mkdir -p tmp/reports
 	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/coverage run -m pytest tests/
 	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/coverage report -m
 
@@ -92,5 +92,9 @@ zip-degrades-lambdas: zip-lambda-layer
 	cd $(BUILD_PATH)/degrades-message-receiver && zip -r -X ../degrades-message-receiver.zip .
 	cd $(BUILD_PATH)/degrades-daily-summary && zip -r -X ../degrades-daily-summary.zip .
 
+
+format-degrades:
+	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/ruff format
+	cd stacks/degrades-reporting/terraform && terraform fmt -recursive
 
 

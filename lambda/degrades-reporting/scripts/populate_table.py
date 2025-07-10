@@ -19,7 +19,7 @@ def populate_degrades_table(date):
 
     for file_key in file_keys:
         print(f"Reading file:{file_key}")
-        message = s3_service.get_file_from_S3(bucket_name=bucket_name, key=file_key)
+        message = s3_service.read_file_from_S3(bucket_name=bucket_name, key=file_key)
         message_dict = json.loads(message)
         if message_dict["eventType"] == "DEGRADES":
             sum += 1

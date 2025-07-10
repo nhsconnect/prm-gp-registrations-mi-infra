@@ -20,7 +20,7 @@ resource "aws_lambda_function" "degrades_daily_summary" {
 resource "aws_lambda_permission" "degrades_daily_summary_schedule" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.degrades_daily_summary.function_name
-  principal     = "eventsa.amazonaws.com"
+  principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.degrades_daily_summary_lambda_schedule.arn
 }
 

@@ -154,18 +154,23 @@ def mock_table_with_files(mock_table):
 
 
 @pytest.fixture
-def mock_s3_with_files():
+def mock_s3():
+    with mock_aws():
+        conn = boto3.resource("s3", region_name=REGION_NAME)
+        bucket = conn.create_bucket(Bucket=MOCK_BUCKET)
+        yield bucket
+
+
+@pytest.fixture
+def mock_s3_with_files(mock_s3):
     with mock_aws():
         folder_path = "tests/mocks/mixed_messages"
         json_files = [f for f in os.listdir(folder_path) if f.endswith(".json")]
 
-        conn = boto3.resource("s3", region_name=REGION_NAME)
-        bucket = conn.create_bucket(Bucket=MOCK_BUCKET)
-
         for file in json_files:
-            bucket.upload_file(os.path.join(folder_path, file), f"2024/01/01/{file}")
+            mock_s3.upload_file(os.path.join(folder_path, file), f"2024/01/01/{file}")
 
-        yield bucket
+    yield mock_s3
 
 
 @pytest.fixture
@@ -173,8 +178,10 @@ def mock_s3_service(mocker):
     with mock_aws():
         service = S3Service()
         mocker.patch.object(service, "list_files_from_S3")
-        mocker.patch.object(service, "get_file_from_S3")
+        mocker.patch.object(service, "read_file_from_S3")
         mocker.patch.object(service, "upload_file")
+        mocker.patch.object(service, "download_file")
+        mocker.patch.object(service, "get_object_from_s3")
         yield service
         service._instance = None
 

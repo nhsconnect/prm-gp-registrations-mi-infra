@@ -57,10 +57,18 @@ def generate_report_from_dynamo_query(
 
     logger.info(f"Writing degrades report...")
 
+    headers = ["Type", "Reason", "Count"]
+
     with open(f"/tmp/{date}.csv", "w") as output_file:
-        fieldnames = list(degrade_totals.keys())
+        fieldnames = headers
         writer = csv.DictWriter(output_file, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerow(degrade_totals)
+        for degrade in degrade_totals:
+            writer.writerow(degrade)
+
 
     return f"/tmp/{date}.csv"
+
+def split_degrade_type_reason(degrade_type_reason):
+    type_reason = degrade_type_reason.split(":")
+    return type_reason[0], type_reason[1]

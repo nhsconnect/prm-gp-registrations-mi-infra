@@ -49,15 +49,22 @@ def extract_query_timestamp_from_scheduled_event_trigger(
         return int(midnight.timestamp()), query_date.strftime("%Y-%m-%d")
 
 
-def get_degrade_totals_from_degrades(degrades_messages: list[DegradeMessage]) -> dict:
+def get_degrade_totals_from_degrades(degrades_messages: list[DegradeMessage]) -> list[dict]:
     degrade_totals = defaultdict(int)
 
     for degrade_message in degrades_messages:
         for degrade in degrade_message.degrades:
-            degrade_type_reason = f"{degrade.type}: {degrade.reason}"
+            degrade_type_reason = f"{degrade.type}:{degrade.reason}"
             degrade_totals[degrade_type_reason] += 1
 
-    total = sum(degrade_totals.values())
-    degrade_totals["TOTAL"] += total
+    rows = []
 
-    return dict(degrade_totals)
+    for key, value in degrade_totals.items():
+        type, reason = split_degrade_type_reason(key)
+        rows.append({"Type": type, "Reason": reason, "Count": value})
+
+    return rows
+
+def split_degrade_type_reason(degrade_type_reason):
+    type_reason = degrade_type_reason.split(":")
+    return type_reason[0], type_reason[1]

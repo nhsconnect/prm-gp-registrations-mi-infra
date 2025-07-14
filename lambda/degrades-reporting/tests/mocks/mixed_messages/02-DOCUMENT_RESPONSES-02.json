@@ -1,0 +1,30 @@
+{
+  "eventId": "02-DOCUMENT_RESPONSES-02",
+  "eventGeneratedDateTime": "2024-09-20T15:25:19",
+  "eventType": "DOCUMENT_RESPONSES",
+  "reportingSystemSupplier": "EMIS",
+  "reportingPracticeOdsCode": "Z12345",
+  "requestingPracticeOdsCode": "A12345",
+  "requestingPracticeName": "TEST_PRACTICE_2",
+  "requestingPracticeIcbOdsCode": "12A",
+  "requestingPracticeIcbName": "TEST ICB - 12A",
+  "sendingPracticeOdsCode": "Y12345",
+  "sendingPracticeName": "TEST_PRACTICE",
+  "sendingPracticeIcbOdsCode": "12A",
+  "sendingPracticeIcbName": "TEST ICB - 12A",
+  "conversationId": "02-DOCUMENT_RESPONSES-02",
+  "registrationEventDateTime": "2024-09-20T15:25:18",
+  "payload": {
+    "attachment": {
+      "clinicalType": "OTHER",
+      "mimeType": "application/xml",
+      "sizeBytes": 30618
+    },
+    "documentMigration": {
+      "successful": true,
+      "reason": null
+    }
+  },
+  "requestingSupplierName": "EMIS",
+  "sendingSupplierName": "EMIS"
+}

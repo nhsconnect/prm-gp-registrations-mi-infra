@@ -1,0 +1,118 @@
+{
+  "eventId": "03-DEGRADES-03",
+  "eventGeneratedDateTime": "2024-09-20T00:00:00",
+  "eventType": "DEGRADES",
+  "reportingSystemSupplier": "EMIS",
+  "payload": {
+    "degrades": [
+      {
+        "type": "MEDICATION",
+        "reason": "CODE",
+        "coding": [
+          {
+            "code": "11588001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "11588001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "11588001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "11588001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "00252001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "00252001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "11588001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "11588001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "03969001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "01142001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "01142001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "12795001",
+            "system": "UNKNOWN"
+          },
+          {
+            "code": "12795001",
+            "system": "UNKNOWN"
+          }
+        ]
+      },
+      {
+        "type": "RECORD_ENTRY",
+        "reason": "CODE",
+        "coding": [
+          {
+            "code": "mn2..",
+            "system": "CLINICAL_TERMS_READV3"
+          }
+        ]
+      }
+    ]
+  }
+}

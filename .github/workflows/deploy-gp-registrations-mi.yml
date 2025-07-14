@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   terraform_process:
-    uses: ./.github/workflows/base-gp-registrations-mi.yml
+    uses: ./.github/workflows/base-degrades-reporting.yml
     with:
       environment: ${{ inputs.environment }}
       is_deployment: true

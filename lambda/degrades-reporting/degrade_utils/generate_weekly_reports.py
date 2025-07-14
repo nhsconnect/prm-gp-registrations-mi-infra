@@ -26,19 +26,27 @@ def generate_weekly_report(date_beginning: str):
 
     s3_service = S3Service()
 
-    s3_service.download_file(bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
-                             key="reports/degrades_weekly_report.csv", file="tmp/degrades_weekly_report.csv")
+    s3_service.download_file(
+        bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
+        key="reports/degrades_weekly_report.csv",
+        file="tmp/degrades_weekly_report.csv",
+    )
 
-    with open("tmp/degrades_weekly_report.csv") as weekly_report_csv, open("tmp/degrades_weekly_report.csv", "a") as updated_weekly_report_csv:
+    with (
+        open("tmp/degrades_weekly_report.csv") as weekly_report_csv,
+        open("tmp/degrades_weekly_report.csv", "a") as updated_weekly_report_csv,
+    ):
         reader = csv.DictReader(weekly_report_csv)
         writer = csv.DictWriter(updated_weekly_report_csv, reader.fieldnames)
 
         for row in new_rows:
             writer.writerow(row)
 
-
-    s3_service.upload_file(bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
-                           key="reports/degrades_weekly_report.csv", file="tmp/degrades_weekly_report.csv")
+    s3_service.upload_file(
+        bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
+        key="reports/degrades_weekly_report.csv",
+        file="tmp/degrades_weekly_report.csv",
+    )
 
     logger.info(
         f"Successfully updated weekly summary report with summary for week beginning: {date_beginning}"
@@ -93,6 +101,13 @@ def generate_new_rows_from_week_summary(summary: dict, date_beginning: str) -> l
 
     if counts:
         for key, value in counts.items():
-            rows.append({"Week beginning": date_beginning, "Type": key[0], "Reason": key[1], "Count": value})
+            rows.append(
+                {
+                    "Week beginning": date_beginning,
+                    "Type": key[0],
+                    "Reason": key[1],
+                    "Count": value,
+                }
+            )
 
     return rows

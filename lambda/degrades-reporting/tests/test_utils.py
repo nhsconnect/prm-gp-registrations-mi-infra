@@ -79,10 +79,11 @@ def test_get_degrade_totals_from_degrades():
         DegradeMessage.model_validate(COMPLEX_DEGRADES_MESSAGE_DYNAMO_RESPONSE),
     ]
 
-
-    expected = [{"Count": 3, "Reason": "CODE", "Type": "MEDICATION"},
-                {"Count": 1, "Reason": "CODE", "Type": "RECORD_ENTRY"},
-                {"Count": 1, "Reason": "CODE", "Type": "NON_DRUG_ALLERGY"}]
+    expected = [
+        {"Count": 3, "Reason": "CODE", "Type": "MEDICATION"},
+        {"Count": 1, "Reason": "CODE", "Type": "RECORD_ENTRY"},
+        {"Count": 1, "Reason": "CODE", "Type": "NON_DRUG_ALLERGY"},
+    ]
 
     actual = get_degrade_totals_from_degrades(degrades)
 

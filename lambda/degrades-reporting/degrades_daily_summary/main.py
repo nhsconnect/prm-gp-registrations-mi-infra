@@ -66,8 +66,8 @@ def generate_report_from_dynamo_query(
         for degrade in degrade_totals:
             writer.writerow(degrade)
 
-
     return f"/tmp/{date}.csv"
+
 
 def split_degrade_type_reason(degrade_type_reason):
     type_reason = degrade_type_reason.split(":")

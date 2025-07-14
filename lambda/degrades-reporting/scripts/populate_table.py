@@ -18,9 +18,7 @@ def populate_degrades_table(date):
 
     bucket_name = BUCKET
     sqs_client = boto3.client("sqs", region_name=REGION)
-    sqs_queue_url = sqs_client.get_queue_url(
-        QueueName=QUEUE
-    )
+    sqs_queue_url = sqs_client.get_queue_url(QueueName=QUEUE)
 
     s3_service = S3Service()
     print("Getting list of files from S3")

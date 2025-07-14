@@ -40,15 +40,22 @@ def test_generate_weekly_summary_summarises_weekly_data(mock_s3, set_env):
         mock_s3.upload_file(f"./tests/reports/{file}.csv", f"reports/daily/{file}.csv")
 
     actual = generate_weekly_summary(files, "2024-09-16")
-    expected = {"Count": {('DRUG_ALLERGY', 'CODE'): 2, ('MEDICATION', 'CODE'): 21, ('NON_DRUG_ALLERGY', 'CODE'): 8,
-                          ('RECORD_ENTRY', 'CODE'): 12, ('RECORD_ENTRY', 'NUMERIC_VALUE'): 6}}
+    expected = {
+        "Count": {
+            ("DRUG_ALLERGY", "CODE"): 2,
+            ("MEDICATION", "CODE"): 21,
+            ("NON_DRUG_ALLERGY", "CODE"): 8,
+            ("RECORD_ENTRY", "CODE"): 12,
+            ("RECORD_ENTRY", "NUMERIC_VALUE"): 6,
+        }
+    }
     assert actual == expected
 
 
-
-
 @mock_aws
-def test_weekly_report_generation_adds_new_row_to_global_report(set_env, mock_s3, mocker):
+def test_weekly_report_generation_adds_new_row_to_global_report(
+    set_env, mock_s3, mocker
+):
     files = [
         "2024-09-16",
         "2024-09-17",
@@ -62,11 +69,20 @@ def test_weekly_report_generation_adds_new_row_to_global_report(set_env, mock_s3
     for file in files:
         mock_s3.upload_file(f"./tests/reports/{file}.csv", f"reports/daily/{file}.csv")
 
-    mock_summary = mocker.patch("degrade_utils.generate_weekly_reports.generate_weekly_summary")
+    mock_summary = mocker.patch(
+        "degrade_utils.generate_weekly_reports.generate_weekly_summary"
+    )
 
-    mock_summary.return_value = {"Count": {('MEDICATION', 'CODE'): 16, ('NON_DRUG_ALLERGY', 'CODE'): 7,
-                                           ('RECORD_ENTRY', 'CODE'): 11, ('RECORD_ENTRY', 'NUMERIC_VALUE'): 4,
-                                           ('DRUG_ALLERGY', 'CODE'): 2, ('ALLERGY', 'CODE'): 1}}
+    mock_summary.return_value = {
+        "Count": {
+            ("MEDICATION", "CODE"): 16,
+            ("NON_DRUG_ALLERGY", "CODE"): 7,
+            ("RECORD_ENTRY", "CODE"): 11,
+            ("RECORD_ENTRY", "NUMERIC_VALUE"): 4,
+            ("DRUG_ALLERGY", "CODE"): 2,
+            ("ALLERGY", "CODE"): 1,
+        }
+    }
 
     mock_s3.upload_file(
         "./tests/reports/global.csv", "reports/degrades_weekly_report.csv"
@@ -87,5 +103,6 @@ def test_weekly_report_generation_adds_new_row_to_global_report(set_env, mock_s3
         assert actual == expected
 
     os.remove("tmp/degrades_weekly_report.csv")
+
 
 # TODO PRM-410 add test cases: gen new rows from weekly summary, pos + neg, neg test gen report and summary

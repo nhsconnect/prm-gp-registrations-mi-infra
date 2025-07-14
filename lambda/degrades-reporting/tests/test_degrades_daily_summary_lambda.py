@@ -56,7 +56,6 @@ def test_generate_report_from_dynamo_query_result(mock_table_with_files):
     os.remove(f"/tmp/{TEST_DEGRADES_DATE}.csv")
 
 
-
 @mock_aws
 def test_degrades_daily_summary_generates_report(
     mock_scheduled_event,

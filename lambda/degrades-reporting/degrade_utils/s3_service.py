@@ -47,4 +47,3 @@ class S3Service:
             self.client.download_file(Bucket=bucket_name, Key=key, Filename=file)
         except ClientError as e:
             raise e
-

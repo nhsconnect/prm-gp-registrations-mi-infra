@@ -2,7 +2,7 @@ name: "PR-terraform-plan"
 on:
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - 'stacks/container-repositories/**'
       - 'stacks/base-networking/**'

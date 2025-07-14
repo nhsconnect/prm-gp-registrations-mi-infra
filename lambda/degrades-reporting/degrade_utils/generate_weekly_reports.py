@@ -11,7 +11,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-
 def generate_weekly_report(date_beginning: str):
     logger.info(f"Getting file keys for reports week beginning: {date_beginning}")
     file_keys = get_keys_from_date_range(date_beginning)
@@ -27,19 +26,38 @@ def generate_weekly_report(date_beginning: str):
 
     s3_service = S3Service()
 
-    s3_service.download_file(
-        bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
-        key="reports/degrades_weekly_report.csv",
-        file="tmp/degrades_weekly_report.csv",
-    )
+    try:
+        s3_service.download_file(
+            bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
+            key="reports/degrades_weekly_report.csv",
+            file="tmp/degrades_weekly_report.csv",
+        )
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "NoSuchKey":
+            logger.info("No weekly summary report found, creating new one")
+            with open(
+                "tmp/degrades_weekly_report.csv", "a+"
+            ) as updated_weekly_report_csv:
+                writer = csv.DictWriter(
+                    updated_weekly_report_csv, CsvHeaders.list_values()
+                )
+                writer.writeheader()
 
-    with (
-        open("tmp/degrades_weekly_report.csv", "a+") as updated_weekly_report_csv,
-    ):
+        if e.response["Error"]["Code"] == "404":
+            logger.info("No weekly summary report found, creating new one")
+            with open(
+                "tmp/degrades_weekly_report.csv", "a+"
+            ) as updated_weekly_report_csv:
+                writer = csv.DictWriter(
+                    updated_weekly_report_csv, CsvHeaders.list_values()
+                )
+                writer.writeheader()
+        else:
+            raise e
+
+    with open("tmp/degrades_weekly_report.csv", "a+") as updated_weekly_report_csv:
         writer = csv.DictWriter(updated_weekly_report_csv, CsvHeaders.list_values())
-
-        for row in new_rows:
-            writer.writerow(row)
+        writer.writerows(new_rows)
 
     s3_service.upload_file(
         bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),

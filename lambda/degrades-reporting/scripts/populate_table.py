@@ -4,11 +4,22 @@ import boto3
 from degrade_utils.s3_service import S3Service
 
 
+""" Ad hoc script to search through S3 bucket for degrades date and send to degrades queue
+
+    To use: Populate the constants with mi registrations bucket name, region, and degrades queue name
+    set the date prefix you would like to search through in format YYYY/MM/DD => when searching through dev, day may not be necessary
+    as the numbers of messages are quite low."""
+
+
 def populate_degrades_table(date):
-    bucket_name = os.getenv("REGISTRATIONS_MI_EVENT_BUCKET")
-    sqs_client = boto3.client("sqs", region_name=os.getenv("REGION"))
+    BUCKET = os.getenv("REGISTRATIONS_MI_EVENT_BUCKET")
+    QUEUE = os.getenv("DEGRADES_SQS_QUEUE_NAME")
+    REGION = os.getenv("REGION")
+
+    bucket_name = BUCKET
+    sqs_client = boto3.client("sqs", region_name=REGION)
     sqs_queue_url = sqs_client.get_queue_url(
-        QueueName=os.getenv("DEGRADES_SQS_QUEUE_NAME")
+        QueueName=QUEUE
     )
 
     s3_service = S3Service()

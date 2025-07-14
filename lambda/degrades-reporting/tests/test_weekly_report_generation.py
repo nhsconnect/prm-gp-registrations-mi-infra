@@ -1,8 +1,4 @@
 import os
-import csv
-from unittest.mock import call
-import boto3
-import pandas as pd
 from moto import mock_aws
 
 from degrade_utils.generate_weekly_reports import (

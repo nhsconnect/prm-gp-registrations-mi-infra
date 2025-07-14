@@ -1,14 +1,15 @@
 import csv
-import io
 import os
 import pandas as pd
 import logging
 from datetime import datetime, timedelta
 from botocore.exceptions import ClientError
 from degrade_utils.s3_service import S3Service
+from degrade_utils.enums import CsvHeaders
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
 
 
 def generate_weekly_report(date_beginning: str):
@@ -33,11 +34,9 @@ def generate_weekly_report(date_beginning: str):
     )
 
     with (
-        open("tmp/degrades_weekly_report.csv") as weekly_report_csv,
-        open("tmp/degrades_weekly_report.csv", "a") as updated_weekly_report_csv,
+        open("tmp/degrades_weekly_report.csv", "a+") as updated_weekly_report_csv,
     ):
-        reader = csv.DictReader(weekly_report_csv)
-        writer = csv.DictWriter(updated_weekly_report_csv, reader.fieldnames)
+        writer = csv.DictWriter(updated_weekly_report_csv, CsvHeaders.list_values())
 
         for row in new_rows:
             writer.writerow(row)
@@ -103,10 +102,10 @@ def generate_new_rows_from_week_summary(summary: dict, date_beginning: str) -> l
         for key, value in counts.items():
             rows.append(
                 {
-                    "Week beginning": date_beginning,
-                    "Type": key[0],
-                    "Reason": key[1],
-                    "Count": value,
+                    CsvHeaders.WEEK_BEGINNING: date_beginning,
+                    CsvHeaders.TYPE: key[0],
+                    CsvHeaders.REASON: key[1],
+                    CsvHeaders.COUNT: value,
                 }
             )
 

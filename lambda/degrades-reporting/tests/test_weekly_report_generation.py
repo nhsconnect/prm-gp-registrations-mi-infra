@@ -1,5 +1,5 @@
 import os
-
+import pytest
 from degrade_utils.generate_weekly_reports import (
     generate_weekly_report,
     get_keys_from_date_range,
@@ -8,6 +8,29 @@ from degrade_utils.generate_weekly_reports import (
 )
 
 from degrade_utils.enums import CsvHeaders
+
+
+@pytest.fixture
+def mock_weekly_summary(mocker):
+    mock_function = mocker.patch(
+        "degrade_utils.generate_weekly_reports.generate_weekly_summary"
+    )
+    return mock_function
+
+
+def upload_daily_reports(mock_s3):
+    date_keys = [
+        "2024-09-16",
+        "2024-09-17",
+        "2024-09-18",
+        "2024-09-19",
+        "2024-09-20",
+        "2024-09-21",
+        "2024-09-22",
+    ]
+
+    for date in date_keys:
+        mock_s3.upload_file(f"./tests/reports/{date}.csv", f"reports/daily/{date}.csv")
 
 
 def test_get_keys_from_date_range():
@@ -34,8 +57,7 @@ def test_generate_weekly_summary_summarises_weekly_data(mock_s3, set_env):
         "2024-09-22",
     ]
 
-    for date in date_keys:
-        mock_s3.upload_file(f"./tests/reports/{date}.csv", f"reports/daily/{date}.csv")
+    upload_daily_reports(mock_s3)
 
     actual = generate_weekly_summary(date_keys, "2024-09-16")
     expected = {
@@ -68,26 +90,11 @@ def test_generate_weekly_summary_no_new_entries_returns_empty_dict(mock_s3, set_
 
 
 def test_weekly_report_generation_adds_new_row_to_global_report(
-    set_env, mock_s3, mocker
+    set_env, mock_s3, mock_weekly_summary
 ):
-    date_keys = [
-        "2024-09-16",
-        "2024-09-17",
-        "2024-09-18",
-        "2024-09-19",
-        "2024-09-20",
-        "2024-09-21",
-        "2024-09-22",
-    ]
+    upload_daily_reports(mock_s3)
 
-    for date in date_keys:
-        mock_s3.upload_file(f"./tests/reports/{date}.csv", f"reports/daily/{date}.csv")
-
-    mock_summary = mocker.patch(
-        "degrade_utils.generate_weekly_reports.generate_weekly_summary"
-    )
-
-    mock_summary.return_value = {
+    mock_weekly_summary.return_value = {
         "Count": {
             ("MEDICATION", "CODE"): 16,
             ("NON_DRUG_ALLERGY", "CODE"): 7,
@@ -120,26 +127,9 @@ def test_weekly_report_generation_adds_new_row_to_global_report(
 
 
 def test_generate_weekly_reports_writes_new_report_no_previous_report_written(
-    mock_s3, set_env, mocker
+    mock_s3, set_env, mock_weekly_summary
 ):
-    date_keys = [
-        "2024-09-16",
-        "2024-09-17",
-        "2024-09-18",
-        "2024-09-19",
-        "2024-09-20",
-        "2024-09-21",
-        "2024-09-22",
-    ]
-
-    for date in date_keys:
-        mock_s3.upload_file(f"./tests/reports/{date}.csv", f"reports/daily/{date}.csv")
-
-    mock_summary = mocker.patch(
-        "degrade_utils.generate_weekly_reports.generate_weekly_summary"
-    )
-
-    mock_summary.return_value = {
+    mock_weekly_summary.return_value = {
         "Count": {
             ("MEDICATION", "CODE"): 19,
             ("NON_DRUG_ALLERGY", "CODE"): 8,

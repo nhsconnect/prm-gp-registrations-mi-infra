@@ -78,13 +78,13 @@ jobs:
             ./tasks_github_actions.sh build-lambdas
 
       - name: Make virtual environment
-        if: github.ref == 'refs/heads/master' && inputs.is_deployment
+        if: github.ref == 'refs/heads/main' && inputs.is_deployment
         run: |
           python3 -m venv ./venv
           ./venv/bin/pip3 install --upgrade pip urllib3
 
       - name: Get ODS CSV Files
-        if: github.ref == 'refs/heads/master' && inputs.is_deployment
+        if: github.ref == 'refs/heads/main' && inputs.is_deployment
         run: |
           PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 -m utils.get_latest_ods_csv ${{ secrets.TRUD_API_KEY }} ${{ vars.TRUD_API_URL }}
 
@@ -168,6 +168,6 @@ jobs:
             });
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/master' && inputs.is_deployment
+        if: github.ref == 'refs/heads/main' && inputs.is_deployment
         run: terraform apply -auto-approve -input=false ${{ vars.AWS_ENVIRONMENT }}.tfplan
         working-directory: ./stacks/gp-registrations-mi/terraform

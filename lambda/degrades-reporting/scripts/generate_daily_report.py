@@ -5,6 +5,7 @@ from models.degrade_message import DegradeMessage
 from degrade_utils.dynamo_service import DynamoService
 from degrade_utils.s3_service import S3Service
 from degrade_utils.utils import get_degrade_totals_from_degrades
+from degrade_utils.enums import CsvHeaders
 
 """Adhoc script to generate daily report from DynamoDB
     DATE, in format YYYY-MM-DD, to be passed in as an environment variable,
@@ -57,7 +58,7 @@ def generate_report_from_dynamo_query(
 
     print(f"Writing degrades report...")
 
-    headers = ["Type", "Reason", "Count"]
+    headers = [CsvHeaders.TYPE, CsvHeaders.REASON, CsvHeaders.COUNT]
 
     with open(f"/tmp/{date}.csv", "w") as output_file:
         fieldnames = headers

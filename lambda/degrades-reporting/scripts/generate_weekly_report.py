@@ -6,7 +6,7 @@ import os
     Populate the environmental variables with the MI Registrations bucket name and region it is hosted"""
 
 if __name__ == "__main__":
-    date = "2024-02-19"
+    date = "2024-02-26"
     os.environ["REGISTRATIONS_MI_EVENT_BUCKET"] = ""
     os.environ["REGION"] = ""
 

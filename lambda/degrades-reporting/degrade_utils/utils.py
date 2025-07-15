@@ -49,6 +49,8 @@ def extract_query_timestamp_from_scheduled_event_trigger(
         return int(midnight.timestamp()), query_date.strftime("%Y-%m-%d")
 
 
+
+# This needs sorting, there's definitely a better way to do this
 def get_degrade_totals_from_degrades(
     degrades_messages: list[DegradeMessage],
 ) -> list[dict]:

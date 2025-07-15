@@ -8,6 +8,7 @@ from degrade_utils.utils import (
     extract_query_timestamp_from_scheduled_event_trigger,
     get_degrade_totals_from_degrades,
 )
+from degrade_utils.enums import CsvHeaders
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -57,7 +58,7 @@ def generate_report_from_dynamo_query(
 
     logger.info(f"Writing degrades report...")
 
-    headers = ["Type", "Reason", "Count"]
+    headers = [CsvHeaders.TYPE, CsvHeaders.REASON, CsvHeaders.COUNT]
 
     with open(f"/tmp/{date}.csv", "w") as output_file:
         fieldnames = headers
@@ -67,8 +68,3 @@ def generate_report_from_dynamo_query(
             writer.writerow(degrade)
 
     return f"/tmp/{date}.csv"
-
-
-def split_degrade_type_reason(degrade_type_reason):
-    type_reason = degrade_type_reason.split(":")
-    return type_reason[0], type_reason[1]

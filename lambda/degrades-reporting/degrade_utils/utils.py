@@ -51,8 +51,6 @@ def extract_query_timestamp_from_scheduled_event_trigger(
         return int(midnight.timestamp()), query_date.strftime("%Y-%m-%d")
 
 
-
-# This needs sorting, there's definitely a better way to do this
 def get_degrade_totals_from_degrades(
     degrades_messages: list[DegradeMessage],
 ) -> pd.DataFrame:
@@ -69,33 +67,3 @@ def get_degrade_totals_from_degrades(
             return result
         else:
             return pd.DataFrame()
-
-        # df = pd.DataFrame(degrades_messages)
-        #
-        # df_exploaded = df.explode("degrades", ignore_index=True)
-        #
-        # degrades_df = pd.json_normalize(df_exploaded['degrades'])
-        #
-        # df_flat = df_exploaded.drop(columns=["degrades"]).join(degrades_df)
-        #
-        # result = df_flat.groupby(["type", "reason"]).sum().to_dict()
-        #
-        # return result
-    # degrade_totals = defaultdict(int)
-    #
-    # for degrade_message in degrades_messages:
-    #     for degrade in degrade_message.degrades:
-    #         degrade_type_reason = f"{degrade.type}:{degrade.reason}"
-    #         degrade_totals[degrade_type_reason] += 1
-    # rows = []
-    #
-    # for key, value in degrade_totals.items():
-    #     type, reason = split_degrade_type_reason(key)
-    #     rows.append({"Type": type, "Reason": reason, "Count": value})
-    #
-    # return rows
-
-
-def split_degrade_type_reason(degrade_type_reason):
-    type_reason = degrade_type_reason.split(":")
-    return type_reason[0], type_reason[1]

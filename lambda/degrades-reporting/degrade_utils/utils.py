@@ -1,7 +1,6 @@
 import json
 import os
 import pandas as pd
-from collections import defaultdict
 from datetime import datetime, timedelta
 
 from degrade_utils.enums import CsvHeaders
@@ -40,15 +39,13 @@ def extract_degrades_payload(payload: dict) -> list[Degrade]:
 
 
 def extract_query_timestamp_from_scheduled_event_trigger(
-    event: dict,
+    trigger_time: str,
 ) -> tuple[int, str] | None:
-    event_trigger_time = event.get("time", "")
 
-    if event_trigger_time:
-        dt = datetime.fromisoformat(event_trigger_time)
-        query_date = dt - timedelta(days=1)
-        midnight = datetime.combine(query_date, datetime.min.time())
-        return int(midnight.timestamp()), query_date.strftime("%Y-%m-%d")
+    dt = datetime.fromisoformat(trigger_time)
+    query_date = dt - timedelta(days=1)
+    midnight = datetime.combine(query_date, datetime.min.time())
+    return int(midnight.timestamp()), query_date.strftime("%Y-%m-%d")
 
 
 def get_degrade_totals_from_degrades(
@@ -67,3 +64,8 @@ def get_degrade_totals_from_degrades(
             return result
         else:
             return pd.DataFrame()
+
+
+def is_monday(date):
+    day = datetime.fromisoformat(date)
+    return day.weekday() == 0

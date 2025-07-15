@@ -1,4 +1,6 @@
 import os
+from copy import deepcopy
+
 from moto import mock_aws
 import pandas as pd
 from degrades_daily_summary.main import (
@@ -55,10 +57,10 @@ def test_generate_report_from_dynamo_query_result(mock_table_with_files, mocker)
     generate_report_from_dynamo_query(degrades_from_table, TEST_DEGRADES_DATE)
 
     expected = readfile(f"{os.getcwd()}/tests/reports/{TEST_DEGRADES_DATE}.csv")
-    with open(f"/tmp/{TEST_DEGRADES_DATE}.csv", "r") as file:
+    with open(f"tmp/{TEST_DEGRADES_DATE}.csv", "r") as file:
         actual = file.read()
         assert actual == expected
-    os.remove(f"/tmp/{TEST_DEGRADES_DATE}.csv")
+    os.remove(f"tmp/{TEST_DEGRADES_DATE}.csv")
 
 
 @mock_aws
@@ -92,16 +94,27 @@ def test_degrades_daily_summary_uploads_to_s3(
     mocker,
     mock_table_with_files,
 ):
-    mock_generate_report = mocker.patch(
-        "degrades_daily_summary.main.generate_report_from_dynamo_query"
-    )
-
-    mock_generate_report.return_value = "./tests/reports/2024-09-20.csv"
 
     lambda_handler(mock_scheduled_event, context)
 
     mock_s3_service.upload_file.assert_called_with(
-        file="./tests/reports/2024-09-20.csv",
+        file="tmp/2024-09-20.csv",
         bucket_name=MOCK_BUCKET,
         key="reports/daily/2024-09-20.csv",
     )
+    os.remove(f"tmp/{TEST_DEGRADES_DATE}.csv")
+
+@mock_aws
+def test_daily_summary_calls_generate_weekly_report_on_a_monday(mock_scheduled_event, context, set_env, mocker, mock_dynamo_service, mock_s3_service):
+
+    mock_dynamo_service.query.return_value = ["object returned"]
+    mocker.patch(
+        "degrades_daily_summary.main.generate_report_from_dynamo_query"
+    )
+    mock_generate_weekly_report = mocker.patch("degrades_daily_summary.main.generate_weekly_report")
+
+    MONDAY_EVENT = deepcopy(mock_scheduled_event)
+    MONDAY_EVENT["time"] = "2024-09-23T06:00:00Z"
+    lambda_handler(MONDAY_EVENT, context)
+
+    mock_generate_weekly_report.assert_called_with("2024-09-16")

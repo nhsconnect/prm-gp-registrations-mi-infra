@@ -20,6 +20,7 @@ from degrade_utils.utils import (
     extract_degrades_payload,
     extract_query_timestamp_from_scheduled_event_trigger,
     get_degrade_totals_from_degrades,
+    is_monday
 )
 
 
@@ -67,7 +68,7 @@ def test_extract_degrades_payload_complex_message():
 
 
 def test_extract_query_timestamp_from_scheduled_event_trigger(mock_scheduled_event):
-    actual = extract_query_timestamp_from_scheduled_event_trigger(mock_scheduled_event)
+    actual = extract_query_timestamp_from_scheduled_event_trigger(mock_scheduled_event.get("time"))
     expected = (simple_message_timestamp, TEST_DEGRADES_DATE)
 
     assert actual == expected
@@ -90,3 +91,7 @@ def test_get_degrade_totals_from_degrades():
 
     assert_frame_equal(actual, expected)
     assert actual.compare(expected).empty
+
+def test_is_monday():
+    assert is_monday("2024-09-20") == False
+    assert is_monday("2024-09-16")

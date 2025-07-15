@@ -7,8 +7,10 @@ from botocore.exceptions import ClientError
 from degrade_utils.s3_service import S3Service
 from degrade_utils.enums import CsvHeaders
 
+logging.basicConfig(format="%(levelname): %(message)")
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
 
 
 def generate_weekly_report(date_beginning: str):

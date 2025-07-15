@@ -16,6 +16,10 @@ class Degrade(BaseModel):
     reason: str
 
 
+    def is_equal(self, other) -> bool:
+        return self.type == other.type and self.reason == other.reason
+
+
 class DegradeMessage(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_pascal, populate_by_name=True, use_enum_values=True
@@ -24,3 +28,5 @@ class DegradeMessage(BaseModel):
     timestamp: int
     event_type: EventTypes = EventTypes.DEGRADES
     degrades: list[Degrade]
+
+

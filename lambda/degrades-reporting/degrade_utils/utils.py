@@ -1,8 +1,10 @@
 import json
 import os
+import pandas as pd
 from collections import defaultdict
 from datetime import datetime, timedelta
 
+from degrade_utils.enums import CsvHeaders
 from models.degrade_message import DegradeMessage, Degrade
 
 
@@ -53,21 +55,45 @@ def extract_query_timestamp_from_scheduled_event_trigger(
 # This needs sorting, there's definitely a better way to do this
 def get_degrade_totals_from_degrades(
     degrades_messages: list[DegradeMessage],
-) -> list[dict]:
-    degrade_totals = defaultdict(int)
+) -> pd.DataFrame:
 
-    for degrade_message in degrades_messages:
-        for degrade in degrade_message.degrades:
-            degrade_type_reason = f"{degrade.type}:{degrade.reason}"
-            degrade_totals[degrade_type_reason] += 1
+        degrades = []
 
-    rows = []
+        for degrade_message in degrades_messages:
+            for degrade in degrade_message.degrades:
+                degrades.append({CsvHeaders.TYPE: degrade.type, CsvHeaders.REASON: degrade.reason})
 
-    for key, value in degrade_totals.items():
-        type, reason = split_degrade_type_reason(key)
-        rows.append({"Type": type, "Reason": reason, "Count": value})
+        if degrades:
+            df = pd.DataFrame(degrades)
+            result = df.groupby([CsvHeaders.TYPE, CsvHeaders.REASON]).size().reset_index(name=CsvHeaders.COUNT)
+            return result
+        else:
+            return pd.DataFrame()
 
-    return rows
+        # df = pd.DataFrame(degrades_messages)
+        #
+        # df_exploaded = df.explode("degrades", ignore_index=True)
+        #
+        # degrades_df = pd.json_normalize(df_exploaded['degrades'])
+        #
+        # df_flat = df_exploaded.drop(columns=["degrades"]).join(degrades_df)
+        #
+        # result = df_flat.groupby(["type", "reason"]).sum().to_dict()
+        #
+        # return result
+    # degrade_totals = defaultdict(int)
+    #
+    # for degrade_message in degrades_messages:
+    #     for degrade in degrade_message.degrades:
+    #         degrade_type_reason = f"{degrade.type}:{degrade.reason}"
+    #         degrade_totals[degrade_type_reason] += 1
+    # rows = []
+    #
+    # for key, value in degrade_totals.items():
+    #     type, reason = split_degrade_type_reason(key)
+    #     rows.append({"Type": type, "Reason": reason, "Count": value})
+    #
+    # return rows
 
 
 def split_degrade_type_reason(degrade_type_reason):

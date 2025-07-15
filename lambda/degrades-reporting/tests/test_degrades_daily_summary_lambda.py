@@ -1,5 +1,6 @@
 import os
 from moto import mock_aws
+import pandas as pd
 from degrades_daily_summary.main import (
     lambda_handler,
     generate_report_from_dynamo_query,
@@ -20,7 +21,6 @@ def test_degrades_daily_summary_lambda_queries_dynamo(
 ):
     lambda_handler(mock_scheduled_event, context)
     mock_dynamo_service.query.assert_called()
-    os.remove(f"/tmp/{TEST_DEGRADES_DATE}.csv")
 
 
 @mock_aws
@@ -38,11 +38,16 @@ def test_degrades_daily_summary_uses_trigger_date_to_query_dynamo(
         condition=simple_message_timestamp,
         table_name=mock_table.table_name,
     )
-    os.remove(f"/tmp/{TEST_DEGRADES_DATE}.csv")
 
 
 @mock_aws
-def test_generate_report_from_dynamo_query_result(mock_table_with_files):
+def test_generate_report_from_dynamo_query_result(mock_table_with_files, mocker):
+    mocker.patch("degrades_daily_summary.main.get_degrade_totals_from_degrades").return_value = pd.DataFrame([
+        {"Type": "MEDICATION", "Reason": "CODE", "Count": 3},
+        {"Type": "NON_DRUG_ALLERGY", "Reason": "CODE", "Count": 1},
+        {"Type": "RECORD_ENTRY", "Reason": "CODE", "Count": 1},
+    ])
+
     degrades_from_table = mock_table_with_files.query(
         KeyConditionExpression=Key("Timestamp").eq(simple_message_timestamp)
     )["Items"]

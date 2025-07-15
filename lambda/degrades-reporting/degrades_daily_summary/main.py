@@ -10,6 +10,7 @@ from degrade_utils.utils import (
 )
 from degrade_utils.enums import CsvHeaders
 
+logging.basicConfig(format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -56,15 +57,20 @@ def generate_report_from_dynamo_query(
     logger.info(f"Getting degrades totals from: {degrades}")
     degrade_totals = get_degrade_totals_from_degrades(degrades)
 
+    if degrade_totals.empty:
+        logger.info(f"No degrades found for {date}")
+        return
+
     logger.info(f"Writing degrades report...")
 
     headers = [CsvHeaders.TYPE, CsvHeaders.REASON, CsvHeaders.COUNT]
 
-    with open(f"/tmp/{date}.csv", "w") as output_file:
-        fieldnames = headers
-        writer = csv.DictWriter(output_file, fieldnames=fieldnames)
-        writer.writeheader()
-        for degrade in degrade_totals:
-            writer.writerow(degrade)
-
-    return f"/tmp/{date}.csv"
+    degrade_totals.to_csv(f"/tmp/{date}.csv", header=headers, index=False)
+    # with open(f"/tmp/{date}.csv", "w") as output_file:
+    #     fieldnames = headers
+    #     writer = csv.DictWriter(output_file, fieldnames=fieldnames)
+    #     writer.writeheader()
+    #     for degrade in degrade_totals:
+    #         writer.writerow(degrade)
+    #
+    # return f"/tmp/{date}.csv"

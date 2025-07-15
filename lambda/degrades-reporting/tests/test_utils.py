@@ -1,5 +1,6 @@
 import os
-
+import pandas as pd
+from pandas.testing import assert_frame_equal
 from models.degrade_message import DegradeMessage, Degrade
 from tests.conftest import TEST_DEGRADES_DATE
 from tests.mocks.dynamo_response.degrade_table import (
@@ -79,12 +80,13 @@ def test_get_degrade_totals_from_degrades():
         DegradeMessage.model_validate(COMPLEX_DEGRADES_MESSAGE_DYNAMO_RESPONSE),
     ]
 
-    expected = [
-        {"Count": 3, "Reason": "CODE", "Type": "MEDICATION"},
-        {"Count": 1, "Reason": "CODE", "Type": "RECORD_ENTRY"},
-        {"Count": 1, "Reason": "CODE", "Type": "NON_DRUG_ALLERGY"},
-    ]
+    expected = pd.DataFrame([
+        {"Type": "MEDICATION", "Reason": "CODE", "Count": 3},
+        {"Type": "NON_DRUG_ALLERGY", "Reason": "CODE", "Count": 1},
+        {"Type": "RECORD_ENTRY", "Reason": "CODE", "Count": 1},
+    ])
 
     actual = get_degrade_totals_from_degrades(degrades)
 
-    assert actual == expected
+    assert_frame_equal(actual, expected)
+    assert actual.compare(expected).empty

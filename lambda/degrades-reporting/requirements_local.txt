@@ -1,7 +1,0 @@
-awscli-local==0.22.0
-moto==5.1.5
-terraform-local==0.23.1
-pytest==8.4.1
-pytest-mock==3.14.1
-localstack-client==2.10
-coverage==7.9.2

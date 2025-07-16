@@ -16,6 +16,12 @@ variable "degrades_lambda_layer_zip" {
   default     = "lambda/build/degrades-lambda-layer.zip"
 }
 
+variable "pandas_lambda_layer_zip" {
+  type        = string
+  description = "File path for Degrades Lambda Layer"
+  default     = "lambda/build/pandas-lambda-layer.zip"
+}
+
 variable "environment" {
   type        = string
   description = "Uniquely identities each deployment, i.e. dev, prod."

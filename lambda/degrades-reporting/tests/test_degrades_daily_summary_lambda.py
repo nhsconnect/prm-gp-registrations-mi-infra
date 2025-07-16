@@ -44,11 +44,15 @@ def test_degrades_daily_summary_uses_trigger_date_to_query_dynamo(
 
 @mock_aws
 def test_generate_report_from_dynamo_query_result(mock_table_with_files, mocker):
-    mocker.patch("degrades_daily_summary.main.get_degrade_totals_from_degrades").return_value = pd.DataFrame([
-        {"Type": "MEDICATION", "Reason": "CODE", "Count": 3},
-        {"Type": "NON_DRUG_ALLERGY", "Reason": "CODE", "Count": 1},
-        {"Type": "RECORD_ENTRY", "Reason": "CODE", "Count": 1},
-    ])
+    mocker.patch(
+        "degrades_daily_summary.main.get_degrade_totals_from_degrades"
+    ).return_value = pd.DataFrame(
+        [
+            {"Type": "MEDICATION", "Reason": "CODE", "Count": 3},
+            {"Type": "NON_DRUG_ALLERGY", "Reason": "CODE", "Count": 1},
+            {"Type": "RECORD_ENTRY", "Reason": "CODE", "Count": 1},
+        ]
+    )
 
     degrades_from_table = mock_table_with_files.query(
         KeyConditionExpression=Key("Timestamp").eq(simple_message_timestamp)
@@ -94,7 +98,6 @@ def test_degrades_daily_summary_uploads_to_s3(
     mocker,
     mock_table_with_files,
 ):
-
     lambda_handler(mock_scheduled_event, context)
 
     mock_s3_service.upload_file.assert_called_with(
@@ -104,17 +107,34 @@ def test_degrades_daily_summary_uploads_to_s3(
     )
     os.remove(f"tmp/{TEST_DEGRADES_DATE}.csv")
 
-@mock_aws
-def test_daily_summary_calls_generate_weekly_report_on_a_monday(mock_scheduled_event, context, set_env, mocker, mock_dynamo_service, mock_s3_service):
 
+@mock_aws
+def test_daily_summary_calls_generate_weekly_report_on_a_monday(
+    mock_scheduled_event, context, set_env, mocker, mock_dynamo_service, mock_s3_service
+):
     mock_dynamo_service.query.return_value = ["object returned"]
-    mocker.patch(
-        "degrades_daily_summary.main.generate_report_from_dynamo_query"
+    mocker.patch("degrades_daily_summary.main.generate_report_from_dynamo_query")
+    mock_generate_weekly_report = mocker.patch(
+        "degrades_daily_summary.main.generate_weekly_report"
     )
-    mock_generate_weekly_report = mocker.patch("degrades_daily_summary.main.generate_weekly_report")
 
     MONDAY_EVENT = deepcopy(mock_scheduled_event)
     MONDAY_EVENT["time"] = "2024-09-23T06:00:00Z"
     lambda_handler(MONDAY_EVENT, context)
 
     mock_generate_weekly_report.assert_called_with("2024-09-16")
+
+
+@mock_aws
+def test_generate_weekly_report_is_not_called_not_monday(
+    mock_scheduled_event, context, set_env, mock_s3_service, mock_dynamo_service, mocker
+):
+    mock_dynamo_service.query.return_value = ["object returned"]
+    mocker.patch("degrades_daily_summary.main.generate_report_from_dynamo_query")
+    mock_generate_weekly_report = mocker.patch(
+        "degrades_daily_summary.main.generate_weekly_report"
+    )
+
+    lambda_handler(mock_scheduled_event, context)
+
+    mock_generate_weekly_report.assert_not_called()

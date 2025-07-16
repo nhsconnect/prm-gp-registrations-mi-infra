@@ -8,7 +8,7 @@ from degrade_utils.s3_service import S3Service
 from degrade_utils.utils import (
     extract_query_timestamp_from_scheduled_event_trigger,
     get_degrade_totals_from_degrades,
-    is_monday
+    is_monday,
 )
 from degrade_utils.generate_weekly_reports import generate_weekly_report
 from degrade_utils.enums import CsvHeaders
@@ -57,14 +57,14 @@ def lambda_handler(event, context):
 
     if is_monday(event_trigger_time):
         logger.info(f"Today is Monday")
-        reporting_start_date = datetime.fromisoformat(event_trigger_time) - timedelta(days=7)
+        reporting_start_date = datetime.fromisoformat(event_trigger_time) - timedelta(
+            days=7
+        )
         str_date = reporting_start_date.strftime("%Y-%m-%d")
         generate_weekly_report(str_date)
 
 
-def generate_report_from_dynamo_query(
-    degrades_from_table: list[dict], date: str
-):
+def generate_report_from_dynamo_query(degrades_from_table: list[dict], date: str):
     degrades = [DegradeMessage(**message) for message in degrades_from_table]
 
     logger.info(f"Getting degrades totals from: {degrades}")

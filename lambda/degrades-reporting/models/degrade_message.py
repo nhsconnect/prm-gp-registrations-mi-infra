@@ -15,7 +15,6 @@ class Degrade(BaseModel):
     type: str
     reason: str
 
-
     def is_equal(self, other) -> bool:
         return self.type == other.type and self.reason == other.reason
 
@@ -28,5 +27,3 @@ class DegradeMessage(BaseModel):
     timestamp: int
     event_type: EventTypes = EventTypes.DEGRADES
     degrades: list[Degrade]
-
-

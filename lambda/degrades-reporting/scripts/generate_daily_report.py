@@ -69,6 +69,7 @@ def generate_report_from_dynamo_query(
 
     return f"/tmp/{date}.csv"
 
+
 if __name__ == "__main__":
     date = os.getenv("DATE")
     generate_degrades_daily_summary_report_from_date(date)

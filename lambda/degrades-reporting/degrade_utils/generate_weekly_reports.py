@@ -12,7 +12,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-
 def generate_weekly_report(date_beginning: str):
     logger.info(f"Getting file keys for reports week beginning: {date_beginning}")
     file_keys = get_keys_from_date_range(date_beginning)

@@ -41,7 +41,6 @@ def extract_degrades_payload(payload: dict) -> list[Degrade]:
 def extract_query_timestamp_from_scheduled_event_trigger(
     trigger_time: str,
 ) -> tuple[int, str] | None:
-
     dt = datetime.fromisoformat(trigger_time)
     query_date = dt - timedelta(days=1)
     midnight = datetime.combine(query_date, datetime.min.time())
@@ -51,19 +50,24 @@ def extract_query_timestamp_from_scheduled_event_trigger(
 def get_degrade_totals_from_degrades(
     degrades_messages: list[DegradeMessage],
 ) -> pd.DataFrame:
+    degrades = []
 
-        degrades = []
+    for degrade_message in degrades_messages:
+        for degrade in degrade_message.degrades:
+            degrades.append(
+                {CsvHeaders.TYPE: degrade.type, CsvHeaders.REASON: degrade.reason}
+            )
 
-        for degrade_message in degrades_messages:
-            for degrade in degrade_message.degrades:
-                degrades.append({CsvHeaders.TYPE: degrade.type, CsvHeaders.REASON: degrade.reason})
-
-        if degrades:
-            df = pd.DataFrame(degrades)
-            result = df.groupby([CsvHeaders.TYPE, CsvHeaders.REASON]).size().reset_index(name=CsvHeaders.COUNT)
-            return result
-        else:
-            return pd.DataFrame()
+    if degrades:
+        df = pd.DataFrame(degrades)
+        result = (
+            df.groupby([CsvHeaders.TYPE, CsvHeaders.REASON])
+            .size()
+            .reset_index(name=CsvHeaders.COUNT)
+        )
+        return result
+    else:
+        return pd.DataFrame()
 
 
 def is_monday(date):

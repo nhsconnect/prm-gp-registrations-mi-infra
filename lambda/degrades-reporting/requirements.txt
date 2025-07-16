@@ -31,6 +31,7 @@ pytz==2025.2
 PyYAML==6.0.2
 requests==2.32.4
 responses==0.25.7
+ruff==0.12.3
 s3transfer==0.13.0
 six==1.17.0
 terraform-local==0.23.1

@@ -3,17 +3,10 @@ DEGRADES_LAMBDA_PATH = lambda/degrades-reporting
 UTILS = degrade_utils
 
 degrades-env:
-	cd $(DEGRADES_LAMBDA_PATH) && rm -rf lambdas/venv || true
+	cd $(DEGRADES_LAMBDA_PATH) && rm -rf venv || true
 	cd $(DEGRADES_LAMBDA_PATH) && python3.12 -m venv ./venv
 	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install --upgrade pip
 	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install -r requirements.txt --no-cache-dir
-	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install -r requirements_local.txt --no-cache-dir
-
-#degrades-github-env:
-#	cd $(DEGRADES_LAMBDA_PATH) && rm -rf lambdas/venv || true
-#	cd $(DEGRADES_LAMBDA_PATH) && python3.12 -m venv ./venv
-#	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install --upgrade pip
-#	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install -r requirements.txt --no-cache-dir
 
 
 test-degrades:
@@ -60,16 +53,21 @@ zip-degrades-local: zip-lambda-layer
 deploy-local:  zip-degrades-local
 	ACTIVATE_PRO=0 localstack start -d
 	$(DEGRADES_LAMBDA_PATH)/venv/bin/awslocal s3 mb s3://terraform-state
-	cd stacks/degrades-dashboards/terraform && ../../../$(DEGRADES_LAMBDA_PATH)/venv/bin/tflocal init
-	cd stacks/degrades-dashboards/terraform && ../../../$(DEGRADES_LAMBDA_PATH)/venv/bin/tflocal plan
-	cd stacks/degrades-dashboards/terraform && ../../../$(DEGRADES_LAMBDA_PATH)/venv/bin/tflocal apply --auto-approve
+	cd stacks/degrades-reporting/terraform && ../../../$(DEGRADES_LAMBDA_PATH)/venv/bin/tflocal init
+	cd stacks/degrades-reporting/terraform && ../../../$(DEGRADES_LAMBDA_PATH)/venv/bin/tflocal plan
+	cd stacks/degrades-reporting/terraform && ../../../$(DEGRADES_LAMBDA_PATH)/venv/bin/tflocal apply --auto-approve
 
 zip-lambda-layer:
 	cd $(DEGRADES_LAMBDA_PATH) && rm -rf ../../$(BUILD_PATH) || true
 	cd $(DEGRADES_LAMBDA_PATH) && mkdir -p ../../$(BUILD_PATH)/layers
 	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install \
-		--platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 3.12 -r requirements.txt -t ../../$(BUILD_PATH)/layers/python/lib/python3.12/site-packages
-	cd $(BUILD_PATH)/layers && zip -r -X ../degrades-lambda-layer.zip .
+		--platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 3.12 -r layers/requirements_core.txt -t ../../$(BUILD_PATH)/layers/core/python/lib/python3.12/site-packages
+	cd $(BUILD_PATH)/layers/core && zip -r -X ../../degrades-lambda-layer.zip .
+
+	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install \
+		--platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 3.12 -r layers/requirements_pandas.txt -t ../../$(BUILD_PATH)/layers/pandas/python/lib/python3.12/site-packages
+	cd $(BUILD_PATH)/layers/pandas && zip -r -X ../../pandas-lambda-layer.zip .
+
 
 zip-degrades-lambdas: zip-lambda-layer
 	cd $(DEGRADES_LAMBDA_PATH) && rm -rf ../../$(BUILD_PATH)/degrades-message-receiver || true

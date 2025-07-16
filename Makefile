@@ -62,11 +62,11 @@ zip-lambda-layer:
 	cd $(DEGRADES_LAMBDA_PATH) && mkdir -p ../../$(BUILD_PATH)/layers
 	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install \
 		--platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 3.12 -r layers/requirements_core.txt -t ../../$(BUILD_PATH)/layers/core/python/lib/python3.12/site-packages
-	cd $(BUILD_PATH)/layers/core && zip -r -X ../degrades-lambda-layer.zip .
+	cd $(BUILD_PATH)/layers/core && zip -r -X ../../degrades-lambda-layer.zip .
 
 	cd $(DEGRADES_LAMBDA_PATH) && ./venv/bin/pip3 install \
 		--platform manylinux2014_x86_64 --only-binary=:all: --implementation cp --python-version 3.12 -r layers/requirements_pandas.txt -t ../../$(BUILD_PATH)/layers/pandas/python/lib/python3.12/site-packages
-	cd $(BUILD_PATH)/layers/pandas && zip -r -X ../pandas-lambda-layer.zip .
+	cd $(BUILD_PATH)/layers/pandas && zip -r -X ../../pandas-lambda-layer.zip .
 
 
 zip-degrades-lambdas: zip-lambda-layer

@@ -12,6 +12,7 @@ jmespath==1.0.1
 lark==1.2.2
 MarkupSafe==3.0.2
 packaging==25.0
+pandas==2.3.1
 pluggy==1.6.0
 pycparser==2.22
 pydantic==2.11.7

@@ -113,17 +113,17 @@ def test_weekly_report_generation_adds_new_row_to_global_report(
 
     mock_s3.download_file(
         Key="reports/degrades_weekly_report.csv",
-        Filename="tmp/degrades_weekly_report.csv",
+        Filename="/tmp/degrades_weekly_report.csv",
     )
     with (
         open("./tests/reports/global_2.csv", "r") as expected_file,
-        open("tmp/degrades_weekly_report.csv", "r") as actual_file,
+        open("/tmp/degrades_weekly_report.csv", "r") as actual_file,
     ):
         expected = expected_file.read()
         actual = actual_file.read()
         assert actual == expected
 
-    os.remove("tmp/degrades_weekly_report.csv")
+    os.remove("/tmp/degrades_weekly_report.csv")
 
 
 def test_generate_weekly_reports_writes_new_report_no_previous_report_written(
@@ -143,7 +143,7 @@ def test_generate_weekly_reports_writes_new_report_no_previous_report_written(
 
     with (
         open("./tests/reports/global.csv", "r") as expected_file,
-        open("tmp/degrades_weekly_report.csv", "r") as actual_file,
+        open("/tmp/degrades_weekly_report.csv", "r") as actual_file,
     ):
         expected = expected_file.read()
         actual = actual_file.read()
@@ -151,10 +151,10 @@ def test_generate_weekly_reports_writes_new_report_no_previous_report_written(
 
     mock_s3.download_file(
         Key="reports/degrades_weekly_report.csv",
-        Filename="tmp/degrades_weekly_report.csv",
+        Filename="/tmp/degrades_weekly_report.csv",
     )
 
-    os.remove("tmp/degrades_weekly_report.csv")
+    os.remove("/tmp/degrades_weekly_report.csv")
 
 
 def test_generate_new_rows_from_weekly_summary_returns_new_rows_with_date():

@@ -47,7 +47,7 @@ def lambda_handler(event, context):
 
         s3_service = S3Service()
         s3_service.upload_file(
-            file=f"tmp/{query_day}.csv",
+            file=f"/tmp/{query_day}.csv",
             bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
             key=f"{base_file_key}{query_day}.csv",
         )
@@ -78,4 +78,4 @@ def generate_report_from_dynamo_query(degrades_from_table: list[dict], date: str
 
     headers = [CsvHeaders.TYPE, CsvHeaders.REASON, CsvHeaders.COUNT]
 
-    degrade_totals.to_csv(f"tmp/{date}.csv", header=headers, index=False)
+    degrade_totals.to_csv(f"/tmp/{date}.csv", header=headers, index=False)

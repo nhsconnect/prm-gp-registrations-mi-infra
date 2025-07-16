@@ -31,13 +31,13 @@ def generate_weekly_report(date_beginning: str):
         s3_service.download_file(
             bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
             key="reports/degrades_weekly_report.csv",
-            file="tmp/degrades_weekly_report.csv",
+            file="/tmp/degrades_weekly_report.csv",
         )
     except ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchKey":
             logger.info("No weekly summary report found, creating new one")
             with open(
-                "tmp/degrades_weekly_report.csv", "a+"
+                "/tmp/degrades_weekly_report.csv", "a+"
             ) as updated_weekly_report_csv:
                 writer = csv.DictWriter(
                     updated_weekly_report_csv, CsvHeaders.list_values()
@@ -47,7 +47,7 @@ def generate_weekly_report(date_beginning: str):
         if e.response["Error"]["Code"] == "404":
             logger.info("No weekly summary report found, creating new one")
             with open(
-                "tmp/degrades_weekly_report.csv", "a+"
+                "/tmp/degrades_weekly_report.csv", "a+"
             ) as updated_weekly_report_csv:
                 writer = csv.DictWriter(
                     updated_weekly_report_csv, CsvHeaders.list_values()
@@ -56,14 +56,14 @@ def generate_weekly_report(date_beginning: str):
         else:
             raise e
 
-    with open("tmp/degrades_weekly_report.csv", "a+") as updated_weekly_report_csv:
+    with open("/tmp/degrades_weekly_report.csv", "a+") as updated_weekly_report_csv:
         writer = csv.DictWriter(updated_weekly_report_csv, CsvHeaders.list_values())
         writer.writerows(new_rows)
 
     s3_service.upload_file(
         bucket_name=os.getenv("REGISTRATIONS_MI_EVENT_BUCKET"),
         key="reports/degrades_weekly_report.csv",
-        file="tmp/degrades_weekly_report.csv",
+        file="/tmp/degrades_weekly_report.csv",
     )
 
     logger.info(

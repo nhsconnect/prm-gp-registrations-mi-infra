@@ -6,15 +6,15 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '../../lambda/degrades-reporting/**'
-      - '../../stacks/degrades-reporting/**'
+      - 'lambda/degrades-reporting/**'
+      - 'stacks/degrades-reporting/**'
       - '.github/workflows/deploy-degrades.yml'
 
   pull_request:
     branches: [ main ]
     paths:
-      - '../../lambda/degrades-reporting/**'
-      - '../../stacks/degrades-reporting/**'
+      - 'lambda/degrades-reporting/**'
+      - 'stacks/degrades-reporting/**'
       - '.github/workflows/deploy-degrades.yml'
 
 

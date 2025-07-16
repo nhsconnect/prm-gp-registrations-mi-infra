@@ -1,5 +1,6 @@
 import os
-
+import pandas as pd
+from pandas.testing import assert_frame_equal
 from models.degrade_message import DegradeMessage, Degrade
 from tests.conftest import TEST_DEGRADES_DATE
 from tests.mocks.dynamo_response.degrade_table import (
@@ -19,6 +20,7 @@ from degrade_utils.utils import (
     extract_degrades_payload,
     extract_query_timestamp_from_scheduled_event_trigger,
     get_degrade_totals_from_degrades,
+    is_monday,
 )
 
 
@@ -66,7 +68,9 @@ def test_extract_degrades_payload_complex_message():
 
 
 def test_extract_query_timestamp_from_scheduled_event_trigger(mock_scheduled_event):
-    actual = extract_query_timestamp_from_scheduled_event_trigger(mock_scheduled_event)
+    actual = extract_query_timestamp_from_scheduled_event_trigger(
+        mock_scheduled_event.get("time")
+    )
     expected = (simple_message_timestamp, TEST_DEGRADES_DATE)
 
     assert actual == expected
@@ -78,13 +82,21 @@ def test_get_degrade_totals_from_degrades():
         DegradeMessage.model_validate(SIMPLE_DEGRADES_MESSAGE_DYNAMO_RESPONSE),
         DegradeMessage.model_validate(COMPLEX_DEGRADES_MESSAGE_DYNAMO_RESPONSE),
     ]
-    expected = {
-        "MEDICATION: CODE": 3,
-        "RECORD_ENTRY: CODE": 1,
-        "NON_DRUG_ALLERGY: CODE": 1,
-        "TOTAL": 5,
-    }
+
+    expected = pd.DataFrame(
+        [
+            {"Type": "MEDICATION", "Reason": "CODE", "Count": 3},
+            {"Type": "NON_DRUG_ALLERGY", "Reason": "CODE", "Count": 1},
+            {"Type": "RECORD_ENTRY", "Reason": "CODE", "Count": 1},
+        ]
+    )
 
     actual = get_degrade_totals_from_degrades(degrades)
 
-    assert actual == expected
+    assert_frame_equal(actual, expected)
+    assert actual.compare(expected).empty
+
+
+def test_is_monday():
+    assert is_monday("2024-09-20") == False
+    assert is_monday("2024-09-16")

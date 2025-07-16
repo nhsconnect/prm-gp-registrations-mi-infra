@@ -1,8 +1,9 @@
 import json
 import os
-from collections import defaultdict
+import pandas as pd
 from datetime import datetime, timedelta
 
+from degrade_utils.enums import CsvHeaders
 from models.degrade_message import DegradeMessage, Degrade
 
 
@@ -38,26 +39,37 @@ def extract_degrades_payload(payload: dict) -> list[Degrade]:
 
 
 def extract_query_timestamp_from_scheduled_event_trigger(
-    event: dict,
+    trigger_time: str,
 ) -> tuple[int, str] | None:
-    event_trigger_time = event.get("time", "")
-
-    if event_trigger_time:
-        dt = datetime.fromisoformat(event_trigger_time)
-        query_date = dt - timedelta(days=1)
-        midnight = datetime.combine(query_date, datetime.min.time())
-        return int(midnight.timestamp()), query_date.strftime("%Y-%m-%d")
+    dt = datetime.fromisoformat(trigger_time)
+    query_date = dt - timedelta(days=1)
+    midnight = datetime.combine(query_date, datetime.min.time())
+    return int(midnight.timestamp()), query_date.strftime("%Y-%m-%d")
 
 
-def get_degrade_totals_from_degrades(degrades_messages: list[DegradeMessage]) -> dict:
-    degrade_totals = defaultdict(int)
+def get_degrade_totals_from_degrades(
+    degrades_messages: list[DegradeMessage],
+) -> pd.DataFrame:
+    degrades = []
 
     for degrade_message in degrades_messages:
         for degrade in degrade_message.degrades:
-            degrade_type_reason = f"{degrade.type}: {degrade.reason}"
-            degrade_totals[degrade_type_reason] += 1
+            degrades.append(
+                {CsvHeaders.TYPE: degrade.type, CsvHeaders.REASON: degrade.reason}
+            )
 
-    total = sum(degrade_totals.values())
-    degrade_totals["TOTAL"] += total
+    if degrades:
+        df = pd.DataFrame(degrades)
+        result = (
+            df.groupby([CsvHeaders.TYPE, CsvHeaders.REASON])
+            .size()
+            .reset_index(name=CsvHeaders.COUNT)
+        )
+        return result
+    else:
+        return pd.DataFrame()
 
-    return dict(degrade_totals)
+
+def is_monday(date):
+    day = datetime.fromisoformat(date)
+    return day.weekday() == 0

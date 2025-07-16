@@ -15,6 +15,9 @@ class Degrade(BaseModel):
     type: str
     reason: str
 
+    def is_equal(self, other) -> bool:
+        return self.type == other.type and self.reason == other.reason
+
 
 class DegradeMessage(BaseModel):
     model_config = ConfigDict(

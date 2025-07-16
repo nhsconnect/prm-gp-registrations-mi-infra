@@ -43,6 +43,7 @@ class S3Service:
             raise e
 
     def download_file(self, bucket_name, key, file):
-        self.client.download_file(Bucket=bucket_name, Key=key, Filename=file)
-
-        return file
+        try:
+            self.client.download_file(Bucket=bucket_name, Key=key, Filename=file)
+        except ClientError as e:
+            raise e

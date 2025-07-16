@@ -34,16 +34,6 @@ def generate_weekly_report(date_beginning: str):
             file="/tmp/degrades_weekly_report.csv",
         )
     except ClientError as e:
-        if e.response["Error"]["Code"] == "NoSuchKey":
-            logger.info("No weekly summary report found, creating new one")
-            with open(
-                "/tmp/degrades_weekly_report.csv", "a+"
-            ) as updated_weekly_report_csv:
-                writer = csv.DictWriter(
-                    updated_weekly_report_csv, CsvHeaders.list_values()
-                )
-                writer.writeheader()
-
         if e.response["Error"]["Code"] == "404":
             logger.info("No weekly summary report found, creating new one")
             with open(
@@ -52,6 +42,7 @@ def generate_weekly_report(date_beginning: str):
                 writer = csv.DictWriter(
                     updated_weekly_report_csv, CsvHeaders.list_values()
                 )
+                logger.info("Writing weekly report CSV headers")
                 writer.writeheader()
         else:
             raise e

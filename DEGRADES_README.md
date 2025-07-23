@@ -1,7 +1,15 @@
 # Degrades-Reporting
 To collect data around the number and different types of degrade events received from GP2GP
-Degrades events received by event-enrichment lambda are sent to an degrades SQS queue which triggers degrades-message-receiver lambda.
-The degrades-message-receiver lambda writes this events to a dynamo table to be later queried.
+Degrades events received by event-enrichment lambda are sent to a Degrades SQS queue which triggers degrades-message-receiver lambda.
+The degrades-message-receiver lambda writes this events to a dynamo table to be later queried for reports generation. These reports are
+written to CSV and stored in an S3 bucket, under paths reports/ and reports/daily/, to be consumed by PowerBi for the creation of dashboards.
+
+![](degrades_architecture.svg)
+
+
+As we already have a check in the gp-registrations-mi lambda against whether an event is a degrade event or not, it was decided to use
+this lambda to send any degrades events to an SQS queue to be processed.
+The alternative was to read every gp2gp event received each day from S3 to determine its event type, and only store or process degrades found.
 
 ## Set-up
 
@@ -9,29 +17,6 @@ Setting up virtual venv
 
 `make degrades-env`
 Install dependencies needed for degrades work
-
-
-## Local deployment
-
-To use localstack to deploy the degrades-reporting work locally, create a local.auto.tfvars within the terraform directory
-add the following variables to this file
-environment="dev"
-region="eu-west-2"
-registrations_mi_event_bucket="bucket"
-degrades_message_queue="queue"
-degrades_message_table="table"
-
-This isn't necessary but will require manual input if not present.
-
-`make deploy-local`
-Deploy degrades infrastructure to local environment using localstack
-
-
-
-### Localstack Limitations:
-Lambda layers are not implemented/connected to lambdas on the standard/community tier. 
-They will be created however.
-IAM Permission relationships are not enforced on the standard/community tier
 
 ## Testing
 
@@ -49,3 +34,23 @@ Creates a lambda layer zip file => stacks/degrades-dashboards/terraform/lambda/b
 `make zip-degrades-lambda`
 Creates a lambda layer zip and zip files of degrades lambdas => stacks/degrades-dashboards/terraform/lambda/build
 This is used in deployment workflows
+
+## Scripts
+
+There are 3 adhoc scripts that have been used to prepopulate the dev environment with historical data held within S3.
+Each will need environmental variables defined, which can be found in AWS, bucket name, queue name, table name, and region.
+The terminal they are run from/tool used to run them will also need to be granted permission to be able to interact with these AWS resources.
+
+### populate_table.py 
+Loops through the S3 bucket where enriched gp registration events are stored by date prefix, on dev this can be YYYY/MM as there is
+relatively little data held there, sending degrade events to a queue to be written to the degrades event dynamo table.
+
+### generate_daily_report.py
+Reads degrades dynamo table for a given date YYYY-MM-DD to generate a daily summary of this data and store in S3 reports/daily/YYYY-MM-DD.csv
+Headers are: Type, Reason, Count 
+
+### generate_weekly_report.py
+Collects reports for a week, 7 days, starting from date YYYY-MM-DD, summarises the data within these reports and appends new rows 
+to an existing report, creates new report if one does not exist.
+Headers are: Week_beginning, Type, Reason, Count 
+

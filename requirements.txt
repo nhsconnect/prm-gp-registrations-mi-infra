@@ -1,0 +1,7 @@
+urllib3
+pynamodb
+boto3
+requests
+pandas
+tqdm
+dotenv

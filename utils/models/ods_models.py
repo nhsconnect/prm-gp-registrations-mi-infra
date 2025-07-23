@@ -6,7 +6,7 @@ from pynamodb.models import Model
 
 class PracticeOds(Model):
     class Meta:
-        table_name = os.getenv("GP_ODS_DYNAMO_TABLE_NAME")
+        table_name = "sandbox_dev_mi_enrichment_practice_ods"
 
     practice_ods_code = UnicodeAttribute(hash_key=True, attr_name="PracticeOdsCode")
     practice_name = UnicodeAttribute(attr_name="PracticeName")
@@ -19,7 +19,7 @@ class PracticeOds(Model):
 
 class IcbOds(Model):
     class Meta:
-        table_name = os.getenv("ICB_ODS_DYNAMO_TABLE_NAME")
+        table_name = "sandbox_dev_mi_enrichment_icb_ods"
 
     icb_ods_code = UnicodeAttribute(hash_key=True, attr_name="IcbOdsCode")
     icb_name = UnicodeAttribute(attr_name="IcbName")

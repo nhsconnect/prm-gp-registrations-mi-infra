@@ -8,7 +8,7 @@ from urllib3.util.retry import Retry
 
 import logging
 
-from utils.enums.trud import TrudItem
+from utils.enums.ods import TrudItem
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

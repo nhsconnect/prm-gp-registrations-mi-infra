@@ -2,6 +2,10 @@ BUILD_PATH = stacks/degrades-reporting/terraform/lambda/build
 DEGRADES_LAMBDA_PATH = lambda/degrades-reporting
 UTILS = degrade_utils
 
+env:
+	python3 -m venv .venv
+	.venv/bin/pip3 install -r  requirements.txt
+
 degrades-env:
 	cd $(DEGRADES_LAMBDA_PATH) && rm -rf venv || true
 	cd $(DEGRADES_LAMBDA_PATH) && python3.12 -m venv ./venv

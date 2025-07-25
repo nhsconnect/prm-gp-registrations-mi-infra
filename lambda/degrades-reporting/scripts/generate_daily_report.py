@@ -1,6 +1,6 @@
 import os
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 from models.degrade_message import DegradeMessage
 from degrade_utils.dynamo_service import DynamoService
 from degrade_utils.s3_service import S3Service
@@ -12,13 +12,14 @@ from degrade_utils.enums import CsvHeaders
     REGION where the dynamodb table is located must be passed in as an environmental variable,
     populate constants BUCKET and TABLE with the name of registrations mi bucket name and degrades table name"""
 
-BUCKET = os.getenv("REGISTRATIONS_MI_EVENT_BUCKET")
-TABLE = os.getenv("DEGRADES_MESSAGE_TABLE")
+BUCKET = ""
+TABLE = ""
+
 
 
 def generate_degrades_daily_summary_report_from_date(date: str):
     dt = datetime.fromisoformat(date)
-    midnight = datetime.combine(dt, datetime.min.time())
+    midnight = datetime.combine(dt, datetime.min.time()) + timedelta(hours=1)
     timestamp = int(midnight.timestamp())
 
     dynamo_service = DynamoService()
@@ -34,7 +35,7 @@ def generate_degrades_daily_summary_report_from_date(date: str):
 
     print("Generating degrades daily report for {}".format(date))
 
-    file_path = generate_report_from_dynamo_query(degrades, date)
+    generate_report_from_dynamo_query(degrades, date)
 
     base_file_key = "reports/daily"
 
@@ -42,7 +43,7 @@ def generate_degrades_daily_summary_report_from_date(date: str):
 
     s3_service = S3Service()
     s3_service.upload_file(
-        file=file_path,
+        file=f"/tmp/{date}.csv",
         bucket_name=BUCKET,
         key=f"{base_file_key}/{date}.csv",
     )
@@ -50,26 +51,23 @@ def generate_degrades_daily_summary_report_from_date(date: str):
 
 def generate_report_from_dynamo_query(
     degrades_from_table: list[dict], date: str
-) -> str:
+) -> str | None:
     degrades = [DegradeMessage(**message) for message in degrades_from_table]
 
     print(f"Getting degrades totals from: {degrades}")
     degrade_totals = get_degrade_totals_from_degrades(degrades)
 
+    if degrade_totals.empty:
+        print(f"No degrades found for {date}")
+        return
+
     print(f"Writing degrades report...")
 
     headers = [CsvHeaders.TYPE, CsvHeaders.REASON, CsvHeaders.COUNT]
 
-    with open(f"/tmp/{date}.csv", "w") as output_file:
-        fieldnames = headers
-        writer = csv.DictWriter(output_file, fieldnames=fieldnames)
-        writer.writeheader()
-        for degrade in degrade_totals:
-            writer.writerow(degrade)
-
-    return f"/tmp/{date}.csv"
+    degrade_totals.to_csv(f"/tmp/{date}.csv", header=headers, index=False)
 
 
 if __name__ == "__main__":
-    date = os.getenv("DATE")
+    date = "2024-09-20"
     generate_degrades_daily_summary_report_from_date(date)

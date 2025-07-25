@@ -16,7 +16,6 @@ BUCKET = ""
 TABLE = ""
 
 
-
 def generate_degrades_daily_summary_report_from_date(date: str):
     dt = datetime.fromisoformat(date)
     midnight = datetime.combine(dt, datetime.min.time()) + timedelta(hours=1)

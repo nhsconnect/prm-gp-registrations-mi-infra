@@ -1,7 +1,7 @@
 # Degrades-Reporting
 To collect data around the number and different types of degrade events received from GP2GP
 Degrades events received by event-enrichment lambda are sent to a Degrades SQS queue which triggers degrades-message-receiver lambda.
-The degrades-message-receiver lambda writes this events to a dynamo table to be later queried for reports generation. These reports are
+The degrades-message-receiver lambda writes these events to a DynamoDB table to be later queried for reports generation. These reports are
 written to CSV and stored in an S3 bucket, under paths reports/ and reports/daily/, to be consumed by PowerBi for the creation of dashboards.
 
 ![](degrades_architecture.svg)

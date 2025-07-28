@@ -16,7 +16,6 @@ BUCKET = ""
 TABLE = ""
 
 
-
 def generate_degrades_daily_summary_report_from_date(date: str):
     dt = datetime.fromisoformat(date)
     midnight = datetime.combine(dt, datetime.min.time()) + timedelta(hours=1)
@@ -66,7 +65,6 @@ def generate_report_from_dynamo_query(
     headers = [CsvHeaders.TYPE, CsvHeaders.REASON, CsvHeaders.COUNT]
 
     degrade_totals.to_csv(f"/tmp/{date}.csv", header=headers, index=False)
-
 
 
 if __name__ == "__main__":

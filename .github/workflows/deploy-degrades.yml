@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
+        type: choice
         default: "dev"
         description: "Which environment this action should run against"
         required: true

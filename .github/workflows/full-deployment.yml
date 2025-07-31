@@ -28,11 +28,10 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        environment: ${{ inputs.environment }}
         terraform_stack: [base-networking, container-repositories, ecs-cluster]
     uses: ./.github/workflows/base-terraform-plan-and-apply.yml
     with:
-      environment: ${{ matrix.environment }}
+      environment: ${{ inputs.environment }}
       terraform_stack: ${{ matrix.terraform_stack }}
       is_deployment: ${{ inputs.is_deployment }}
     secrets: inherit

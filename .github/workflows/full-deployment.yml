@@ -46,6 +46,7 @@ jobs:
     secrets: inherit
 
   deploy-gp-registrations-mi:
+    needs: [deploy_degrades]
     uses: ./.github/workflows/base-gp-registrations-mi.yml
     with:
       environment: ${{ inputs.environment }}

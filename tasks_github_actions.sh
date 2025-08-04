@@ -7,7 +7,7 @@ task="$1"
 function build_lambda {
     lambda_name=$1
     lambda_services=$2
-
+    shared_requirements=lambda/shared_requirements.txt
     build_dir=lambda/build/$lambda_name
     rm -rf $build_dir
     mkdir -p $build_dir
@@ -17,6 +17,10 @@ function build_lambda {
     fi
     cp lambda/$lambda_name/*.py $build_dir
 
+    if test -f "$shared_requirements"; then
+        pip install -r $shared_requirements -t $build_dir
+    fi
+    
     pushd $build_dir
     zip -r -X ../$lambda_name.zip .
     popd

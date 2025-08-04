@@ -73,15 +73,15 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Build Lambdas
-        run: | 
-            ./tasks_github_actions.sh build-lambdas
-
       - name: Make virtual environment
         if: github.ref == 'refs/heads/main' && inputs.is_deployment
         run: |
           python3 -m venv ./venv
           ./venv/bin/pip3 install --upgrade pip urllib3
+
+      - name: Build Lambdas
+        run: | 
+            ./tasks_github_actions.sh build-lambdas
 
       - name: Get ODS CSV Files
         if: github.ref == 'refs/heads/main' && inputs.is_deployment

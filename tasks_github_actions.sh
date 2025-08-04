@@ -16,8 +16,13 @@ function build_lambda {
         cp -r ./$lambda_services $build_dir
     fi
     cp lambda/$lambda_name/*.py $build_dir
-
     pushd $build_dir
+    shared_requirements="lambda/shared_requirements.txt"
+
+    if test -f "$shared_requirements"; then
+        pip install -r $shared_requirements -t $build_dir
+    fi
+
     zip -r -X ../$lambda_name.zip .
     popd
 }

@@ -19,7 +19,7 @@ on:
 jobs:
   terraform_process:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}${{ (inputs.environment == 'prod' && !inputs.is_deployment) && '-plan' || '' }}
     defaults:
       run:
         working-directory: ./stacks/${{ inputs.terraform_stack }}/terraform

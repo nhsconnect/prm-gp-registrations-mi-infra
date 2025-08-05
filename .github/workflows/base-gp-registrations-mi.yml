@@ -15,7 +15,8 @@ on:
 jobs:
   terraform_process:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}${{ (inputs.environment == 'prod' && !inputs.is_deployment) && '-plan' || '' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -16,6 +16,8 @@ jobs:
   terraform_process:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}${{ (inputs.environment == 'prod' && !inputs.is_deployment) && '-plan' || '' }}
+    env:
+      GITHUB_ENV: ${{ inputs.environment }}${{ (inputs.environment == 'prod' && !inputs.is_deployment) && '-plan' || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -137,6 +139,6 @@ jobs:
             });
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && (inputs.environment != 'prod' || inputs.is_deployment == 'true')
+        if: github.ref == 'refs/heads/main' && inputs.is_deployment && (env.GITHUB_ENV != 'prod-plan')
         run: terraform apply -auto-approve -input=false ${{ vars.AWS_ENVIRONMENT }}.tfplan
         working-directory: ./stacks/degrades-reporting/terraform

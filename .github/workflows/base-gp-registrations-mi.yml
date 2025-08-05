@@ -169,6 +169,6 @@ jobs:
             });
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && inputs.is_deployment
+        if: github.ref == 'refs/heads/main' && (inputs.environment != 'prod' || inputs.is_deployment == 'true')
         run: terraform apply -auto-approve -input=false ${{ vars.AWS_ENVIRONMENT }}.tfplan
         working-directory: ./stacks/gp-registrations-mi/terraform

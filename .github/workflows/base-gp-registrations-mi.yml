@@ -76,7 +76,7 @@ jobs:
           python-version: '3.12'
 
       - name: Make virtual environment
-        if: github.ref == 'refs/heads/main' && inputs.is_deployment
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && inputs.is_deployment
         run: |
           python3 -m venv ./venv
           ./venv/bin/pip3 install --upgrade pip urllib3
@@ -158,6 +158,6 @@ jobs:
             });
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && inputs.is_deployment && (env.GITHUB_ENV != 'prod-plan')
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && inputs.is_deployment && (env.GITHUB_ENV != 'prod-plan')
         run: terraform apply -auto-approve -input=false ${{ vars.AWS_ENVIRONMENT }}.tfplan
         working-directory: ./stacks/gp-registrations-mi/terraform

@@ -17,3 +17,4 @@ lambda/build
 lambda/degrades-reporting/tmp
 lambda/degrades-reporting/tests/tmp
 stacks/degrades-reporting/terraform/lambda/
+venv

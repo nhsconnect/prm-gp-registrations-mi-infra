@@ -91,19 +91,7 @@ jobs:
           PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 -m utils.get_latest_ods_csv ${{ secrets.TRUD_API_KEY }} ${{ vars.TRUD_API_URL }}
 
       - name: Setup Terraform variables
-        id: vars-prod
-        if: inputs.environment == 'prod' && inputs.is_deployment
-        run: |-
-          cat > pipeline.auto.tfvars <<EOF
-          gp_registrations_mi_image_tag = ${{ steps.push-image-to-prod.outputs.image-tag }}
-          environment = "${{ vars.AWS_ENVIRONMENT }}"
-          degrades_message_queue = "${{ secrets.AWS_DEGRADES_MESSAGE_QUEUE }}"
-          EOF
-        working-directory: ./stacks/gp-registrations-mi/terraform
-
-      - name: Setup Terraform variables
-        id: vars-dev
-        if: inputs.environment != 'prod'
+        id: vars
         run: |-
           IMAGE_TAG=$(aws ecr describe-images --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
           cat > pipeline.auto.tfvars <<EOF

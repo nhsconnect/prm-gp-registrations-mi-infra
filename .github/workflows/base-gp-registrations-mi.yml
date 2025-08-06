@@ -25,6 +25,7 @@ jobs:
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
+        id: creds
         with:
           role-to-assume:  ${{ (inputs.is_deployment && secrets.AWS_ASSUME_ROLE) || secrets.AWS_ASSUME_ROLE_READ_ONLY }}
           role-skip-session-tagging: true
@@ -34,17 +35,17 @@ jobs:
       - name: Publish Docker Image to Prod
         id: push-image-to-prod
         if: inputs.environment == 'prod' && inputs.is_deployment
-
         run: |
           aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_DEV_REPOSITORY }}
-          IMAGE_TAG=$(aws ecr describe-images --registry-id ${{ secrets.AWS_DEV_ACCOUNT_ID }} --repository-name ${{ secrets.ECR_REPOSITORY_DEV_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
-          source_repo=${{ secrets.AWS_ECR_DEV_REPOSITORY }}/${{ secrets.ECR_REPOSITORY_DEV_NAME }}:${IMAGE_TAG//\"}
-          destination_repo=${{ secrets.AWS_ECR_PROD_REPOSITORY}}/${{ secrets.ECR_REPOSITORY_NAME }}:${IMAGE_TAG//\"}
-          docker pull $source_repo
-          docker tag $source_repo $destination_repo
-          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_PROD_REPOSITORY }}
-          docker push $destination_repo
-          echo "image-tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          source_repo=${{ secrets.AWS_DEV_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_DEV_NAME }}
+          destination_repo=${{ steps.creds.outputs.aws-account-id}}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}
+          docker pull $source_repo:latest
+          docker tag $source_repo:latest $destination_repo:latest
+          docker tag $source_repo:latest $destination_repo:${{ github.sha }}
+          docker tag $source_repo:latest $destination_repo:${{ github.ref_name }}
+          docker push $destination_repo:latest
+          docker push $destination_repo:${{ github.sha }}
+          docker push $destination_repo:${{ github.ref_name }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

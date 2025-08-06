@@ -86,7 +86,7 @@ jobs:
             ./tasks_github_actions.sh build-lambdas
 
       - name: Get ODS CSV Files
-        if: github.ref == 'refs/heads/main' && inputs.is_deployment
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && inputs.is_deployment
         run: |
           PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 -m utils.get_latest_ods_csv ${{ secrets.TRUD_API_KEY }} ${{ vars.TRUD_API_URL }}
 

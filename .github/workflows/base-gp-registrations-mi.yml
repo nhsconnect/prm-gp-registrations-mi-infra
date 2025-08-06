@@ -32,13 +32,17 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           mask-aws-account-id: true
 
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: "${{ steps.creds.outputs.aws-account-id }},${{ secrets.AWS_DEV_ACCOUNT_ID }}"
+
       - name: Publish Docker Image to Prod
         id: push-image-to-prod
         if: inputs.environment == 'prod' && inputs.is_deployment
         run: |
-          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_DEV_REPOSITORY }}
           source_repo=${{ secrets.AWS_DEV_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_DEV_NAME }}
-          destination_repo=${{ steps.creds.outputs.aws-account-id}}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}
+          destination_repo=${{ steps.creds.outputs.aws-account-id }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}
           docker pull $source_repo:latest
           docker tag $source_repo:latest $destination_repo:latest
           docker tag $source_repo:latest $destination_repo:${{ github.sha }}

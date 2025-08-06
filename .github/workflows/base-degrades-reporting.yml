@@ -139,6 +139,6 @@ jobs:
             });
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && inputs.is_deployment && (env.GITHUB_ENV != 'prod-plan')
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && inputs.is_deployment && (env.GITHUB_ENV != 'prod-plan')
         run: terraform apply -auto-approve -input=false ${{ vars.AWS_ENVIRONMENT }}.tfplan
         working-directory: ./stacks/degrades-reporting/terraform

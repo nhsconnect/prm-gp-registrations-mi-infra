@@ -16,7 +16,7 @@ resource "aws_cloudwatch_metric_alarm" "degrades_dlq_new_message" {
 
 
 resource "aws_cloudwatch_metric_alarm" "degrades_daily_summary_lambda_error" {
-  alarm_name          = "degrades_daily_summary_lambday_error_alarm_${var.environment}"
+  alarm_name          = "degrades_daily_summary_lambda_error_alarm_${var.environment}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   namespace           = "AWS/Lambda"

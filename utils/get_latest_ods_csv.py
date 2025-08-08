@@ -1,10 +1,15 @@
 import csv
+from datetime import date
 import sys
+import os
 
-from .enums.trud import TrudItem
-from .services.trud_api_service import TrudApiService
-from .trud_files import (
+from .services.ods_api_service import OdsApiService
+from .ods_files import (
+    ALL_ICB_AND_GP_FILES,
+    ECCGAM_ZIP_URL,
+    GP_WEEKLY_REPORT_NAME,
     ICB_MONTHLY_FILE_PATH,
+    ICB_MONTHLY_REPORT_NAME,
     ICB_QUARTERLY_FILE_PATH,
     ICB_MONTHLY_FILE_NAME,
     ICB_QUARTERLY_FILE_NAME,
@@ -12,6 +17,7 @@ from .trud_files import (
     GP_FILE_HEADERS,
     GP_WEEKLY_FILE_NAME,
     GP_WEEKLY_ZIP_FILE_PATH,
+    ICB_QUARTERLY_REPORT_NAME,
 )
 
 
@@ -45,9 +51,8 @@ def write_to_csv(file_path, headers_list: list, rows_list: list):
 
 
 def get_gp_latest_ods_csv(service):
-    release_list_response = service.get_release_list(TrudItem.NHS_ODS_WEEKLY, True)
     download_file = service.get_download_file(
-        release_list_response[0].get("archiveFileUrl")
+        os.getenv("ODS_API_URL") + GP_WEEKLY_REPORT_NAME
     )
     epraccur_zip_file = service.unzipping_files(
         download_file, GP_WEEKLY_ZIP_FILE_PATH, byte=True
@@ -63,22 +68,19 @@ def get_gp_latest_ods_csv(service):
 
 
 def get_icb_latest_ods_csv(service):
-    release_list_response = service.get_release_list(
-        TrudItem.ORG_REF_DATA_MONTHLY, False
-    )
-    download_url_by_release = service.get_download_url_by_release(release_list_response)
     icb_update_changes = []
-    for release, url in download_url_by_release.items():
+    for file in ALL_ICB_AND_GP_FILES:
+        url = ECCGAM_ZIP_URL if file == ICB_MONTHLY_REPORT_NAME else os.getenv("ODS_API_URL") + file
         download_file = service.get_download_file(url)
         csv_modified_rows = None
-        is_quarterly_release = release.endswith(".0.0")
+        is_quarterly_release = file == ICB_QUARTERLY_REPORT_NAME
         zip_file_path = (
             ICB_MONTHLY_FILE_PATH
             if not is_quarterly_release
             else ICB_QUARTERLY_FILE_PATH
         )
         output_name = (
-            "update_icb_" + release + ".csv"
+            "update_icb_" + date.today() + ".csv"
             if not is_quarterly_release
             else "initial_full_icb_ods.csv"
         )
@@ -108,9 +110,9 @@ def get_icb_latest_ods_csv(service):
 
 if __name__ == "__main__":
     try:
-        trud_service = TrudApiService(sys.argv[1], sys.argv[2])
-        get_gp_latest_ods_csv(trud_service)
-        get_icb_latest_ods_csv(trud_service)
+        ods_service = OdsApiService(sys.argv[1])
+        get_gp_latest_ods_csv(ods_service)
+        get_icb_latest_ods_csv(ods_service)
         print("\nOds download process complete.")
     except Exception as e:
         print(f"\nExiting Process! {e}")

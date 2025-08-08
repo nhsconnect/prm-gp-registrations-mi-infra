@@ -4,36 +4,39 @@ import logging
 import os
 import tempfile
 from datetime import date, timedelta, datetime
-
 import boto3
-
-from utils.enums.ods import OdsDownloadType, OdsItem
-from utils.models.ods_models import PracticeOds, IcbOds
-from utils.services.ods_api_service import OdsApiService
-from utils.ods_files import (
+from dotenv import load_dotenv
+from enums.ods import OdsDownloadType, OdsItem
+from models.ods_models import PracticeOds, IcbOds
+from services.ods_api_service import OdsApiService
+from ods_files import (
     ECCGAM_ZIP_URL,
     OLD_GP_FILE_HEADERS,
-    GP_WEEKLY_FILE_NAME, // 
+    GP_WEEKLY_FILE_NAME,
     GP_WEEKLY_REPORT_NAME,
-    ICB_FILE_HEADERS,
+    OLD_ICB_FILE_HEADERS,
     ICB_MONTHLY_REPORT_NAME,
     ICB_MONTHLY_FILE_NAME,
+    ICB_MONTHLY_FILE_PATH,
     ICB_QUARTERLY_REPORT_NAME,
+    ICB_QUARTERLY_FILE_NAME
 )
+
+load_dotenv()
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
+ODS_API_URL = "https://www.odsdatasearchandexport.nhs.uk/api/getReport?report="  # Replace with actual ODS API URL
 
-
-def lambda_handler(event, context):
+def lambda_handler():
     try:
         ods_service = OdsApiService(
-            api_url=os.environ.get("ODS_API_URL"),
+            api_url=ODS_API_URL,
         )
 
-        extract_and_process_ods_gp_data(ods_service)
+        #extract_and_process_ods_gp_data(ods_service)
         extract_and_process_ods_icb_data(ods_service)
 
         return {"statusCode": 200}
@@ -70,7 +73,7 @@ def check_release_date_within_last_7_days(release_date_string: str):
         return days_since_release <= timedelta(days=7)
     except (TypeError, ValueError):
         logger.info("failed to check release date")
-        raise UnableToGetReleaseDate()
+        # raise UnableToGetReleaseDate()
 
 
 def extract_and_process_ods_gp_data(ods_service: OdsApiService):
@@ -80,6 +83,7 @@ def extract_and_process_ods_gp_data(ods_service: OdsApiService):
         ods_service.api_url + GP_WEEKLY_REPORT_NAME
     )
     file_name = os.path.join(TEMP_DIR, GP_WEEKLY_FILE_NAME)
+    
     with open(file_name, "wb") as f:
         f.write(download_file)
 
@@ -105,21 +109,29 @@ def extract_and_process_ods_icb_data(ods_service: OdsApiService):
     for report in icb_report_names:
         logger.info("Proceeding to download ICB data")
         is_quarterly_release = report == ICB_QUARTERLY_REPORT_NAME
-        url = ECCGAM_ZIP_URL if report == ICB_MONTHLY_REPORT_NAME else os.getenv("ODS_API_URL") + report
+        url = ECCGAM_ZIP_URL if report == ICB_MONTHLY_REPORT_NAME else ods_service.api_url + report
 
         download_file = ods_service.get_download_file(url)
-
+            
         icb_ods_data_amended_data = []
         logger.info("Extracting and processing ODS ICB data")
 
         if is_quarterly_release:
-            icb_ods_data = ods_csv_to_dict(download_file, ICB_FILE_HEADERS)
+            file_name = os.path.join(TEMP_DIR, ICB_QUARTERLY_FILE_NAME)
+            with open(file_name, "wb") as f:
+                f.write(download_file)
+            
+            icb_ods_data = ods_csv_to_dict(file_name, OLD_ICB_FILE_HEADERS)
             icb_ods_data_amended_data = get_amended_records(icb_ods_data)
         else:
+            file_name = os.path.join(TEMP_DIR, ICB_MONTHLY_FILE_PATH)
+            with open(file_name, "wb") as f:
+                f.write(download_file)
+                
             if icb_csv_file := ods_service.unzipping_files(
-                download_file, ICB_MONTHLY_FILE_NAME, TEMP_DIR
+                file_name, ICB_MONTHLY_FILE_NAME, TEMP_DIR
             ):
-                icb_ods_data = ods_csv_to_dict(icb_csv_file, ICB_FILE_HEADERS)
+                icb_ods_data = ods_csv_to_dict(icb_csv_file, OLD_ICB_FILE_HEADERS)
                 icb_ods_data_amended_data = get_amended_records(icb_ods_data)
             else:
                 logger.warning("Failed to unzip ICB monthly CSV from archive")
@@ -186,5 +198,7 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                 logger.info(f"Failed to create/update record by ICB ODS code: {str(e)}")
 
 
-class UnableToGetReleaseDate(Exception):
-    pass
+# class UnableToGetReleaseDate(Exception):
+#     pass
+
+lambda_handler()

@@ -15,7 +15,9 @@ on:
 jobs:
   terraform_process:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}${{ (inputs.environment == 'prod' && !inputs.is_deployment) && '-plan' || '' }}
+    env:
+      GITHUB_ENV: ${{ inputs.environment }}${{ (inputs.environment == 'prod' && !inputs.is_deployment) && '-plan' || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,26 +25,31 @@ jobs:
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
+        id: creds
         with:
           role-to-assume:  ${{ (inputs.is_deployment && secrets.AWS_ASSUME_ROLE) || secrets.AWS_ASSUME_ROLE_READ_ONLY }}
           role-skip-session-tagging: true
           aws-region: ${{ vars.AWS_REGION }}
           mask-aws-account-id: true
 
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: "${{ steps.creds.outputs.aws-account-id }},${{ secrets.AWS_DEV_ACCOUNT_ID }}"
+
       - name: Publish Docker Image to Prod
         id: push-image-to-prod
         if: inputs.environment == 'prod' && inputs.is_deployment
-
         run: |
-          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_DEV_REPOSITORY }}
-          IMAGE_TAG=$(aws ecr describe-images --registry-id ${{ secrets.AWS_DEV_ACCOUNT_ID }} --repository-name ${{ secrets.ECR_REPOSITORY_DEV_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
-          source_repo=${{ secrets.AWS_ECR_DEV_REPOSITORY }}/${{ secrets.ECR_REPOSITORY_DEV_NAME }}:${IMAGE_TAG//\"}
-          destination_repo=${{ secrets.AWS_ECR_PROD_REPOSITORY}}/${{ secrets.ECR_REPOSITORY_NAME }}:${IMAGE_TAG//\"}
-          docker pull $source_repo
-          docker tag $source_repo $destination_repo
-          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_PROD_REPOSITORY }}
-          docker push $destination_repo
-          echo "image-tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          source_repo=${{ secrets.AWS_DEV_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_DEV_NAME }}
+          destination_repo=${{ steps.creds.outputs.aws-account-id }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}
+          docker pull $source_repo:latest
+          docker tag $source_repo:latest $destination_repo:latest
+          docker tag $source_repo:latest $destination_repo:${{ github.sha }}
+          docker tag $source_repo:latest $destination_repo:${{ github.ref_name }}
+          docker push $destination_repo:latest
+          docker push $destination_repo:${{ github.sha }}
+          docker push $destination_repo:${{ github.ref_name }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -73,35 +80,23 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Build Lambdas
-        run: | 
-            ./tasks_github_actions.sh build-lambdas
-
       - name: Make virtual environment
-        if: github.ref == 'refs/heads/main' && inputs.is_deployment
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && inputs.is_deployment
         run: |
           python3 -m venv ./venv
           ./venv/bin/pip3 install --upgrade pip urllib3
 
+      - name: Build Lambdas
+        run: | 
+            ./tasks_github_actions.sh build-lambdas
+
       - name: Get ODS CSV Files
-        if: github.ref == 'refs/heads/main' && inputs.is_deployment
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && inputs.is_deployment
         run: |
           PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 -m utils.get_latest_ods_csv ${{ vars.ODS_API_URL }}
 
       - name: Setup Terraform variables
-        id: vars-prod
-        if: inputs.environment == 'prod' && inputs.is_deployment
-        run: |-
-          cat > pipeline.auto.tfvars <<EOF
-          gp_registrations_mi_image_tag = ${{ steps.push-image-to-prod.outputs.image-tag }}
-          environment = "${{ vars.AWS_ENVIRONMENT }}"
-          degrades_message_queue = "${{ secrets.AWS_DEGRADES_MESSAGE_QUEUE }}"
-          EOF
-        working-directory: ./stacks/gp-registrations-mi/terraform
-
-      - name: Setup Terraform variables
-        id: vars-dev
-        if: inputs.environment != 'prod'
+        id: vars
         run: |-
           IMAGE_TAG=$(aws ecr describe-images --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')
           cat > pipeline.auto.tfvars <<EOF
@@ -168,6 +163,6 @@ jobs:
             });
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && inputs.is_deployment
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && inputs.is_deployment && (env.GITHUB_ENV != 'prod-plan')
         run: terraform apply -auto-approve -input=false ${{ vars.AWS_ENVIRONMENT }}.tfplan
         working-directory: ./stacks/gp-registrations-mi/terraform

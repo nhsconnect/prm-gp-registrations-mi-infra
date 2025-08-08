@@ -5,6 +5,7 @@ resource "aws_lambda_function" "degrades_daily_summary" {
   runtime          = "python3.12"
   handler          = "main.lambda_handler"
   timeout          = 900
+  memory_size      = 256
   source_code_hash = filebase64sha256("${var.degrades_daily_summary_lambda_zip}")
   layers           = [aws_lambda_layer_version.degrades.arn, aws_lambda_layer_version.pandas.arn]
 

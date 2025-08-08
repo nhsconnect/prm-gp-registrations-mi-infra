@@ -2,6 +2,15 @@ name: Deploy Degrades
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        default: "dev"
+        description: "Which environment this action should run against"
+        required: true
+        options:
+          - dev
+          - prod
 
   push:
     branches: [ main ]
@@ -44,10 +53,10 @@ jobs:
           make test-degrades
 
 
-  deploy_degrades_infra:
+  deploy_degrades:
     needs: [test_lambda]
     uses: ./.github/workflows/base-degrades-reporting.yml
     with:
-      environment: dev
+      environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment ) || 'dev' }}
       is_deployment: ${{ github.ref == 'refs/heads/main' }}
     secrets: inherit

@@ -1,0 +1,53 @@
+name: Full Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        default: "dev"
+        description: "Which environment this action should run against?"
+        required: true
+        options:
+          - dev
+          - prod
+      is_deployment:
+        type: boolean
+        default: false
+        description: "Does the workflow run Terraform Apply?"
+        
+        
+permissions:
+  pull-requests: write
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
+jobs:
+  deploy_base_infrastructure:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        terraform_stack: [base-networking, container-repositories, ecs-cluster]
+    uses: ./.github/workflows/base-terraform-plan-and-apply.yml
+    with:
+      environment: ${{ inputs.environment }}
+      terraform_stack: ${{ matrix.terraform_stack }}
+      is_deployment: ${{ inputs.is_deployment }}
+    secrets: inherit
+
+  deploy_degrades:
+    needs: [deploy_base_infrastructure]
+    uses: ./.github/workflows/base-degrades-reporting.yml
+    with:
+      environment: ${{ inputs.environment }}
+      is_deployment: ${{ inputs.is_deployment }}
+    secrets: inherit
+
+  deploy-gp-registrations-mi:
+    needs: [deploy_degrades]
+    uses: ./.github/workflows/base-gp-registrations-mi.yml
+    with:
+      environment: ${{ inputs.environment }}
+      is_deployment: ${{ inputs.is_deployment }}
+    secrets: inherit

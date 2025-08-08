@@ -13,8 +13,8 @@ lambda/build
 **/**/.terraform
 **/**/.terraform.*
 .vscode/settings.json
-
-venv/
+.venv/*
+*/.venv/
 .coverage
 lambda/degrades-reporting/tmp
 lambda/degrades-reporting/tests/tmp
@@ -23,3 +23,4 @@ stacks/degrades-reporting/terraform/lambda/
 .venv/
 
 */.env
+venv

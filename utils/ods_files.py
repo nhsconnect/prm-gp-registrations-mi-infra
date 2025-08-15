@@ -1,11 +1,17 @@
-GP_WEEKLY_ZIP_FILE_PATH = "Data/epraccur.zip"
-GP_WEEKLY_FILE_NAME = "epraccur.csv"
+GP_ZIP_FILE_PATH = "Data/epraccur.zip"
+GP_FILE_NAME = "epraccur.csv"
+GP_REPORT_NAME = "epraccur"
 
-ICB_MONTHLY_FILE_PATH = "eamendam.zip"
-ICB_MONTHLY_FILE_NAME = "eccgam.csv"
+ICB_FILE_PATH = "ocsissue/data/eccg.zip"
+ICB_FILE_NAME = "eccg.csv"
+ICB_REPORT_NAME = "eccg"
 
-ICB_QUARTERLY_FILE_PATH = "ocsissue/data/eccg.zip"
-ICB_QUARTERLY_FILE_NAME = "eccg.csv"
+ODS_API_WEEKLY_QUERY = "&lastChangePeriod=7"
+
+ALL_ICB_AND_GP_FILES = [
+    "eccg",
+    "epraccur",
+]
 
 GP_FILE_HEADERS = [
     "PracticeOdsCode",

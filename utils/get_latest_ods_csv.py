@@ -1,25 +1,17 @@
 import csv
-from datetime import date
 import sys
 import os
-
+import tempfile
 from .services.ods_api_service import OdsApiService
 from .ods_files import (
-    ALL_ICB_AND_GP_FILES,
-    ECCGAM_ZIP_URL,
-    GP_WEEKLY_REPORT_NAME,
-    ICB_MONTHLY_FILE_PATH,
-    ICB_MONTHLY_REPORT_NAME,
-    ICB_QUARTERLY_FILE_PATH,
-    ICB_MONTHLY_FILE_NAME,
-    ICB_QUARTERLY_FILE_NAME,
+    GP_REPORT_NAME,
+    GP_FILE_NAME,
+    ICB_FILE_NAME,
     ICB_FILE_HEADERS,
-    GP_FILE_HEADERS,
-    GP_WEEKLY_FILE_NAME,
-    GP_WEEKLY_ZIP_FILE_PATH,
-    ICB_QUARTERLY_REPORT_NAME,
+    GP_FILE_HEADERS
 )
 
+TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
 
 def create_modify_csv(
     file_path: str,
@@ -52,15 +44,17 @@ def write_to_csv(file_path, headers_list: list, rows_list: list):
 
 def get_gp_latest_ods_csv(service):
     download_file = service.get_download_file(
-        os.getenv("ODS_API_URL") + GP_WEEKLY_REPORT_NAME
+        os.getenv("ODS_API_URL") + GP_REPORT_NAME
     )
-    epraccur_zip_file = service.unzipping_files(
-        download_file, GP_WEEKLY_ZIP_FILE_PATH, byte=True
-    )
-    epraccur_csv_file = service.unzipping_files(epraccur_zip_file, GP_WEEKLY_FILE_NAME)
+    output_name = "initial_full_gps_ods.csv"
+    
+    file_path = os.path.join(TEMP_DIR, GP_FILE_NAME)
+    with open(file_path, "wb") as f:
+        f.write(download_file)
+
     create_modify_csv(
-        epraccur_csv_file,
-        "initial_full_gps_ods.csv",
+        file_path,
+        output_name,
         GP_FILE_HEADERS,
         ["PracticeOdsCode", "PracticeName", "IcbOdsCode"],
         True,
@@ -69,43 +63,26 @@ def get_gp_latest_ods_csv(service):
 
 def get_icb_latest_ods_csv(service):
     icb_update_changes = []
-    for file in ALL_ICB_AND_GP_FILES:
-        url = ECCGAM_ZIP_URL if file == ICB_MONTHLY_REPORT_NAME else os.getenv("ODS_API_URL") + file
-        download_file = service.get_download_file(url)
-        csv_modified_rows = None
-        is_quarterly_release = file == ICB_QUARTERLY_REPORT_NAME
-        zip_file_path = (
-            ICB_MONTHLY_FILE_PATH
-            if not is_quarterly_release
-            else ICB_QUARTERLY_FILE_PATH
-        )
-        output_name = (
-            "update_icb_" + date.today() + ".csv"
-            if not is_quarterly_release
-            else "initial_full_icb_ods.csv"
-        )
-        csv_file_name = (
-            ICB_MONTHLY_FILE_NAME
-            if not is_quarterly_release
-            else ICB_QUARTERLY_FILE_NAME
-        )
+    url = service.api_url + ICB_FILE_NAME
+    download_file = service.get_download_file(url)
+    csv_modified_rows = None
 
-        if epraccur_zip_file := service.unzipping_files(
-            download_file, zip_file_path, byte=True
-        ):
-            if epraccur_csv_file := service.unzipping_files(
-                epraccur_zip_file, csv_file_name
-            ):
-                csv_modified_rows = create_modify_csv(
-                    epraccur_csv_file,
-                    output_name,
-                    ICB_FILE_HEADERS,
-                    ["IcbOdsCode", "IcbName"],
-                    is_quarterly_release,
-                    icb_update_changes,
-                )
-        if csv_modified_rows:
-            icb_update_changes.extend(csv_modified_rows)
+    output_name = "initial_full_icb_ods.csv"
+    
+    file_path = os.path.join(TEMP_DIR, ICB_FILE_NAME)
+    with open(file_path, "wb") as f:
+        f.write(download_file)
+
+    csv_modified_rows = create_modify_csv(
+        file_path,
+        output_name,
+        ICB_FILE_HEADERS,
+        ["IcbOdsCode", "IcbName"],
+        True,
+        icb_update_changes,
+    )
+    if csv_modified_rows:
+        icb_update_changes.extend(csv_modified_rows)
 
 
 if __name__ == "__main__":

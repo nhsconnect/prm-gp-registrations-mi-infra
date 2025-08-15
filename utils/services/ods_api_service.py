@@ -4,7 +4,6 @@ from zipfile import ZipFile
 import urllib3
 from urllib3.exceptions import HTTPError
 from urllib3.util.retry import Retry
-
 import logging
 
 logger = logging.getLogger()

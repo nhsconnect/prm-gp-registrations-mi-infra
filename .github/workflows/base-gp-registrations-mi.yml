@@ -22,7 +22,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         id: creds
@@ -34,6 +33,7 @@ jobs:
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
+        if: inputs.environment == 'prod' && inputs.is_deployment
         with:
           registries: "${{ steps.creds.outputs.aws-account-id }},${{ secrets.AWS_DEV_ACCOUNT_ID }}"
 

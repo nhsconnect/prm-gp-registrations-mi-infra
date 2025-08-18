@@ -5,21 +5,21 @@ import tempfile
 from utils.enums.ods import OdsDownloadType
 from utils.models.ods_models import PracticeOds, IcbOds
 from utils.services.ods_api_service import OdsApiService
-from utils.ods_files import (
+from utils.constants.ods_constants import (
     GP_FILE_HEADERS,
     GP_FILE_NAME,
     GP_REPORT_NAME,
     ICB_FILE_HEADERS,
     ICB_REPORT_NAME,
-    ICB_FILE_NAME
+    ICB_FILE_NAME,
+    ODS_API_URL,
+    ODS_API_WEEKLY_QUERY
 )
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
 TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
-ODS_API_URL = "https://www.odsdatasearchandexport.nhs.uk/api/getReport?report="  # Replace with actual ODS API URL
-ODS_API_WEEKLY_QUERY = "&lastChangePeriod=7"
+
 def lambda_handler():
     try:
         ods_service = OdsApiService(

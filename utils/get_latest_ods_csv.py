@@ -3,12 +3,13 @@ import sys
 import os
 import tempfile
 from .services.ods_api_service import OdsApiService
-from .ods_files import (
+from .constants.ods_constants import (
     GP_REPORT_NAME,
     GP_FILE_NAME,
     ICB_FILE_NAME,
     ICB_FILE_HEADERS,
-    GP_FILE_HEADERS
+    GP_FILE_HEADERS,
+    ODS_API_URL,
 )
 
 TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
@@ -43,9 +44,8 @@ def write_to_csv(file_path, headers_list: list, rows_list: list):
 
 
 def get_gp_latest_ods_csv(service):
-    download_file = service.get_download_file(
-        os.getenv("ODS_API_URL") + GP_REPORT_NAME
-    )
+    url = service.api_url + GP_REPORT_NAME
+    download_file = service.get_download_file(url)
     output_name = "initial_full_gps_ods.csv"
     
     file_path = os.path.join(TEMP_DIR, GP_FILE_NAME)
@@ -87,7 +87,7 @@ def get_icb_latest_ods_csv(service):
 
 if __name__ == "__main__":
     try:
-        ods_service = OdsApiService(sys.argv[1])
+        ods_service = OdsApiService(ODS_API_URL)
         get_gp_latest_ods_csv(ods_service)
         get_icb_latest_ods_csv(ods_service)
         print("\nOds download process complete.")

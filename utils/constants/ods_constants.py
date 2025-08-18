@@ -7,6 +7,7 @@ ICB_FILE_NAME = "eccg.csv"
 ICB_REPORT_NAME = "eccg"
 
 ODS_API_WEEKLY_QUERY = "&lastChangePeriod=7"
+ODS_API_URL = "https://www.odsdatasearchandexport.nhs.uk/api/getReport?report="
 
 ALL_ICB_AND_GP_FILES = [
     "eccg",

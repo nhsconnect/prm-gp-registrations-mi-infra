@@ -93,7 +93,7 @@ jobs:
       - name: Get ODS CSV Files
         if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && inputs.is_deployment
         run: |
-          PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 -m utils.get_latest_ods_csv ${{ vars.ODS_API_URL }}
+          PYTHONPATH=$PYTHONPATH:. ./venv/bin/python3 -m utils.get_latest_ods_csv
 
       - name: Setup Terraform variables
         id: vars

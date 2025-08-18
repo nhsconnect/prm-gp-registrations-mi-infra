@@ -10,9 +10,9 @@ resource "aws_lambda_function" "ods_bulk_update" {
   layers           = [aws_lambda_layer_version.mi_enrichment.arn]
   environment {
     variables = {
-      GP_ODS_DYNAMO_TABLE_NAME     = aws_dynamodb_table.mi_api_gp_ods.name,
-      ICB_ODS_DYNAMO_TABLE_NAME    = aws_dynamodb_table.mi_api_icb_ods.name,
-      ODS_S3_BUCKET_NAME           = aws_s3_bucket.ods_csv_files.bucket
+      GP_ODS_DYNAMO_TABLE_NAME  = aws_dynamodb_table.mi_api_gp_ods.name,
+      ICB_ODS_DYNAMO_TABLE_NAME = aws_dynamodb_table.mi_api_icb_ods.name,
+      ODS_S3_BUCKET_NAME        = aws_s3_bucket.ods_csv_files.bucket
     }
   }
   tags = merge(

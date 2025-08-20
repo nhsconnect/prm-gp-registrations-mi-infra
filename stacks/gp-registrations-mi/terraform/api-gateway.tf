@@ -80,13 +80,6 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   }
 }
 
-resource "aws_api_gateway_stage" "default" {
-  deployment_id = aws_api_gateway_deployment.api_gateway_deployment.id
-  rest_api_id   = aws_api_gateway_rest_api.rest_api.id
-  stage_name  = local.api_stage_name
-}
-
-
 resource "aws_api_gateway_stage" "api_gateway_stage" {
   depends_on    = [aws_cloudwatch_log_group.access_logs, aws_cloudwatch_log_group.execution_logs]
   deployment_id = aws_api_gateway_deployment.api_gateway_deployment.id

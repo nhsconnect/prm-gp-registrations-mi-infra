@@ -5,12 +5,12 @@ resource "aws_iam_role" "error_alarm_alert_lambda_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "cloudwatch_log_access" {
-  role       = aws_iam_policy.error_alarm_alert_lambda_cloudwatch_log_access.name
+  role       = aws_iam_policy.error_alarm_alert_lambda_role.name
   policy_arn = aws_iam_policy.error_alarm_alert_lambda_cloudwatch_log_access.arn
 }
 
 resource "aws_iam_role_policy_attachment" "ssm_access" {
-  role       = aws_iam_policy.error_alarm_alert_lambda_ssm_access.name
+  role       = aws_iam_policy.error_alarm_alert_lambda_role.name
   policy_arn = aws_iam_policy.error_alarm_alert_lambda_ssm_access.arn
 }
 

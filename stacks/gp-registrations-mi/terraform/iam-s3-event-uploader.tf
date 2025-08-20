@@ -3,12 +3,26 @@ resource "aws_iam_role" "s3_event_uploader_role" {
 
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 
-  managed_policy_arns = [
-    aws_iam_policy.mi_events_output_s3_put_access.arn,
-    aws_iam_policy.incoming_mi_events_for_s3_event_uploader_lambda_to_send_to_dlq_access.arn,
-    aws_iam_policy.incoming_mi_events_for_s3_event_uploader_lambda_sqs_read_access.arn,
-    aws_iam_policy.s3_event_uploader_lambda_cloudwatch_log_access.arn
-  ]
+}
+
+resource "aws_iam_role_policy_attachment" "s3_put_access" {
+  role       = aws_iam_role.s3_event_uploader_role.name
+  policy_arn = aws_iam_policy.mi_events_output_s3_put_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "send_to_dlq_access" {
+  role       = aws_iam_role.s3_event_uploader_role.name
+  policy_arn = aws_iam_policy.incoming_mi_events_for_s3_event_uploader_lambda_to_send_to_dlq_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "sqs_read_access" {
+  role       = aws_iam_role.s3_event_uploader_role.name
+  policy_arn = aws_iam_policy.incoming_mi_events_for_s3_event_uploader_lambda_sqs_read_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_log_access" {
+  role       = aws_iam_role.s3_event_uploader_role.name
+  policy_arn = aws_iam_policy.s3_event_uploader_lambda_cloudwatch_log_access.arn
 }
 
 resource "aws_iam_policy" "mi_events_output_s3_put_access" {

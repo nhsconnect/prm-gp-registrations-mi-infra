@@ -58,7 +58,6 @@ resource "aws_api_gateway_integration" "api_gateway_integration" {
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment" {
   rest_api_id = aws_api_gateway_rest_api.rest_api.id
-  stage_name  = local.api_stage_name
   depends_on = [
     aws_api_gateway_integration.api_gateway_integration,
     aws_cloudwatch_log_group.execution_logs,
@@ -80,6 +79,13 @@ resource "aws_api_gateway_deployment" "api_gateway_deployment" {
     create_before_destroy = true
   }
 }
+
+resource "aws_api_gateway_stage" "default" {
+  deployment_id = aws_api_gateway_deployment.api_gateway_deployment.id
+  rest_api_id   = aws_api_gateway_rest_api.rest_api.id
+  stage_name  = local.api_stage_name
+}
+
 
 resource "aws_api_gateway_stage" "api_gateway_stage" {
   depends_on    = [aws_cloudwatch_log_group.access_logs, aws_cloudwatch_log_group.execution_logs]

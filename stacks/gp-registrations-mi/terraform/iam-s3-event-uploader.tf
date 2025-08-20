@@ -20,7 +20,7 @@ resource "aws_iam_role_policy_attachment" "sqs_read_access" {
   policy_arn = aws_iam_policy.incoming_mi_events_for_s3_event_uploader_lambda_sqs_read_access.arn
 }
 
-resource "aws_iam_role_policy_attachment" "cloudwatch_log_access" {
+resource "aws_iam_role_policy_attachment" "s3_event_cloudwatch_log_access" {
   role       = aws_iam_role.s3_event_uploader_role.name
   policy_arn = aws_iam_policy.s3_event_uploader_lambda_cloudwatch_log_access.arn
 }

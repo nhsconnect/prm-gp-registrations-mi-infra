@@ -19,7 +19,7 @@ resource "aws_iam_role_policy_attachment" "lambda_ssm_access" {
   policy_arn = aws_iam_policy.splunk_cloud_uploader_lambda_ssm_access.arn
 }
 
-resource "aws_iam_role_policy_attachment" "cloudwatch_log_access" {
+resource "aws_iam_role_policy_attachment" "splunk_cloudwatch_log_access" {
   role       = aws_iam_role.splunk_cloud_event_uploader_lambda_role.name
   policy_arn = aws_iam_policy.splunk_cloud_event_uploader_lambda_cloudwatch_log_access.arn
 }

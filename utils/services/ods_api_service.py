@@ -1,6 +1,7 @@
 import os
 from io import BytesIO
 from zipfile import ZipFile
+import certifi
 import urllib3
 from urllib3.exceptions import HTTPError
 from urllib3.util.retry import Retry
@@ -18,7 +19,11 @@ class OdsApiService:
             total=3, backoff_factor=1, status_forcelist=[400, 404, 500, 502, 503, 504]
         )
 
-        self.http = urllib3.PoolManager(retries=retry_strategy, cert_reqs='CERT_NONE')
+        self.http = urllib3.PoolManager(
+            retries=retry_strategy, 
+            cert_reqs="CERT_REQUIRED", 
+            ca_certs=certifi.where()
+            )
         
     def get_download_file(self, download_url):
         try:

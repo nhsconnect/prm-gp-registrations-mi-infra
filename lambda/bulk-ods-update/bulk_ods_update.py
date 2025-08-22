@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime, timedelta, timezone
 import logging
 import os
 import tempfile
@@ -13,22 +14,21 @@ from utils.constants.ods_constants import (
     ICB_REPORT_NAME,
     ICB_FILE_NAME,
     ODS_API_URL,
-    ODS_API_WEEKLY_QUERY
+    ODS_API_DATE_QUERY
 )
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
+seven_days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%d")
 
 def lambda_handler():
     try:
         ods_service = OdsApiService(
             api_url=ODS_API_URL,
         )
-
         extract_and_process_ods_gp_data(ods_service)
         extract_and_process_ods_icb_data(ods_service)
-
         return {"statusCode": 200}
     except Exception as e:
         logger.info(f"An unexpected error occurred: {e}")
@@ -39,7 +39,7 @@ def extract_and_process_ods_gp_data(ods_service: OdsApiService):
     logger.info("Extracting and processing ODS GP data")
 
     download_file = ods_service.get_download_file(
-        ods_service.api_url + GP_REPORT_NAME + ODS_API_WEEKLY_QUERY
+        ods_service.api_url + GP_REPORT_NAME + ODS_API_DATE_QUERY + seven_days_ago
     )
     file_name = os.path.join(TEMP_DIR, GP_FILE_NAME)
     
@@ -63,7 +63,7 @@ def extract_and_process_ods_icb_data(ods_service: OdsApiService):
     logger.info("Getting latest ICB release details")
 
     logger.info("Proceeding to download ICB data")
-    url = ods_service.api_url + ICB_REPORT_NAME + ODS_API_WEEKLY_QUERY
+    url = ods_service.api_url + ICB_REPORT_NAME + ODS_API_DATE_QUERY + seven_days_ago
 
     download_file = ods_service.get_download_file(url)
         
@@ -93,7 +93,9 @@ def get_amended_records(data: list[dict]) -> list[dict]:
         for amended_data in data
         if amended_data.get("AmendedRecordIndicator") == "1"
     ]
-
+    
+def status_from_close_date(close_date: str | None) -> str:
+    return "Closed" if close_date else "Open"
 
 def ods_csv_to_dict(file_path: str, headers: list[str]) -> list[dict]:
     with open(file_path, mode="r") as csv_file:
@@ -117,6 +119,7 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                             amended_record.get("PracticeName")
                         ),
                         PracticeOds.icb_ods_code.set(amended_record.get("IcbOdsCode")),
+                        PracticeOds.practice_status.set(status_from_close_date(amended_record.get("CloseDate"))),
                     ]
                 )
                 logger.info(
@@ -131,7 +134,7 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
         for amended_record in data:
             try:
                 icb = IcbOds(amended_record.get("IcbOdsCode"))
-                icb.update(actions=[IcbOds.icb_name.set(amended_record.get("IcbName"))])
+                icb.update(actions=[IcbOds.icb_name.set(amended_record.get("IcbName")), IcbOds.icb_status.set(status_from_close_date(amended_record.get("CloseDate")))])
                 logger.info(
                     f'Overwriting for ODS: {amended_record.get("IcbOdsCode")} - Name: {amended_record.get("IcbName")}')
             except Exception as e:

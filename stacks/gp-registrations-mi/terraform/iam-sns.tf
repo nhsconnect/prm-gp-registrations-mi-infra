@@ -19,9 +19,11 @@ data "aws_iam_policy_document" "sns_publish" {
 resource "aws_iam_role" "sns_topic_enriched_mi_events_cloudwatch_log_access_role" {
   name               = "${var.environment}-sns-topic-enriched-mi-events-cloudwatch-log-access-role"
   assume_role_policy = data.aws_iam_policy_document.sns_assume_role.json
-  managed_policy_arns = [
-    aws_iam_policy.sns_topic_enriched_mi_events_log_access.arn,
-  ]
+}
+
+resource "aws_iam_role_policy_attachment" "mi_events_log_access" {
+  role       = aws_iam_role.sns_topic_enriched_mi_events_cloudwatch_log_access_role.name
+  policy_arn = aws_iam_policy.sns_topic_enriched_mi_events_log_access.arn
 }
 
 data "aws_iam_policy_document" "sns_assume_role" {

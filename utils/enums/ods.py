@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class TrudItem(StrEnum):
+class OdsItem(StrEnum):
     NHS_ODS_WEEKLY = "58"
     ORG_REF_DATA_MONTHLY = "242"
 

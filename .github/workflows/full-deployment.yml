@@ -43,7 +43,7 @@ jobs:
     uses: ./.github/workflows/base-degrades-reporting.yml
     with:
       environment: ${{ github.event_name == 'push' && 'dev' || inputs.environment }}
-      is_deployment: ${{ github.event_name == 'push' && 'dev' || inputs.is_deployment }}
+      is_deployment: ${{ github.event_name == 'push' && true || inputs.is_deployment }}
     secrets: inherit
 
   deploy-gp-registrations-mi:
@@ -51,5 +51,5 @@ jobs:
     uses: ./.github/workflows/base-gp-registrations-mi.yml
     with:
       environment: ${{ github.event_name == 'push' && 'dev' || inputs.environment }}
-      is_deployment: ${{ github.event_name == 'push' && 'dev' || inputs.is_deployment }}
+      is_deployment: ${{ github.event_name == 'push' && true || inputs.is_deployment }}
     secrets: inherit

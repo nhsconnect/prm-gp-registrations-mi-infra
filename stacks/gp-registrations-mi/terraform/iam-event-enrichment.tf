@@ -2,11 +2,21 @@
 resource "aws_iam_role" "event_enrichment_lambda_role" {
   name               = "${var.environment}-event-enrichment-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_event_enrichment_assume_role.json
-  managed_policy_arns = [
-    aws_iam_policy.enriched_mi_events_sns_publish_access.arn,
-    aws_iam_policy.dynamodb_policy_ods_enrichment_lambda.arn,
-    aws_iam_policy.dynamodb_policy_icb_ods_enrichment_lambda.arn
-  ]
+}
+
+resource "aws_iam_role_policy_attachment" "sns_publish_access" {
+  role       = aws_iam_role.event_enrichment_lambda_role.name
+  policy_arn = aws_iam_policy.enriched_mi_events_sns_publish_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ods_enrichment_lambda" {
+  role       = aws_iam_role.event_enrichment_lambda_role.name
+  policy_arn = aws_iam_policy.dynamodb_policy_ods_enrichment_lambda.arn
+}
+
+resource "aws_iam_role_policy_attachment" "icb_ods_enrichment_lambda" {
+  role       = aws_iam_role.event_enrichment_lambda_role.name
+  policy_arn = aws_iam_policy.dynamodb_policy_icb_ods_enrichment_lambda.arn
 }
 
 data "aws_iam_policy_document" "lambda_event_enrichment_assume_role" {
@@ -22,11 +32,21 @@ data "aws_iam_policy_document" "lambda_event_enrichment_assume_role" {
 resource "aws_iam_role" "bulk_ods_lambda" {
   name               = "${var.environment}-bulk-ods-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_bulk_ods_assume_role.json
-  managed_policy_arns = [
-    aws_iam_policy.dynamodb_policy_bulk_icb_ods_data_lambda.arn,
-    aws_iam_policy.dynamodb_policy_bulk_ods_data_lambda.arn,
-    aws_iam_policy.ods_csv_files_data_policy.arn,
-  ]
+}
+
+resource "aws_iam_role_policy_attachment" "icb_ods_data_lambda" {
+  role       = aws_iam_role.bulk_ods_lambda.name
+  policy_arn = aws_iam_policy.dynamodb_policy_bulk_icb_ods_data_lambda.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ods_data_lambda" {
+  role       = aws_iam_role.bulk_ods_lambda.name
+  policy_arn = aws_iam_policy.dynamodb_policy_bulk_ods_data_lambda.arn
+}
+
+resource "aws_iam_role_policy_attachment" "csv_files_data_policy" {
+  role       = aws_iam_role.bulk_ods_lambda.name
+  policy_arn = aws_iam_policy.ods_csv_files_data_policy.arn
 }
 
 data "aws_iam_policy_document" "lambda_bulk_ods_assume_role" {

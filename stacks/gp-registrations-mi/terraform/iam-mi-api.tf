@@ -2,9 +2,11 @@ resource "aws_iam_role" "gp_registrations_mi" {
   name               = "${var.environment}-gp-registrations-mi"
   description        = "Role for gp registrations mi ecs service"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
-  managed_policy_arns = [
-    aws_iam_policy.outgoing_send_mi_events_to_queue_for_enrichment_access.arn
-  ]
+}
+
+resource "aws_iam_role_policy_attachment" "enrichment_queue_access" {
+  role       = aws_iam_role.gp_registrations_mi.name
+  policy_arn = aws_iam_policy.outgoing_send_mi_events_to_queue_for_enrichment_access.arn
 }
 
 data "aws_iam_policy_document" "ecs_assume" {

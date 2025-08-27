@@ -1,6 +1,8 @@
 name: Full Deployment
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       environment:
@@ -26,28 +28,28 @@ jobs:
   deploy_base_infrastructure:
     strategy:
       fail-fast: false
-      max-parallel: 1
+      max-parallel: 3
       matrix:
         terraform_stack: [base-networking, container-repositories, ecs-cluster]
     uses: ./.github/workflows/base-terraform-plan-and-apply.yml
     with:
-      environment: ${{ inputs.environment }}
+      environment: ${{ github.event_name == 'push' && 'dev' || inputs.environment }}
       terraform_stack: ${{ matrix.terraform_stack }}
-      is_deployment: ${{ inputs.is_deployment }}
+      is_deployment: ${{ github.event_name == 'push' && true || inputs.is_deployment }}
     secrets: inherit
 
   deploy_degrades:
     needs: [deploy_base_infrastructure]
     uses: ./.github/workflows/base-degrades-reporting.yml
     with:
-      environment: ${{ inputs.environment }}
-      is_deployment: ${{ inputs.is_deployment }}
+      environment: ${{ github.event_name == 'push' && 'dev' || inputs.environment }}
+      is_deployment: ${{ github.event_name == 'push' && true || inputs.is_deployment }}
     secrets: inherit
 
   deploy-gp-registrations-mi:
     needs: [deploy_degrades]
     uses: ./.github/workflows/base-gp-registrations-mi.yml
     with:
-      environment: ${{ inputs.environment }}
-      is_deployment: ${{ inputs.is_deployment }}
+      environment: ${{ github.event_name == 'push' && 'dev' || inputs.environment }}
+      is_deployment: ${{ github.event_name == 'push' && true || inputs.is_deployment }}
     secrets: inherit

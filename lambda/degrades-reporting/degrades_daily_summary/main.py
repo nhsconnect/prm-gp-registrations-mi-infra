@@ -23,7 +23,7 @@ def lambda_handler(event, context):
     if not event_trigger_time:
         return
 
-    logger.info("Retrieving timestamp and date from event")
+    logger.info("Retrieving timestamp and date from event.")
     query_timestamp, query_day = extract_query_timestamp_from_scheduled_event_trigger(
         event_trigger_time
     )

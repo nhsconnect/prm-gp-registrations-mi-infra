@@ -43,7 +43,7 @@ jobs:
         id: push-image-to-prod
         if: inputs.environment == 'prod' && inputs.is_deployment
         run: |
-          source_repo=${{ secrets.AWS_DEV_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.ECR_REPOSITORY_DEV_NAME }}
+          source_repo=${{ secrets.AWS_DEV_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.AWS_ECR_DEV_REPOSITORY }}
           destination_repo=${{ steps.creds.outputs.aws-account-id }}.dkr.ecr.eu-west-2.amazonaws.com/${{ secrets.AWS_ECR_REPOSITORY }}
           docker pull $source_repo:latest
           docker tag $source_repo:latest $destination_repo:latest

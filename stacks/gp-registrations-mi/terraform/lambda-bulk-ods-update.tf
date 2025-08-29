@@ -39,9 +39,9 @@ resource "aws_cloudwatch_log_group" "bulk_ods_update_lambda" {
 resource "aws_cloudwatch_event_rule" "ods_bulk_update_schedule" {
   name                = "${var.environment}_ods_bulk_update_schedule"
   description         = "Schedule for ODS Update Lambda"
-  schedule_expression = "cron(0 4 ? * 1 *)"
+  schedule_expression = "cron(0 0 4 * * *)"
 }
-
+0 4 * * *
 resource "aws_cloudwatch_event_target" "ods_bulk_update_schedule_event" {
   rule      = aws_cloudwatch_event_rule.ods_bulk_update_schedule.name
   target_id = "ods_bulk_update_schedule"

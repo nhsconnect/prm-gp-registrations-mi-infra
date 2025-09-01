@@ -66,7 +66,7 @@ def get_gp_latest_ods_csv(service):
     create_modify_csv(
         file_path=file_path,
         modify_file_path=output_name,
-        headers_list=GP_FILE_HEADERS,  # must include "CloseDate"
+        headers_list=GP_FILE_HEADERS,
         modify_headers=["PracticeOdsCode", "PracticeName", "IcbOdsCode", "PracticeStatus"],
         write_to_file=True,
         derived_columns={

@@ -10,11 +10,9 @@ resource "aws_lambda_function" "ods_bulk_update" {
   layers           = [aws_lambda_layer_version.mi_enrichment.arn]
   environment {
     variables = {
-      TRUD_API_KEY_PARAM_NAME      = data.aws_ssm_parameter.trud_api_key.name,
-      TRUD_FHIR_API_URL_PARAM_NAME = data.aws_ssm_parameter.trud_api_endpoint.value,
-      GP_ODS_DYNAMO_TABLE_NAME     = aws_dynamodb_table.mi_api_gp_ods.name,
-      ICB_ODS_DYNAMO_TABLE_NAME    = aws_dynamodb_table.mi_api_icb_ods.name,
-      ODS_S3_BUCKET_NAME           = aws_s3_bucket.ods_csv_files.bucket
+      GP_ODS_DYNAMO_TABLE_NAME  = aws_dynamodb_table.mi_api_gp_ods.name,
+      ICB_ODS_DYNAMO_TABLE_NAME = aws_dynamodb_table.mi_api_icb_ods.name,
+      ODS_S3_BUCKET_NAME        = aws_s3_bucket.ods_csv_files.bucket
     }
   }
   tags = merge(
@@ -38,18 +36,10 @@ resource "aws_cloudwatch_log_group" "bulk_ods_update_lambda" {
   retention_in_days = 60
 }
 
-data "aws_ssm_parameter" "trud_api_key" {
-  name = "/registrations/${var.environment}/user-input/trud-api-key"
-}
-
-data "aws_ssm_parameter" "trud_api_endpoint" {
-  name = "/registrations/${var.environment}/user-input/trud-api-url"
-}
-
 resource "aws_cloudwatch_event_rule" "ods_bulk_update_schedule" {
   name                = "${var.environment}_ods_bulk_update_schedule"
   description         = "Schedule for ODS Update Lambda"
-  schedule_expression = "cron(0 4 ? * 1 *)"
+  schedule_expression = "cron(0 4 ? * * *)"
 }
 
 resource "aws_cloudwatch_event_target" "ods_bulk_update_schedule_event" {

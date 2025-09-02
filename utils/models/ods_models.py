@@ -1,5 +1,4 @@
 import os
-
 from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute
 from pynamodb.models import Model
 
@@ -15,6 +14,7 @@ class PracticeOds(Model):
     supplier_last_updated = UTCDateTimeAttribute(
         null=True, attr_name="SupplierLastUpdated"
     )
+    practice_status = UnicodeAttribute(null=True, attr_name="PracticeStatus")
 
 
 class IcbOds(Model):
@@ -23,3 +23,4 @@ class IcbOds(Model):
 
     icb_ods_code = UnicodeAttribute(hash_key=True, attr_name="IcbOdsCode")
     icb_name = UnicodeAttribute(attr_name="IcbName")
+    icb_status = UnicodeAttribute(null=True, attr_name="IcbStatus")

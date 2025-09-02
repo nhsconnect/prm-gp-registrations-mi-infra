@@ -84,31 +84,6 @@ data "aws_iam_policy_document" "event_enrichment_lambda_ssm_access" {
   }
 }
 
-# SSM Bulk ODS
-resource "aws_iam_role_policy_attachment" "bulk_ods_lambda_ssm_access" {
-  role       = aws_iam_role.bulk_ods_lambda.name
-  policy_arn = aws_iam_policy.bulk_ods_lambda_ssm_access.arn
-}
-
-resource "aws_iam_policy" "bulk_ods_lambda_ssm_access" {
-  name   = "${var.environment}-bulk-ods-lambda-ssm-access"
-  policy = data.aws_iam_policy_document.bulk_ods_lambda_ssm_access.json
-}
-
-data "aws_iam_policy_document" "bulk_ods_lambda_ssm_access" {
-  statement {
-    sid = "GetSSMParameter"
-
-    actions = [
-      "ssm:GetParameter"
-    ]
-    resources = [
-      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${data.aws_ssm_parameter.trud_api_key.name}"
-    ]
-  }
-}
-
-
 #SQS - inbound
 resource "aws_iam_role_policy_attachment" "incoming_mi_events_for_event_enrichment_lambda_sqs_read_access" {
   role       = aws_iam_role.event_enrichment_lambda_role.name

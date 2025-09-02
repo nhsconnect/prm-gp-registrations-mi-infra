@@ -2,12 +2,26 @@
 resource "aws_iam_role" "splunk_cloud_event_uploader_lambda_role" {
   name               = "${var.environment}-splunk-cloud-event-uploader-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
-  managed_policy_arns = [
-    aws_iam_policy.incoming_mi_events_for_splunk_cloud_uploader_lambda_sqs_read_access.arn,
-    aws_iam_policy.incoming_mi_events_for_splunk_cloud_uploader_lambda_to_send_to_dlq_access.arn,
-    aws_iam_policy.splunk_cloud_uploader_lambda_ssm_access.arn,
-    aws_iam_policy.splunk_cloud_event_uploader_lambda_cloudwatch_log_access.arn,
-  ]
+}
+
+resource "aws_iam_role_policy_attachment" "mi_events_cloud_uploader_sqs_read_access" {
+  role       = aws_iam_role.splunk_cloud_event_uploader_lambda_role.name
+  policy_arn = aws_iam_policy.incoming_mi_events_for_splunk_cloud_uploader_lambda_sqs_read_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "mi_events_cloud_uploader_send_to_dlq_access" {
+  role       = aws_iam_role.splunk_cloud_event_uploader_lambda_role.name
+  policy_arn = aws_iam_policy.incoming_mi_events_for_splunk_cloud_uploader_lambda_to_send_to_dlq_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_ssm_access" {
+  role       = aws_iam_role.splunk_cloud_event_uploader_lambda_role.name
+  policy_arn = aws_iam_policy.splunk_cloud_uploader_lambda_ssm_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "splunk_cloudwatch_log_access" {
+  role       = aws_iam_role.splunk_cloud_event_uploader_lambda_role.name
+  policy_arn = aws_iam_policy.splunk_cloud_event_uploader_lambda_cloudwatch_log_access.arn
 }
 
 #SSM

@@ -35,7 +35,6 @@ jobs:
         if: inputs.environment == 'prod' && inputs.is_deployment
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
-        if: inputs.environment == 'prod' && inputs.is_deployment
         with:
           registries: "${{ steps.creds.outputs.aws-account-id }},${{ secrets.AWS_DEV_ACCOUNT_ID }}"
 

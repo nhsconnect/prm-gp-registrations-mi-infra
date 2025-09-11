@@ -2,8 +2,8 @@ import csv
 import os
 import tempfile
 from typing import Any, Callable, Dict, Optional
-from services.ods_api_service import OdsApiService
-from constants.ods_constants import (
+from .services.ods_api_service import OdsApiService
+from .constants.ods_constants import (
     GP_REPORT_NAME,
     GP_FILE_NAME,
     ICB_FILE_NAME,

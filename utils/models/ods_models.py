@@ -15,6 +15,7 @@ class PracticeOds(Model):
         null=True, attr_name="SupplierLastUpdated"
     )
     practice_status = UnicodeAttribute(null=True, attr_name="PracticeStatus")
+    last_updated = UTCDateTimeAttribute(null=True, attr_name="LastUpdated")
 
 
 class IcbOds(Model):
@@ -24,3 +25,4 @@ class IcbOds(Model):
     icb_ods_code = UnicodeAttribute(hash_key=True, attr_name="IcbOdsCode")
     icb_name = UnicodeAttribute(attr_name="IcbName")
     icb_status = UnicodeAttribute(null=True, attr_name="IcbStatus")
+    last_updated = UTCDateTimeAttribute(null=True, attr_name="LastUpdated")

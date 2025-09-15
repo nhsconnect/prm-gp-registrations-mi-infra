@@ -120,6 +120,7 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
                         ),
                         PracticeOds.icb_ods_code.set(amended_record.get("IcbOdsCode")),
                         PracticeOds.practice_status.set(status_from_close_date(amended_record.get("CloseDate"))),
+                        PracticeOds.last_updated.set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                     ]
                 )
                 logger.info(
@@ -134,7 +135,11 @@ def compare_and_overwrite(download_type: OdsDownloadType, data: list[dict]):
         for amended_record in data:
             try:
                 icb = IcbOds(amended_record.get("IcbOdsCode"))
-                icb.update(actions=[IcbOds.icb_name.set(amended_record.get("IcbName")), IcbOds.icb_status.set(status_from_close_date(amended_record.get("CloseDate")))])
+                icb.update(actions=[
+                    IcbOds.icb_name.set(amended_record.get("IcbName")), 
+                    IcbOds.icb_status.set(status_from_close_date(amended_record.get("CloseDate"))),
+                    IcbOds.last_updated.set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                    ])
                 logger.info(
                     f'Overwriting for ODS: {amended_record.get("IcbOdsCode")} - Name: {amended_record.get("IcbName")}')
             except Exception as e:

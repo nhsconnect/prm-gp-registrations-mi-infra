@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 import os
 import tempfile
 from typing import Any, Callable, Dict, Optional
@@ -70,7 +71,8 @@ def get_gp_latest_ods_csv(service):
         modify_headers=["PracticeOdsCode", "PracticeName", "IcbOdsCode", "PracticeStatus"],
         write_to_file=True,
         derived_columns={
-            "PracticeStatus": status_from_close_date
+            "PracticeStatus": status_from_close_date,
+            "LastUpdated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         },
     )
 
@@ -88,10 +90,10 @@ def get_icb_latest_ods_csv(service):
         ["IcbOdsCode", "IcbName", "IcbStatus"],
         True,
         derived_columns={
-            "IcbStatus": status_from_close_date
+            "IcbStatus": status_from_close_date,
+            "LastUpdated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         },
     )
-
 if __name__ == "__main__":
     try:
         ods_service = OdsApiService(ODS_API_URL)

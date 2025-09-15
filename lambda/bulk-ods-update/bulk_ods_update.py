@@ -95,7 +95,7 @@ def get_amended_records(data: list[dict]) -> list[dict]:
     ]
     
 def status_from_close_date(close_date: str | None) -> str:
-    return "Closed" if close_date else "Open"
+    return "Inactive" if close_date else "Active"
 
 def ods_csv_to_dict(file_path: str, headers: list[str]) -> list[dict]:
     with open(file_path, mode="r") as csv_file:

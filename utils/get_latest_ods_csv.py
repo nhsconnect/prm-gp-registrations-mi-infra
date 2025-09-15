@@ -55,7 +55,7 @@ def write_to_csv(file_path, headers_list: list, rows_list: list):
 
 def status_from_close_date(row: dict) -> str:
     close_date = (row.get("CloseDate") or "").strip()
-    return "Closed" if close_date else "Open"
+    return "Inactive" if close_date else "Active"
 
 def get_gp_latest_ods_csv(service):
     url = service.api_url + GP_REPORT_NAME
@@ -94,6 +94,7 @@ def get_icb_latest_ods_csv(service):
             "LastUpdated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         },
     )
+    
 if __name__ == "__main__":
     try:
         ods_service = OdsApiService(ODS_API_URL)

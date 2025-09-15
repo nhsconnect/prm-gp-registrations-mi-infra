@@ -22,7 +22,7 @@ logger.setLevel(logging.INFO)
 TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
 seven_days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%d")
 
-def lambda_handler():
+def lambda_handler(event, context):
     try:
         ods_service = OdsApiService(
             api_url=ODS_API_URL,

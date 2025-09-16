@@ -63,7 +63,9 @@ resource "aws_iam_policy" "dynamodb_policy_bulk_icb_ods_data_lambda" {
       {
         "Effect" : "Allow",
         "Action" : [
+          "dynamodb:GetItem",
           "dynamodb:UpdateItem",
+          "dynamodb:PutItem",
         ],
         "Resource" : [
           aws_dynamodb_table.mi_api_icb_ods.arn

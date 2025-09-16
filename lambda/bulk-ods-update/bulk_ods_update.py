@@ -110,6 +110,7 @@ def update_gp_data(amended_record: dict):
             PracticeOds.practice_status.set(status_from_close_date(amended_record.get("CloseDate"))),
             PracticeOds.last_updated.set(datetime.now(timezone.utc))
             ])
+
         if DEBUG_LOG_RETURN:
             practice.refresh() 
             logger.info(f"Updated ICB {odsCode}: {practice.attribute_values}")
@@ -125,6 +126,7 @@ def update_icb_data(amended_record: dict):
             IcbOds.icb_status.set(status_from_close_date(amended_record.get("CloseDate"))),
             IcbOds.last_updated.set(datetime.now(timezone.utc))
             ])
+
         if DEBUG_LOG_RETURN:
             icb.refresh() 
             logger.info(f"Updated ICB {odsCode}: {icb.attribute_values}")

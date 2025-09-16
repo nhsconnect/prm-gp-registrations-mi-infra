@@ -105,13 +105,14 @@ def update_gp_data(amended_record: dict):
     try:
         odsCode = amended_record.get("PracticeOdsCode")
         practice = PracticeOds(odsCode)
-        res = practice.update(actions=[
+        practice.update(actions=[
             PracticeOds.practice_name.set(amended_record.get("PracticeName")), 
             PracticeOds.practice_status.set(status_from_close_date(amended_record.get("CloseDate"))),
-            PracticeOds.last_updated.set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-            ], return_values="ALL_NEW" if DEBUG_LOG_RETURN else "NONE")
+            PracticeOds.last_updated.set(datetime.now(timezone.utc))
+            ])
         if DEBUG_LOG_RETURN:
-            logger.info(f"Updated Practice {odsCode}: {res.attribute_values}")
+            practice.refresh() 
+            logger.info(f"Updated ICB {odsCode}: {practice.attribute_values}")
     except Exception as e:
         logger.info(f"Failed to create/update record by Practice ODS code: {str(e)}")
         
@@ -119,13 +120,14 @@ def update_icb_data(amended_record: dict):
     try:
         odsCode = amended_record.get("IcbOdsCode")
         icb = IcbOds(odsCode)
-        res = icb.update(actions=[
+        icb.update(actions=[
             IcbOds.icb_name.set(amended_record.get("IcbName")), 
             IcbOds.icb_status.set(status_from_close_date(amended_record.get("CloseDate"))),
-            IcbOds.last_updated.set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-            ], return_values="ALL_NEW" if DEBUG_LOG_RETURN else "NONE")
+            IcbOds.last_updated.set(datetime.now(timezone.utc))
+            ])
         if DEBUG_LOG_RETURN:
-            logger.info(f"Updated ICB {odsCode}: {res.attribute_values}")
+            icb.refresh() 
+            logger.info(f"Updated ICB {odsCode}: {icb.attribute_values}")
     except Exception as e:
         logger.info(f"Failed to create/update record by ICB ODS code: {str(e)}")
         

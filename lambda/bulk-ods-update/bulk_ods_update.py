@@ -45,19 +45,17 @@ def extract_and_process_ods_gp_data(ods_service: OdsApiService):
 
     download_file = ods_service.get_download_file(url)
     file_name = os.path.join(TEMP_DIR, GP_FILE_NAME)
-    
+
     with open(file_name, "wb") as f:
         f.write(download_file)
-
+        
     gp_ods_data = ods_csv_to_dict(file_name, GP_FILE_HEADERS)
     gp_ods_data_amended_data = gp_ods_data if FULL_BACKFILL else get_amended_records(gp_ods_data)
 
     if gp_ods_data_amended_data:
         logger.info(f"GP records to update: {len(gp_ods_data_amended_data)} (full_backfill={FULL_BACKFILL})")
-
         compare_and_overwrite(OdsDownloadType.GP, gp_ods_data_amended_data)
         return
-
     logger.info("No amended GP data found")
 
 

@@ -52,6 +52,7 @@ resource "aws_iam_policy" "dynamodb_policy_ods_enrichment_lambda" {
   })
 }
 
+
 resource "aws_iam_policy" "dynamodb_policy_bulk_ods_data_lambda" {
   name = "dynamodb_${aws_dynamodb_table.mi_api_gp_ods.name}_bulk_update_lambda_policy"
   path = "/"

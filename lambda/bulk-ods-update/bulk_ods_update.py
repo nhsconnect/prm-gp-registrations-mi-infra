@@ -113,7 +113,7 @@ def update_gp_data(amended_record: dict):
 
         if DEBUG_LOG_RETURN:
             practice.refresh() 
-            logger.info(f"Updated ICB {odsCode}: {practice.attribute_values}")
+            logger.info(f"Updated Practice {odsCode}: {practice.attribute_values}")
     except Exception as e:
         logger.info(f"Failed to create/update record by Practice ODS code: {str(e)}")
         

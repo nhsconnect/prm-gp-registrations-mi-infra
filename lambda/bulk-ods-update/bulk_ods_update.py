@@ -19,8 +19,8 @@ from utils.constants.ods_constants import (
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-FULL_BACKFILL = os.getenv("ODS_FULL_BACKFILL_FLAG", "false").lower()
-DEBUG_LOG_RETURN = os.getenv("ODS_DEBUG", "false").lower()
+FULL_BACKFILL = os.getenv("ODS_FULL_BACKFILL_FLAG", False)
+DEBUG_LOG_RETURN = os.getenv("ODS_DEBUG", False)
 TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
 seven_days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%d")
 

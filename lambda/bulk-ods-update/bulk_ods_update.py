@@ -19,8 +19,8 @@ from utils.constants.ods_constants import (
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-FULL_BACKFILL = os.getenv("ODS_FULL_BACKFILL_FLAG", "false").lower()
-DEBUG_LOG_RETURN = os.getenv("ODS_DEBUG", "false").lower()
+FULL_BACKFILL = os.getenv("ODS_FULL_BACKFILL_FLAG", False)
+DEBUG_LOG_RETURN = os.getenv("ODS_DEBUG", False)
 TEMP_DIR = tempfile.mkdtemp(dir="/tmp")
 seven_days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%d")
 
@@ -113,7 +113,7 @@ def update_gp_data(amended_record: dict):
 
         if DEBUG_LOG_RETURN:
             practice.refresh() 
-            logger.info(f"Updated ICB {odsCode}: {practice.attribute_values}")
+            logger.info(f"Updated Practice {odsCode}: {practice.attribute_values}")
     except Exception as e:
         logger.info(f"Failed to create/update record by Practice ODS code: {str(e)}")
         

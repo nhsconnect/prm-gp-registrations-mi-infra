@@ -112,7 +112,7 @@ def backfill_statuses(missing_status_data, table_name, is_status_field=True):
             logger.warning("Record missing ODS code: %s", record)
             continue
         if odsCode[0] not in list_of_ods_to_ignore:
-
+            successfully_updated = 0
             try:
                 if table_name == gp_table:
                     if is_status_field:
@@ -125,6 +125,7 @@ def backfill_statuses(missing_status_data, table_name, is_status_field=True):
                             PracticeOds.practice_status.set(gp_status),
                             PracticeOds.last_updated.set(datetime.now(timezone.utc))
                         ])
+                        successfully_updated += 1
                         logger.info("Backfilled Practice %s with status %s", odsCode, gp_status)
                     else:
                         icb_code = get_ods_status(odsCode, False)
@@ -136,6 +137,7 @@ def backfill_statuses(missing_status_data, table_name, is_status_field=True):
                             PracticeOds.icb_ods_code.set(icb_code),
                             PracticeOds.last_updated.set(datetime.now(timezone.utc))
                         ])
+                        successfully_updated += 1
                         logger.info("Backfilled Practice %s with ICB ODS %s", odsCode, icb_code)
                 else:
                     icb_status = get_ods_status(odsCode, True)
@@ -147,8 +149,9 @@ def backfill_statuses(missing_status_data, table_name, is_status_field=True):
                         IcbOds.icb_status.set(icb_status),
                         IcbOds.last_updated.set(datetime.now(timezone.utc))
                     ])
+                    successfully_updated += 1
                     logger.info("Backfilled ICB %s with status %s", odsCode, icb_status)
-
+                print(f"Backfilled {successfully_updated} record(s) %s for ODS {odsCode} in table {table_name}.", "statuses" if is_status_field else "icb_code")
             except Exception as e:
                 # Keep going; don’t exit the loop
                 logger.exception("Failed to backfill %s (%s): %s", odsCode, table_name, e)
